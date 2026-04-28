@@ -5,6 +5,7 @@ import Link from "next/link";
 import { use } from "react";
 import { getTopicBySlug, type Flashcard } from "@/data/index";
 import { notFound } from "next/navigation";
+import { downloadReviewPDF } from "@/lib/generatePDF";
 
 export default function FlashcardsPage({
   params,
@@ -37,6 +38,17 @@ function FlashcardSession({
   const [round, setRound] = useState(1);
   const [isFlipped, setIsFlipped] = useState(false);
   const [roundDone, setRoundDone] = useState(false);
+  const [generatingPDF, setGeneratingPDF] = useState(false);
+
+  async function handleDownloadPDF(cardIndices: number[]) {
+    setGeneratingPDF(true);
+    try {
+      const cards = cardIndices.map((i) => flashcards[i]);
+      await downloadReviewPDF(cards, topicTitle, `repaso-${slug}.pdf`);
+    } finally {
+      setGeneratingPDF(false);
+    }
+  }
 
   const currentCardIdx = queue[queuePos];
   const card = flashcards[currentCardIdx];
@@ -108,13 +120,27 @@ function FlashcardSession({
             </div>
             <p className="text-slate-500 text-xs uppercase tracking-wide font-medium mb-2">Vas a repasar:</p>
             <ul className="flex flex-col gap-2 max-h-52 overflow-y-auto">
-              {nextQueue.map((idx) => (
-                <li key={idx} className="text-sm text-slate-300 bg-slate-800 rounded-lg px-3 py-2 leading-snug">
+              {nextQueue.map((idx, i) => (
+                <li key={i} className="text-sm text-slate-300 bg-slate-800 rounded-lg px-3 py-2 leading-snug">
                   {flashcards[idx].front}
                 </li>
               ))}
             </ul>
           </div>
+          <button
+            onClick={() => handleDownloadPDF(nextQueue)}
+            disabled={generatingPDF}
+            className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 border border-slate-700 text-slate-300 font-semibold rounded-xl py-3 transition-colors mb-3 text-sm"
+          >
+            {generatingPDF ? (
+              <>
+                <span className="animate-spin">⏳</span> Generando PDF...
+              </>
+            ) : (
+              <>📄 Descargar PDF para imprimir ({nextQueue.length} tarjetas)</>
+            )}
+          </button>
+
           <div className="flex gap-3">
             <button
               onClick={startNextRound}
@@ -134,12 +160,25 @@ function FlashcardSession({
   // ── Todo dominado ────────────────────────────────────────────────────────
   if (roundDone && nextQueue.length === 0) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center px-4 py-16">
+      <main className="min-h-dvh flex flex-col items-center justify-center px-4 py-16">
         <div className="w-full max-w-lg text-center">
           <div className="text-7xl mb-4">🏆</div>
           <h2 className="text-3xl font-bold text-white mb-2">¡Dominaste todo!</h2>
           <p className="text-slate-400 mb-1">{total} flashcards completadas</p>
-          <p className="text-slate-500 text-sm mb-10">en {round} {round === 1 ? "ronda" : "rondas"}</p>
+          <p className="text-slate-500 text-sm mb-8">en {round} {round === 1 ? "ronda" : "rondas"}</p>
+
+          <button
+            onClick={() => handleDownloadPDF(flashcards.map((_, i) => i))}
+            disabled={generatingPDF}
+            className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 border border-slate-700 text-slate-300 font-semibold rounded-xl py-3 transition-colors mb-3 text-sm"
+          >
+            {generatingPDF ? (
+              <><span className="animate-spin">⏳</span> Generando PDF...</>
+            ) : (
+              <>📄 Descargar todas las tarjetas en PDF</>
+            )}
+          </button>
+
           <div className="flex gap-3">
             <button onClick={restartAll} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl py-3 transition-colors">
               Empezar de nuevo

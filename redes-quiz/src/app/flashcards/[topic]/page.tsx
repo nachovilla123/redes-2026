@@ -199,35 +199,44 @@ function FlashcardSession({
       </div>
 
       <div className="w-full max-w-xl mb-6">
-        <div className="flip-card cursor-pointer select-none" style={{ height: "340px" }} onClick={flip}>
+        <div className="flip-card cursor-pointer select-none" style={{ height: "440px" }} onClick={flip}>
           <div className={`flip-card-inner ${isFlipped ? "flipped" : ""}`}>
             <div className="flip-card-front bg-slate-900 border border-slate-700 rounded-2xl flex flex-col items-center justify-center p-8 text-center">
               <span className="text-xs text-slate-600 uppercase tracking-widest font-medium mb-4">{card.tag}</span>
               <p className="text-white text-xl font-semibold leading-relaxed">{card.front}</p>
               <p className="text-slate-600 text-xs mt-6">Tocá para ver la respuesta</p>
             </div>
-            <div className="flip-card-back bg-slate-800 border border-slate-600 rounded-2xl flex flex-col justify-center p-8 overflow-y-auto">
-              <span className="text-xs text-blue-400 uppercase tracking-widest font-medium mb-4">Respuesta</span>
+            <div className="flip-card-back bg-slate-800 border border-slate-600 rounded-2xl flex flex-col p-8 overflow-y-auto">
+              <span className="text-xs text-blue-400 uppercase tracking-widest font-medium mb-4 shrink-0">Respuesta</span>
               <p className="text-slate-100 text-base leading-relaxed whitespace-pre-line">{card.back}</p>
+              <p className="text-slate-500 text-xs mt-6 shrink-0">Tocá para volver a la pregunta</p>
             </div>
           </div>
         </div>
       </div>
 
       {isFlipped ? (
-        <div className="w-full max-w-xl flex gap-3">
+        <div className="w-full max-w-xl flex flex-col gap-3">
           <button
-            onClick={() => markAndAdvance("review")}
-            className="flex-1 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 font-semibold rounded-xl py-4 transition-colors"
+            onClick={flip}
+            className="w-full bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 font-medium rounded-xl py-3 transition-colors"
           >
-            ↩ A repasar
+            ↺ Volver a la pregunta
           </button>
-          <button
-            onClick={() => markAndAdvance("known")}
-            className="flex-1 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 text-green-400 font-semibold rounded-xl py-4 transition-colors"
-          >
-            ✓ Lo sé
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => markAndAdvance("review")}
+              className="flex-1 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 font-semibold rounded-xl py-4 transition-colors"
+            >
+              ↩ A repasar
+            </button>
+            <button
+              onClick={() => markAndAdvance("known")}
+              className="flex-1 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 text-green-400 font-semibold rounded-xl py-4 transition-colors"
+            >
+              ✓ Lo sé
+            </button>
+          </div>
         </div>
       ) : (
         <div className="w-full max-w-xl">

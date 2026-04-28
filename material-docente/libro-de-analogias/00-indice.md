@@ -21,6 +21,11 @@
 | 11 | NAT: el portero del edificio | [11-nat.md](11-nat.md) |
 | 12 | VPN: el túnel secreto | [12-vpn.md](12-vpn.md) |
 | 13 | ACL: el portero con lista | [13-acl.md](13-acl.md) |
+| 14 | WiFi / IEEE 802.11: CSMA/CA, RTS/CTS, nodo oculto | [14-wifi-ieee80211.md](14-wifi-ieee80211.md) |
+| 15 | ARQ y Ventanas Deslizantes: Go-Back-N y Selective Repeat | [15-arq-ventanas-deslizantes.md](15-arq-ventanas-deslizantes.md) |
+| 16 | Routing y Encaminamiento: RIP, OSPF, BGP, tablas de rutas | [16-routing-encaminamiento.md](16-routing-encaminamiento.md) |
+| 17 | Fragmentación IPv4: MTU, MF, Fragment Offset, cálculos | [17-fragmentacion-ip.md](17-fragmentacion-ip.md) |
+| 18 | VLSM: ejercicios resueltos paso a paso | [18-vlsm-ejercicios.md](18-vlsm-ejercicios.md) |
 
 ---
 

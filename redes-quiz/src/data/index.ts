@@ -1,6 +1,10 @@
 import { TOPIC, flashcards } from "./clase1";
 import { TOPIC2, flashcardsClase2 } from "./clase2";
 import { TOPIC3, flashcardsClase3 } from "./clase3";
+import { TOPIC4, flashcardsClase4 } from "./clase4";
+import { TOPIC5, flashcardsClase5 } from "./clase5";
+import { TOPIC6, flashcardsClase6 } from "./clase6";
+import { TOPIC7, flashcardsClase7 } from "./clase7";
 import type { Flashcard } from "./clase1";
 
 export type { Flashcard };
@@ -32,6 +36,30 @@ export const topics: Topic[] = [
     emoji: "🔀",
     ...TOPIC3,
     flashcards: flashcardsClase3,
+  },
+  {
+    slug: "wifi-arq",
+    emoji: "📶",
+    ...TOPIC4,
+    flashcards: flashcardsClase4,
+  },
+  {
+    slug: "routing-fragmentacion",
+    emoji: "🗺️",
+    ...TOPIC5,
+    flashcards: flashcardsClase5,
+  },
+  {
+    slug: "vlsm-dhcp-dns",
+    emoji: "🌐",
+    ...TOPIC6,
+    flashcards: flashcardsClase6,
+  },
+  {
+    slug: "http-tls-jwt",
+    emoji: "🔒",
+    ...TOPIC7,
+    flashcards: flashcardsClase7,
   },
 ];
 

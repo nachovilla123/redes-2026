@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { subnetExercises, type SubnetExercise, type SubnetQuestion } from "@/data/subnetExercises";
 
-// ── helpers ──────────────────────────────────────────────────────────────────
+// ── helpers ───────────────────────────────────────────────────────────────────
 
 function normalize(s: string) {
   return s.trim().toLowerCase().replace(/\s+/g, " ");
@@ -25,198 +25,339 @@ function getScore(exercise: SubnetExercise, answers: Record<string, string>) {
   return { correct, total };
 }
 
-// ── difficulty badge ──────────────────────────────────────────────────────────
-
-const difficultyStyle: Record<string, string> = {
-  básico: "bg-emerald-900/50 text-emerald-400 border-emerald-800",
-  intermedio: "bg-amber-900/50 text-amber-400 border-amber-800",
-  avanzado: "bg-red-900/50 text-red-400 border-red-800",
-};
-
-// ── sub-components ────────────────────────────────────────────────────────────
+// ── single question row ───────────────────────────────────────────────────────
 
 function QuestionRow({
+  index,
   question,
   userAnswer,
   checked,
+  showHints,
   onChange,
+  onEnter,
 }: {
+  index: number;
   question: SubnetQuestion;
   userAnswer: string;
   checked: boolean;
+  showHints: boolean;
   onChange: (v: string) => void;
+  onEnter: () => void;
 }) {
   const [showHint, setShowHint] = useState(false);
   const answered = userAnswer.trim() !== "";
-  const correct = isCorrect(question, userAnswer);
-
-  let inputClass =
-    "w-full bg-slate-800 border rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 outline-none transition-colors font-mono";
-
-  if (checked && answered) {
-    inputClass += correct
-      ? " border-emerald-500 bg-emerald-900/20"
-      : " border-red-500 bg-red-900/20";
-  } else {
-    inputClass += " border-slate-700 focus:border-slate-500";
-  }
+  const correct = checked && answered && isCorrect(question, userAnswer);
+  const wrong = checked && (answered ? !isCorrect(question, userAnswer) : true);
+  const showExplanation = checked && (wrong || !answered);
 
   return (
-    <div className="space-y-1.5">
-      <label className="text-sm text-slate-300 font-medium">{question.label}</label>
-
-      <input
-        type="text"
-        value={userAnswer}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={question.placeholder ?? "tu respuesta"}
-        className={inputClass}
-        autoComplete="off"
-        spellCheck={false}
-      />
-
-      {/* result feedback */}
-      {checked && answered && (
-        <p
-          className={`text-xs font-medium ${
-            correct ? "text-emerald-400" : "text-red-400"
+    <div className="group">
+      <div className="flex gap-3 items-start">
+        {/* number bubble */}
+        <span
+          className={`mt-2.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-colors ${
+            correct
+              ? "bg-emerald-500 text-white"
+              : checked
+              ? "bg-red-500 text-white"
+              : "bg-slate-800 text-slate-500"
           }`}
         >
-          {correct ? (
-            "✓ Correcto"
-          ) : (
-            <>
-              ✗ Incorrecto — la respuesta es:{" "}
-              <span className="font-mono text-white">{question.answer}</span>
-            </>
-          )}
-        </p>
-      )}
+          {correct ? "✓" : checked ? "✗" : index + 1}
+        </span>
 
-      {/* hint */}
-      {question.hint && (
-        <div>
-          {showHint ? (
-            <p className="text-xs text-slate-400 bg-slate-800 rounded-md px-3 py-2 border border-slate-700">
-              💡 {question.hint}
-            </p>
-          ) : (
-            <button
-              onClick={() => setShowHint(true)}
-              className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
-            >
-              Ver pista
-            </button>
+        <div className="flex-1 space-y-2">
+          <p className="text-sm text-slate-300 leading-snug">{question.label}</p>
+
+          <input
+            type="text"
+            value={userAnswer}
+            onChange={(e) => onChange(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && onEnter()}
+            placeholder={question.placeholder ?? "tu respuesta…"}
+            autoComplete="off"
+            spellCheck={false}
+            className={`w-full rounded-xl px-4 py-2.5 text-sm font-mono outline-none transition-all border ${
+              correct
+                ? "bg-emerald-950/60 border-emerald-600 text-emerald-300"
+                : checked && answered
+                ? "bg-red-950/60 border-red-600 text-red-300"
+                : checked && !answered
+                ? "bg-amber-950/30 border-amber-700/60 text-white placeholder-amber-900"
+                : "bg-slate-800/80 border-slate-700 text-white placeholder-slate-600 focus:border-slate-500 focus:bg-slate-800"
+            }`}
+          />
+
+          {/* correct answer + explanation shown when wrong */}
+          {showExplanation && (
+            <div className="rounded-xl border border-slate-700/60 bg-slate-900/80 overflow-hidden">
+              {/* correct answer pill */}
+              <div className="flex items-center gap-2 px-3 pt-3 pb-2">
+                <span className="text-xs text-slate-500">Respuesta correcta:</span>
+                <code className="font-mono text-sm text-white bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-lg">
+                  {question.answer}
+                </code>
+              </div>
+              {/* explanation */}
+              {(question.explanation ?? question.hint) && (
+                <div className="px-3 pb-3 border-t border-slate-800/60 pt-2.5">
+                  <p className="text-[11px] text-slate-500 uppercase tracking-wider font-semibold mb-1.5">
+                    ¿Por qué?
+                  </p>
+                  <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-line">
+                    {question.explanation ?? question.hint}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* hint — always available for básico, only pre-check for others */}
+          {question.hint && !correct && (showHints || !checked) && (
+            <div>
+              {showHint ? (
+                <p className="text-xs text-slate-500 bg-slate-800/60 border border-slate-700/50 rounded-lg px-3 py-2 leading-relaxed">
+                  💡 {question.hint}
+                </p>
+              ) : (
+                <button
+                  onClick={() => setShowHint(true)}
+                  className="text-xs text-slate-600 hover:text-slate-400 transition-colors"
+                >
+                  Ver pista
+                </button>
+              )}
+            </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
 
-function ExerciseCard({ exercise }: { exercise: SubnetExercise }) {
+// ── exercise view ─────────────────────────────────────────────────────────────
+
+function ExerciseView({
+  exercise,
+  onNext,
+  onPrev,
+  isFirst,
+  isLast,
+  exerciseIndex,
+  total,
+}: {
+  exercise: SubnetExercise;
+  onNext: () => void;
+  onPrev: () => void;
+  isFirst: boolean;
+  isLast: boolean;
+  exerciseIndex: number;
+  total: number;
+}) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [checked, setChecked] = useState(false);
+  const topRef = useRef<HTMLDivElement>(null);
+
+  // reset when exercise changes
+  useEffect(() => {
+    setAnswers({});
+    setChecked(false);
+    topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [exercise.id]);
 
   function setAnswer(qId: string, value: string) {
     setAnswers((prev) => ({ ...prev, [qId]: value }));
     if (checked) setChecked(false);
   }
 
-  function handleCheck() {
-    setChecked(true);
-  }
-
-  function handleReset() {
-    setAnswers({});
-    setChecked(false);
-  }
-
-  const { correct, total } = getScore(exercise, answers);
   const allAnswered = exercise.questions.every((q) => (answers[q.id] ?? "").trim() !== "");
-  const perfect = checked && correct === total;
+  const { correct, total: qTotal } = getScore(exercise, answers);
+  const perfect = checked && correct === qTotal;
+
+  const diffColors: Record<string, string> = {
+    básico: "text-emerald-400 bg-emerald-950/50 border-emerald-800/60",
+    intermedio: "text-amber-400 bg-amber-950/50 border-amber-800/60",
+    avanzado: "text-red-400 bg-red-950/50 border-red-800/60",
+  };
 
   return (
-    <div className={`bg-slate-900 border rounded-2xl overflow-hidden transition-all ${
-      perfect ? "border-emerald-600" : "border-slate-800"
-    }`}>
-      {/* header */}
-      <div className="px-6 pt-5 pb-4 border-b border-slate-800">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <span className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 text-sm font-bold shrink-0">
-              {exercise.id}
-            </span>
-            <div>
-              <h2 className="text-white font-semibold text-sm">{exercise.title}</h2>
-              {exercise.scenario && (
-                <p className="text-slate-400 text-xs mt-0.5">{exercise.scenario}</p>
-              )}
-            </div>
-          </div>
-          <span
-            className={`text-xs font-medium px-2 py-1 rounded-md border shrink-0 ${
-              difficultyStyle[exercise.difficulty]
-            }`}
+    <div ref={topRef} className="flex flex-col min-h-dvh">
+      {/* ── top bar ─────────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-10 bg-slate-950/90 backdrop-blur border-b border-slate-800/60 px-4 py-3">
+        <div className="max-w-lg mx-auto flex items-center justify-between gap-4">
+          <Link
+            href="/"
+            className="text-slate-500 hover:text-slate-300 text-sm transition-colors shrink-0"
           >
-            {exercise.difficulty}
+            ← Inicio
+          </Link>
+
+          {/* progress dots */}
+          <div className="flex items-center gap-1.5">
+            {Array.from({ length: total }).map((_, i) => (
+              <div
+                key={i}
+                className={`rounded-full transition-all duration-300 ${
+                  i === exerciseIndex
+                    ? "w-5 h-2 bg-white"
+                    : i < exerciseIndex
+                    ? "w-2 h-2 bg-slate-500"
+                    : "w-2 h-2 bg-slate-700"
+                }`}
+              />
+            ))}
+          </div>
+
+          <span className="text-slate-500 text-sm shrink-0">
+            {exerciseIndex + 1}/{total}
           </span>
         </div>
+      </header>
 
-        {/* given IP */}
-        <div className="mt-4 bg-slate-800 rounded-xl px-4 py-3 border border-slate-700">
-          <p className="text-xs text-slate-500 uppercase tracking-widest mb-1">Datos</p>
-          <p className="text-white font-mono text-lg font-bold tracking-wider">
-            {exercise.given}
-          </p>
-        </div>
-      </div>
-
-      {/* questions */}
-      <div className="px-6 py-5 space-y-5">
-        {exercise.questions.map((q) => (
-          <QuestionRow
-            key={q.id}
-            question={q}
-            userAnswer={answers[q.id] ?? ""}
-            checked={checked}
-            onChange={(v) => setAnswer(q.id, v)}
-          />
-        ))}
-      </div>
-
-      {/* footer */}
-      <div className="px-6 pb-5 flex items-center justify-between gap-3">
-        <div className="text-sm text-slate-400">
-          {checked ? (
-            <span className={correct === total ? "text-emerald-400 font-semibold" : "text-slate-300"}>
-              {correct === total
-                ? "🎉 ¡Perfecto! Todas correctas"
-                : `${correct} / ${total} correctas`}
-            </span>
-          ) : (
-            <span>{total} preguntas</span>
-          )}
-        </div>
-
-        <div className="flex gap-2">
-          {checked && (
-            <button
-              onClick={handleReset}
-              className="text-xs px-4 py-2 rounded-lg border border-slate-700 text-slate-400 hover:text-white hover:border-slate-500 transition-colors"
+      {/* ── main ────────────────────────────────────────────────────── */}
+      <main className="flex-1 px-4 py-8">
+        <div className="max-w-lg mx-auto space-y-6">
+          {/* title + badge */}
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="text-white font-bold text-lg leading-tight">{exercise.title}</h1>
+            <span
+              className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full border ${diffColors[exercise.difficulty]}`}
             >
-              Reiniciar
-            </button>
+              {exercise.difficulty}
+            </span>
+          </div>
+
+          {/* scenario */}
+          {exercise.scenario && (
+            <p className="text-slate-400 text-sm leading-relaxed">{exercise.scenario}</p>
           )}
-          <button
-            onClick={handleCheck}
-            disabled={!allAnswered}
-            className="text-sm px-5 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            Verificar
-          </button>
+
+          {/* given IP — hero display */}
+          <div className="bg-slate-900 border border-slate-700/60 rounded-2xl px-6 py-5">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-600 mb-2">
+              Datos
+            </p>
+            <p className="font-mono text-3xl font-bold text-white tracking-wider">
+              {exercise.given}
+            </p>
+          </div>
+
+          {/* quick reference */}
+          <details className="group">
+            <summary className="cursor-pointer text-xs text-slate-600 hover:text-slate-400 transition-colors list-none flex items-center gap-1.5">
+              <span className="group-open:rotate-90 transition-transform inline-block">▶</span>
+              Reglas rápidas
+            </summary>
+            <div className="mt-2 bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-3 text-xs text-slate-500 space-y-1">
+              <p>• Hosts útiles = 2^(bits host) − 2</p>
+              <p>• Broadcast = red + tamaño bloque − 1</p>
+              <p>• Primera usable = red + 1 &nbsp;|&nbsp; Última = broadcast − 1</p>
+              <p>• Clases: A = 1–126, B = 128–191, C = 192–223</p>
+            </div>
+          </details>
+
+          {/* tip notice */}
+          {!checked && (
+            <p className="text-xs text-slate-600 bg-slate-900/50 border border-slate-800/60 rounded-xl px-4 py-2.5 leading-relaxed">
+              💡 <span className="text-slate-500">Si no sabés la respuesta, escribí cualquier valor y verificá — vas a ver la respuesta correcta con su explicación.</span>
+            </p>
+          )}
+
+          {/* questions */}
+          <div className="space-y-5">
+            {exercise.questions.map((q, i) => (
+              <QuestionRow
+                key={q.id}
+                index={i}
+                question={q}
+                userAnswer={answers[q.id] ?? ""}
+                checked={checked}
+                showHints={exercise.difficulty === "básico"}
+                onChange={(v) => setAnswer(q.id, v)}
+                onEnter={() => {
+                  if (allAnswered) setChecked(true);
+                }}
+              />
+            ))}
+          </div>
+
+          {/* score banner — shown after check */}
+          {checked && (
+            <div
+              className={`rounded-2xl px-5 py-4 border text-center ${
+                perfect
+                  ? "bg-emerald-950/60 border-emerald-700/60"
+                  : "bg-slate-900 border-slate-700/60"
+              }`}
+            >
+              {perfect ? (
+                <p className="text-emerald-400 font-bold text-lg">
+                  🎉 ¡Perfecto! {qTotal}/{qTotal}
+                </p>
+              ) : (
+                <p className="text-white font-semibold text-base">
+                  {correct}/{qTotal} correctas
+                  <span className="text-slate-400 text-sm font-normal ml-2">
+                    — revisá las rojas
+                  </span>
+                </p>
+              )}
+            </div>
+          )}
         </div>
-      </div>
+      </main>
+
+      {/* ── bottom action bar ────────────────────────────────────────── */}
+      <footer className="sticky bottom-0 bg-slate-950/90 backdrop-blur border-t border-slate-800/60 px-4 py-4">
+        <div className="max-w-lg mx-auto">
+          {!checked ? (
+            <div className="flex gap-3">
+              {!isFirst && (
+                <button
+                  onClick={onPrev}
+                  className="px-5 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm transition-colors border border-slate-700"
+                >
+                  ←
+                </button>
+              )}
+              <button
+                onClick={() => setChecked(true)}
+                disabled={!allAnswered}
+                className="flex-1 py-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                Verificar respuestas
+              </button>
+            </div>
+          ) : (
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setAnswers({});
+                  setChecked(false);
+                }}
+                className="px-5 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm transition-colors border border-slate-700"
+              >
+                Reintentar
+              </button>
+              {isLast ? (
+                <Link
+                  href="/"
+                  className="flex-1 py-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-sm transition-colors text-center flex items-center justify-center"
+                >
+                  Volver al inicio
+                </Link>
+              ) : (
+                <button
+                  onClick={onNext}
+                  className="flex-1 py-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-sm transition-colors"
+                >
+                  Siguiente ejercicio →
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </footer>
     </div>
   );
 }
@@ -224,84 +365,19 @@ function ExerciseCard({ exercise }: { exercise: SubnetExercise }) {
 // ── page ──────────────────────────────────────────────────────────────────────
 
 export default function SubnettingPage() {
-  const básicos = subnetExercises.filter((e) => e.difficulty === "básico");
-  const intermedios = subnetExercises.filter((e) => e.difficulty === "intermedio");
-  const avanzados = subnetExercises.filter((e) => e.difficulty === "avanzado");
+  const [current, setCurrent] = useState(0);
+  const total = subnetExercises.length;
 
   return (
-    <main className="min-h-screen px-4 py-12">
-      <div className="max-w-lg mx-auto">
-        {/* back */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-300 text-sm transition-colors mb-8"
-        >
-          ← Volver
-        </Link>
-
-        {/* header */}
-        <div className="mb-10">
-          <p className="text-slate-500 text-xs font-medium tracking-widest uppercase mb-2">
-            Práctica · IPv4
-          </p>
-          <h1 className="text-3xl font-bold text-white mb-3">Subnetting</h1>
-          <p className="text-slate-400 text-sm leading-relaxed">
-            Completá cada ejercicio con la dirección de red, broadcast, rango de hosts y más.
-            Usá el botón <strong className="text-slate-200">Verificar</strong> para ver cuántas acertaste.
-          </p>
-          <div className="mt-4 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-xs text-slate-400 space-y-1">
-            <p>📌 <strong className="text-slate-300">Reglas rápidas:</strong></p>
-            <p>• Hosts útiles = 2^(bits de host) − 2</p>
-            <p>• Broadcast = dirección de red + tamaño del bloque − 1</p>
-            <p>• Primera usable = dirección de red + 1</p>
-            <p>• Última usable = broadcast − 1</p>
-          </div>
-        </div>
-
-        {/* exercises by difficulty */}
-        {básicos.length > 0 && (
-          <section className="mb-8">
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-4">
-              Nivel básico — Identificación de clase y rangos
-            </h3>
-            <div className="flex flex-col gap-5">
-              {básicos.map((ex) => (
-                <ExerciseCard key={ex.id} exercise={ex} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {intermedios.length > 0 && (
-          <section className="mb-8">
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-4">
-              Nivel intermedio — Subnetting
-            </h3>
-            <div className="flex flex-col gap-5">
-              {intermedios.map((ex) => (
-                <ExerciseCard key={ex.id} exercise={ex} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {avanzados.length > 0 && (
-          <section className="mb-8">
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-4">
-              Nivel avanzado — Clase B con subnetting
-            </h3>
-            <div className="flex flex-col gap-5">
-              {avanzados.map((ex) => (
-                <ExerciseCard key={ex.id} exercise={ex} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        <p className="text-center text-slate-600 text-xs mt-6">
-          Más ejercicios pronto · Redes UTN FRBA 2026
-        </p>
-      </div>
-    </main>
+    <ExerciseView
+      key={current}
+      exercise={subnetExercises[current]}
+      exerciseIndex={current}
+      total={total}
+      isFirst={current === 0}
+      isLast={current === total - 1}
+      onNext={() => setCurrent((c) => Math.min(c + 1, total - 1))}
+      onPrev={() => setCurrent((c) => Math.max(c - 1, 0))}
+    />
   );
 }

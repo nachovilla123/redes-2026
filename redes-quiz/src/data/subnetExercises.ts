@@ -4,6 +4,7 @@ export interface SubnetQuestion {
   answer: string;
   altAnswers?: string[];
   hint?: string;
+  explanation?: string; // shown automatically when the answer is wrong
   placeholder?: string;
 }
 
@@ -29,63 +30,73 @@ export const subnetExercises: SubnetExercise[] = [
         label: "¿Qué clase de IP es? (A / B / C)",
         answer: "c",
         altAnswers: ["clase c", "class c"],
-        hint: "El primer octeto vale 192. Las clases van: A=1-126, B=128-191, C=192-223.",
+        hint: "Mirá el primer octeto.",
+        explanation:
+          "Las clases se determinan por el primer octeto:\n• Clase A → 1 a 126\n• Clase B → 128 a 191\n• Clase C → 192 a 223\nEl primer octeto es 192 → entra en el rango 192–223 → Clase C.",
         placeholder: "A, B o C",
       },
       {
         id: "bits_red",
         label: "¿Cuántos bits de RED tiene la máscara?",
         answer: "24",
-        hint: "El /24 te lo dice directamente.",
+        explanation:
+          "El prefijo /24 te dice directamente cuántos bits están reservados para la red. El número después de la barra es exactamente eso: 24 bits de red.",
         placeholder: "número",
       },
       {
         id: "bits_host",
         label: "¿Cuántos bits de HOST te quedan?",
         answer: "8",
-        hint: "32 − bits de red.",
+        explanation:
+          "Una dirección IPv4 tiene 32 bits en total.\n32 − bits de red = bits de host\n32 − 24 = 8 bits de host.\nCon 8 bits podés representar 2^8 = 256 direcciones.",
         placeholder: "número",
       },
       {
         id: "mascara",
         label: "¿Cuál es la máscara en notación decimal?",
         answer: "255.255.255.0",
-        hint: "24 bits en 1 → los primeros 3 octetos son 255.",
+        explanation:
+          "24 bits en 1, luego 8 bits en 0:\n11111111.11111111.11111111.00000000\nEn decimal: 255.255.255.0\nCada octeto de 8 bits en 1 = 255. El último octeto (bits de host) = 0.",
         placeholder: "255.x.x.x",
       },
       {
         id: "hosts",
         label: "¿Cuántos hosts ÚTILES hay en esta red?",
         answer: "254",
-        hint: "2^bits_host − 2 (se restan dirección de red y broadcast).",
+        explanation:
+          "Fórmula: 2^(bits de host) − 2\n2^8 − 2 = 256 − 2 = 254 hosts útiles.\nSe restan 2 porque:\n• La primera dirección es la dirección de RED (192.168.1.0) → no asignable.\n• La última dirección es el BROADCAST (192.168.1.255) → no asignable.",
         placeholder: "número",
       },
       {
         id: "red",
         label: "¿Cuál es la dirección de RED?",
         answer: "192.168.1.0",
-        hint: "Es la primera dirección — todos los bits de host en 0.",
+        explanation:
+          "La dirección de red tiene todos los bits de host en 0.\nCon /24, los primeros 3 octetos son fijos (192.168.1) y el cuarto octeto de host queda en 0.\n→ 192.168.1.0",
         placeholder: "x.x.x.x",
       },
       {
         id: "broadcast",
         label: "¿Cuál es la dirección de BROADCAST?",
         answer: "192.168.1.255",
-        hint: "Es la última dirección — todos los bits de host en 1.",
+        explanation:
+          "El broadcast tiene todos los bits de host en 1.\nCon /24, el cuarto octeto es el de host → todos en 1 = 11111111 = 255.\n→ 192.168.1.255\nAtajo: dirección de red + tamaño del bloque − 1 = 192.168.1.0 + 256 − 1 = 192.168.1.255",
         placeholder: "x.x.x.x",
       },
       {
         id: "primera",
         label: "¿Cuál es la primera IP USABLE?",
         answer: "192.168.1.1",
-        hint: "Dirección de red + 1.",
+        explanation:
+          "La primera IP usable es la dirección de red + 1.\n192.168.1.0 + 1 = 192.168.1.1\nLa dirección .0 en sí no se asigna a ningún host — es la dirección de la red.",
         placeholder: "x.x.x.x",
       },
       {
         id: "ultima",
         label: "¿Cuál es la última IP USABLE?",
         answer: "192.168.1.254",
-        hint: "Broadcast − 1.",
+        explanation:
+          "La última IP usable es el broadcast − 1.\n192.168.1.255 − 1 = 192.168.1.254\nEl broadcast .255 no se asigna a ningún host — es la dirección de difusión a toda la subred.",
         placeholder: "x.x.x.x",
       },
     ],
@@ -102,47 +113,56 @@ export const subnetExercises: SubnetExercise[] = [
         label: "¿Qué clase de IP es? (A / B / C)",
         answer: "a",
         altAnswers: ["clase a", "class a"],
-        hint: "Primer octeto = 10. Clase A va de 1 a 126.",
+        explanation:
+          "El primer octeto es 10.\n• Clase A → 1 a 126 ← 10 está aquí\n• Clase B → 128 a 191\n• Clase C → 192 a 223\n→ Clase A.",
         placeholder: "A, B o C",
       },
       {
         id: "bits_host",
         label: "¿Cuántos bits de HOST te quedan?",
         answer: "24",
-        hint: "32 − 8 = 24 bits de host.",
+        explanation:
+          "32 bits totales − 8 bits de red (/8) = 24 bits de host.\nCon 24 bits podés tener 2^24 = 16.777.216 direcciones (¡más de 16 millones!).",
         placeholder: "número",
       },
       {
         id: "mascara",
         label: "¿Cuál es la máscara en notación decimal?",
         answer: "255.0.0.0",
-        hint: "Solo el primer octeto tiene bits de red.",
+        explanation:
+          "Solo el primer octeto tiene bits de red (8 bits en 1):\n11111111.00000000.00000000.00000000\n= 255.0.0.0\nLos tres octetos restantes son todos bits de host → quedan en 0.",
         placeholder: "255.x.x.x",
       },
       {
         id: "hosts",
-        label: "¿Cuántos hosts útiles hay? (en millones, ej: 16777214)",
+        label: "¿Cuántos hosts útiles hay? (ej: 16777214)",
         answer: "16777214",
-        hint: "2^24 − 2 = 16.777.214. Son muchísimos.",
+        explanation:
+          "2^24 − 2 = 16.777.216 − 2 = 16.777.214 hosts útiles.\nLa Clase A es ideal para redes enormes como las de grandes ISPs o empresas multinacionales.\nEl rango 10.x.x.x es privado (RFC 1918) — el más grande de los rangos privados.",
         placeholder: "número",
       },
       {
         id: "broadcast",
         label: "¿Cuál es la dirección de BROADCAST?",
         answer: "10.255.255.255",
-        hint: "Todos los bits de host en 1 → los últimos 3 octetos son 255.",
+        explanation:
+          "Con /8, solo el primer octeto es red. Los últimos 3 octetos son host → todos en 1:\n10 . 11111111 . 11111111 . 11111111\n= 10.255.255.255",
         placeholder: "x.x.x.x",
       },
       {
         id: "primera",
         label: "¿Cuál es la primera IP USABLE?",
         answer: "10.0.0.1",
+        explanation:
+          "Dirección de red + 1 = 10.0.0.0 + 1 = 10.0.0.1",
         placeholder: "x.x.x.x",
       },
       {
         id: "ultima",
         label: "¿Cuál es la última IP USABLE?",
         answer: "10.255.255.254",
+        explanation:
+          "Broadcast − 1 = 10.255.255.255 − 1 = 10.255.255.254",
         placeholder: "x.x.x.x",
       },
     ],
@@ -159,47 +179,54 @@ export const subnetExercises: SubnetExercise[] = [
         label: "¿Qué clase de IP es? (A / B / C)",
         answer: "b",
         altAnswers: ["clase b", "class b"],
-        hint: "Primer octeto = 172. Clase B va de 128 a 191.",
+        explanation:
+          "El primer octeto es 172.\n• Clase A → 1 a 126\n• Clase B → 128 a 191 ← 172 está aquí\n• Clase C → 192 a 223\n→ Clase B.",
         placeholder: "A, B o C",
       },
       {
         id: "bits_host",
         label: "¿Cuántos bits de HOST te quedan?",
         answer: "16",
-        hint: "32 − 16 = 16 bits de host.",
+        explanation:
+          "32 − 16 = 16 bits de host.\nCon 16 bits de host → 2^16 = 65.536 direcciones posibles.",
         placeholder: "número",
       },
       {
         id: "mascara",
         label: "¿Cuál es la máscara en notación decimal?",
         answer: "255.255.0.0",
-        hint: "Los primeros 2 octetos tienen bits de red.",
+        explanation:
+          "Los primeros 2 octetos tienen bits de red (16 bits en 1):\n11111111.11111111.00000000.00000000\n= 255.255.0.0\nLos últimos 2 octetos son bits de host → quedan en 0.",
         placeholder: "255.x.x.x",
       },
       {
         id: "hosts",
         label: "¿Cuántos hosts útiles hay?",
         answer: "65534",
-        hint: "2^16 − 2 = 65.534.",
+        explanation:
+          "2^16 − 2 = 65.536 − 2 = 65.534 hosts útiles.\nClase B cubre rangos como 172.16.x.x a 172.31.x.x (privados según RFC 1918).",
         placeholder: "número",
       },
       {
         id: "broadcast",
         label: "¿Cuál es la dirección de BROADCAST?",
         answer: "172.16.255.255",
-        hint: "Los últimos 2 octetos todos en 1.",
+        explanation:
+          "Con /16, los últimos 2 octetos son bits de host → todos en 1:\n172.16 . 11111111 . 11111111\n= 172.16.255.255",
         placeholder: "x.x.x.x",
       },
       {
         id: "primera",
         label: "¿Cuál es la primera IP USABLE?",
         answer: "172.16.0.1",
+        explanation: "Dirección de red + 1 = 172.16.0.0 + 1 = 172.16.0.1",
         placeholder: "x.x.x.x",
       },
       {
         id: "ultima",
         label: "¿Cuál es la última IP USABLE?",
         answer: "172.16.255.254",
+        explanation: "Broadcast − 1 = 172.16.255.255 − 1 = 172.16.255.254",
         placeholder: "x.x.x.x",
       },
     ],
@@ -207,7 +234,8 @@ export const subnetExercises: SubnetExercise[] = [
   {
     id: 4,
     title: "Subnetting /26 — Una subred específica",
-    scenario: "Dentro de la red 192.168.1.0/24, se crearon 4 subredes iguales (/26). Trabajás con la segunda subred.",
+    scenario:
+      "Dentro de la red 192.168.1.0/24, se crearon 4 subredes iguales (/26). Trabajás con la segunda subred.",
     given: "192.168.1.64 / 26",
     difficulty: "intermedio",
     questions: [
@@ -215,54 +243,64 @@ export const subnetExercises: SubnetExercise[] = [
         id: "bits_host",
         label: "¿Cuántos bits de HOST te quedan?",
         answer: "6",
-        hint: "32 − 26 = 6 bits de host.",
+        explanation:
+          "32 − 26 = 6 bits de host.\nEn el último octeto: los 2 primeros bits son de subred, los 6 restantes son de host.\nEjemplo: 01|000000 (01 = subred 1, 000000 = host).",
         placeholder: "número",
       },
       {
         id: "mascara",
         label: "¿Cuál es la máscara en notación decimal?",
         answer: "255.255.255.192",
-        hint: "26 bits de red → último octeto: 11000000 = 192.",
+        explanation:
+          "26 bits en 1 → los primeros 3 octetos son 255, y en el 4to octeto los 2 primeros bits son 1:\n11000000 en binario = 128 + 64 = 192\n→ Máscara: 255.255.255.192",
         placeholder: "255.x.x.x",
       },
       {
         id: "hosts",
-        label: "¿Cuántos hosts útiles hay en esta subred?",
+        label: "¿Cuántos hosts ÚTILES hay en esta subred?",
         answer: "62",
-        hint: "2^6 − 2 = 62.",
+        explanation:
+          "2^(bits de host) − 2 = 2^6 − 2 = 64 − 2 = 62 hosts útiles.\nCada subred /26 tiene 64 direcciones en total, pero 2 están reservadas (red y broadcast).",
         placeholder: "número",
       },
       {
         id: "red",
         label: "¿Cuál es la dirección de RED de esta subred?",
         answer: "192.168.1.64",
-        hint: "El 64 es la dirección de red de esta subred (bits de host todos en 0: 01|000000).",
+        explanation:
+          "El 64 en binario es 01|000000 (bits de subred=01, bits de host=000000).\nCon todos los bits de host en 0 → es la dirección de red.\n→ 192.168.1.64",
         placeholder: "x.x.x.x",
       },
       {
         id: "broadcast",
         label: "¿Cuál es la dirección de BROADCAST?",
         answer: "192.168.1.127",
-        hint: "64 + 64 − 1 = 127. O en binario: 01|111111 = 127.",
+        explanation:
+          "Broadcast = dirección de red + tamaño del bloque − 1\nTamaño del bloque = 2^6 = 64 direcciones\n64 + 64 − 1 = 127\n→ 192.168.1.127\nEn binario: 01|111111 = 127 ✓",
         placeholder: "x.x.x.x",
       },
       {
         id: "primera",
         label: "¿Cuál es la primera IP USABLE?",
         answer: "192.168.1.65",
+        explanation:
+          "Dirección de red + 1 = 192.168.1.64 + 1 = 192.168.1.65",
         placeholder: "x.x.x.x",
       },
       {
         id: "ultima",
         label: "¿Cuál es la última IP USABLE?",
         answer: "192.168.1.126",
+        explanation:
+          "Broadcast − 1 = 192.168.1.127 − 1 = 192.168.1.126",
         placeholder: "x.x.x.x",
       },
       {
         id: "subredes_totales",
         label: "¿Cuántas subredes /26 caben en total en 192.168.1.0/24?",
         answer: "4",
-        hint: "2^(26−24) = 2^2 = 4 subredes.",
+        explanation:
+          "Bits de subred tomados = 26 − 24 = 2 bits\n2^2 = 4 subredes posibles:\n• .0/26 (00|xxxxxx)\n• .64/26 (01|xxxxxx) ← esta\n• .128/26 (10|xxxxxx)\n• .192/26 (11|xxxxxx)",
         placeholder: "número",
       },
     ],
@@ -278,41 +316,49 @@ export const subnetExercises: SubnetExercise[] = [
         id: "bits_host",
         label: "¿Cuántos bits de HOST te quedan?",
         answer: "5",
-        hint: "32 − 27 = 5 bits.",
+        explanation:
+          "32 − 27 = 5 bits de host.\nEn el último octeto: los 3 primeros bits son de subred, los 5 restantes de host.",
         placeholder: "número",
       },
       {
         id: "mascara",
         label: "¿Cuál es la máscara en notación decimal?",
         answer: "255.255.255.224",
-        hint: "27 bits → último octeto: 11100000 = 224.",
+        explanation:
+          "27 bits en 1. En el 4to octeto, los 3 primeros bits son 1:\n11100000 = 128 + 64 + 32 = 224\n→ Máscara: 255.255.255.224",
         placeholder: "255.x.x.x",
       },
       {
         id: "hosts",
-        label: "¿Cuántos hosts útiles hay? ¿Alcanza para 25 equipos?",
+        label: "¿Cuántos hosts útiles hay?",
         answer: "30",
-        altAnswers: ["30, sí", "30 si", "sí, 30"],
-        hint: "2^5 − 2 = 30. Alcanza.",
+        altAnswers: ["30, sí", "30 si"],
+        explanation:
+          "2^5 − 2 = 32 − 2 = 30 hosts útiles.\nCon 30 hosts útiles alcanza para 25 equipos (sobran 5 lugares).",
         placeholder: "número",
       },
       {
         id: "broadcast",
         label: "¿Cuál es la dirección de BROADCAST?",
         answer: "192.168.5.159",
-        hint: "128 en binario: 10000000. Bits de host todos en 1: 10011111 = 159.",
+        explanation:
+          "128 en binario: 10000000 → bits de subred = 100, bits de host = 00000\nBroadcast: todos los bits de host en 1 → 10011111\n128 + 16 + 8 + 4 + 2 + 1 = 159\n→ 192.168.5.159\nAtajo: 128 + 32 − 1 = 159 ✓",
         placeholder: "x.x.x.x",
       },
       {
         id: "primera",
         label: "¿Cuál es la primera IP USABLE?",
         answer: "192.168.5.129",
+        explanation:
+          "Dirección de red + 1 = 192.168.5.128 + 1 = 192.168.5.129",
         placeholder: "x.x.x.x",
       },
       {
         id: "ultima",
         label: "¿Cuál es la última IP USABLE?",
         answer: "192.168.5.158",
+        explanation:
+          "Broadcast − 1 = 192.168.5.159 − 1 = 192.168.5.158",
         placeholder: "x.x.x.x",
       },
       {
@@ -320,7 +366,8 @@ export const subnetExercises: SubnetExercise[] = [
         label: "¿Se puede usar esta subred para 25 hosts? (sí / no)",
         answer: "sí",
         altAnswers: ["si", "yes", "s"],
-        hint: "Tenés 30 hosts útiles, 25 caben.",
+        explanation:
+          "Sí. Esta subred tiene 30 hosts útiles y necesitás 25 → 25 ≤ 30 → alcanza.",
         placeholder: "sí o no",
       },
       {
@@ -328,7 +375,8 @@ export const subnetExercises: SubnetExercise[] = [
         label: "¿Se podría usar esta misma subred para 35 hosts? (sí / no)",
         answer: "no",
         altAnswers: ["n", "nope"],
-        hint: "Solo hay 30 hosts útiles. 35 > 30.",
+        explanation:
+          "No. Esta subred tiene solo 30 hosts útiles y necesitarías 35 → 35 > 30 → no alcanza.\nNecesitarías al menos /26 (62 hosts) para cubrir 35 equipos.",
         placeholder: "sí o no",
       },
     ],
@@ -345,61 +393,72 @@ export const subnetExercises: SubnetExercise[] = [
         label: "¿Qué clase de IP es? (A / B / C)",
         answer: "b",
         altAnswers: ["clase b", "class b"],
-        hint: "172 está entre 128 y 191 → Clase B.",
+        explanation:
+          "El primer octeto es 172.\n• Clase B → 128 a 191 ← 172 está aquí\n→ Clase B.",
         placeholder: "A, B o C",
       },
       {
         id: "bits_host",
         label: "¿Cuántos bits de HOST te quedan?",
         answer: "13",
-        hint: "32 − 19 = 13 bits.",
+        explanation:
+          "32 − 19 = 13 bits de host.\nEn el tercer octeto: los 3 primeros bits son de subred (19 − 16 = 3), los 5 restantes son de host. Más el cuarto octeto completo (8 bits) → 5 + 8 = 13 bits de host.",
         placeholder: "número",
       },
       {
         id: "mascara",
         label: "¿Cuál es la máscara en notación decimal?",
         answer: "255.255.224.0",
-        hint: "19 bits → tercer octeto: 11100000 = 224.",
+        explanation:
+          "19 bits en 1. Los primeros 2 octetos = 255.255. En el 3er octeto, los 3 primeros bits son 1:\n11100000 = 128 + 64 + 32 = 224\n→ Máscara: 255.255.224.0",
         placeholder: "255.x.x.x",
       },
       {
         id: "hosts",
         label: "¿Cuántos hosts útiles hay?",
         answer: "8190",
-        hint: "2^13 − 2 = 8.190.",
+        explanation:
+          "2^13 − 2 = 8.192 − 2 = 8.190 hosts útiles.\nEs una subred grande, ideal para un campus universitario con miles de dispositivos.",
         placeholder: "número",
       },
       {
         id: "red",
         label: "¿Cuál es la dirección de RED?",
         answer: "172.20.32.0",
-        hint: "El 32 del tercer octeto es la dirección de red (00100000, bits de host todos en 0).",
+        explanation:
+          "El tercer octeto es 32 = 00100000 en binario.\nCon /19, los 3 primeros bits del tercer octeto son de subred (001) y los 5 restantes de host (00000).\nTodos los bits de host en 0 → dirección de red = 172.20.32.0",
         placeholder: "x.x.x.x",
       },
       {
         id: "broadcast",
         label: "¿Cuál es la dirección de BROADCAST?",
         answer: "172.20.63.255",
-        hint: "32 en binario: 00100000. Bits de host todos en 1: 00111111 = 63 en el tercer octeto. Cuarto octeto todo en 1 = 255.",
+        explanation:
+          "Broadcast = red + tamaño del bloque − 1\nTamaño = 2^13 = 8.192\n172.20.32.0 + 8.192 − 1:\n→ El tercer octeto: 32 en binario = 00100000. Bits de host todos en 1: 00111111 = 63\n→ El cuarto octeto todo en 1 = 255\n→ Broadcast: 172.20.63.255",
         placeholder: "x.x.x.x",
       },
       {
         id: "primera",
         label: "¿Cuál es la primera IP USABLE?",
         answer: "172.20.32.1",
+        explanation:
+          "Dirección de red + 1 = 172.20.32.0 + 1 = 172.20.32.1",
         placeholder: "x.x.x.x",
       },
       {
         id: "ultima",
         label: "¿Cuál es la última IP USABLE?",
         answer: "172.20.63.254",
+        explanation:
+          "Broadcast − 1 = 172.20.63.255 − 1 = 172.20.63.254",
         placeholder: "x.x.x.x",
       },
       {
         id: "subredes",
         label: "¿Cuántas subredes /19 caben en la red clase B original (172.20.0.0/16)?",
         answer: "8",
-        hint: "2^(19−16) = 2^3 = 8 subredes.",
+        explanation:
+          "Bits de subred = 19 − 16 = 3 bits\n2^3 = 8 subredes posibles en el espacio /16.\nCada una cubre un bloque de 8.192 direcciones:\n172.20.0.0/19, 172.20.32.0/19, 172.20.64.0/19, … hasta 172.20.224.0/19",
         placeholder: "número",
       },
     ],

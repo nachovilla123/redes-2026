@@ -25,6 +25,32 @@ export default function Home() {
         </div>
 
         <div className="w-full max-w-lg flex flex-col gap-4">
+          {/* Subnetting interactive section */}
+          <div className="bg-slate-900 border border-indigo-900/50 rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-indigo-900/40 flex items-center justify-center text-xl">
+                🖊️
+              </div>
+              <div>
+                <h2 className="text-white font-semibold">Práctica de Subnetting</h2>
+                <p className="text-slate-500 text-xs">IPv4 · Fill-in-the-blank · 6 ejercicios</p>
+              </div>
+            </div>
+            <p className="text-slate-400 text-xs mb-5">
+              Calculá broadcast, rango de hosts, máscara y más. Verificá tus respuestas al instante.
+            </p>
+            <Link
+              href="/subnetting"
+              className="flex items-center justify-between w-full bg-indigo-900/40 hover:bg-indigo-900/60 text-white font-semibold rounded-xl px-5 py-3.5 transition-colors border border-indigo-800/50"
+            >
+              <span className="flex items-center gap-2 text-sm">
+                <span>🖊️</span>
+                Ejercicios interactivos
+              </span>
+              <span className="text-slate-400 text-sm">→</span>
+            </Link>
+          </div>
+
           {topics.map((topic) => (
             <div
               key={topic.slug}

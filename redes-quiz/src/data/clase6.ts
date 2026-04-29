@@ -7,6 +7,31 @@ export const TOPIC6 = {
 };
 
 export const flashcardsClase6: Flashcard[] = [
+  // FLSM (Subnetting fijo)
+  {
+    id: 514,
+    front: "¿Qué es FLSM (subnetting fijo) y cuándo se usa?",
+    back: "FLSM (Fixed Length Subnet Mask): todos los segmentos de la red usan la misma máscara → subredes de igual tamaño.\n\nCuándo usarlo: cuando todos los segmentos necesitan aproximadamente la misma cantidad de hosts (ej: 4 departamentos con 50 equipos cada uno).\n\nProcedimiento:\n1. Determinar cuántas subredes necesitás → n bits de subred → 2^n subredes\n2. Nueva máscara = máscara original + n bits\n3. Cada subred tiene 2^(bits de host) - 2 hosts útiles\n\nEjemplo: Red 192.168.1.0/24, necesito 4 subredes iguales:\n• 4 subredes → 2 bits → /26 (255.255.255.192)\n• Cada subred: 2^6 - 2 = 62 hosts útiles\n• Subredes: .0/26, .64/26, .128/26, .192/26\n\nVentaja: simple de calcular\nDesventaja: desperdicio si las subredes tienen necesidades muy diferentes → ahí se usa VLSM",
+    tag: "Subnetting",
+  },
+  {
+    id: 515,
+    front: "¿Cuáles son los 4 métodos de VLSM y cuándo conviene cada uno?",
+    back: "VLSM permite subredes de diferentes tamaños en la misma red.\n\n1. TOP-DOWN (Descendente):\n• Se asigna de mayor a menor tamaño\n• Ventaja: maximiza el espacio, menos fragmentación\n• Cuándo: cuando conocés todos los requerimientos de antemano\n• Paso clave: ordenar por hosts requeridos de MAYOR a MENOR\n\n2. BOTTOM-UP (Ascendente):\n• Se asigna de menor a mayor tamaño\n• Ventaja: útil si las subredes pequeñas son críticas o numerosas\n• Riesgo: las subredes grandes pueden no entrar al final — fragmentación\n• Cuándo: muchas oficinas pequeñas / sensores IoT\n\n3. SUPERNET + DIVISIÓN:\n• Se toma un bloque grande (supernet) y se subdivide\n• Ventaja: flexibilidad total\n• Cuándo: diseños jerárquicos (ISP, data centers, universidades)\n\n4. VLSM JERÁRQUICO CON RUTAS AGREGADAS:\n• Se diseña pensando en resumir rutas en los routers\n• Ventaja: reduce tablas de enrutamiento y tráfico de actualizaciones\n• Cuándo: redes grandes con muchos routers (OSPF, BGP)",
+    tag: "Subnetting",
+  },
+  {
+    id: 516,
+    front: "¿Qué es el Supernetting/CIDR y cómo se calcula el resumen?",
+    back: "Supernetting (o agregación CIDR): combinar varias subredes contiguas en una sola entrada de la tabla de rutas.\n\nPor qué importa: reduce el tamaño de las tablas de rutas → menor uso de memoria y CPU en routers → mejor rendimiento.\n\nCondiciones para poder resumir:\n• Las redes deben ser CONTIGUAS (sin huecos entre ellas)\n• La cantidad de redes debe ser potencia de 2 (2, 4, 8, 16...)\n• Deben estar ALINEADAS: la primera red debe empezar en un límite binario correcto\n\nCómo se calcula:\n1. Escribir las direcciones en binario\n2. Encontrar los bits comunes de izquierda → ese es el nuevo prefijo\n3. La dirección del resumen = primera dirección de las subredes con el nuevo prefijo\n\nEjemplo:\n192.168.4.0/24 = 00000100\n192.168.5.0/24 = 00000101\n192.168.6.0/24 = 00000110\n192.168.7.0/24 = 00000111\n→ 6 bits comunes en el 3er octeto → /22\n→ Resumen: 192.168.4.0/22\n\nNo se puede resumir si hay un 'hueco' (ej: falta 192.168.5.0)",
+    tag: "Subnetting",
+  },
+  {
+    id: 517,
+    front: "¿Qué es la 'subred 0' y se puede usar en redes modernas?",
+    back: "La subred 0 es la subred donde los bits de subred son todos ceros.\nEjemplo: si dividís 192.168.1.0/24 en /26, la subred 0 es 192.168.1.0/26.\n\nHistoria:\n• Originalmente (RFC 950) estaba PROHIBIDA porque su dirección coincidía con la red original sin subnetear → posible confusión en el ruteo\n• Estaba reservada junto con la 'subred broadcast' (todos los bits de subred en 1)\n\nSituación actual:\n• El RFC 1878 y tecnologías modernas PERMITEN usar la subred 0\n• Todos los routers/switches/servidores modernos la soportan por defecto\n• Hoy es completamente válido usar 192.168.1.0/26 en producción\n\nConsejo para el examen:\n• Leer el enunciado con cuidado — si dice 'no usar subred 0', respetarlo\n• Si no dice nada, en contextos modernos se puede usar\n• En equipamiento muy antiguo o configuraciones heredadas puede haber restricciones",
+    tag: "Subnetting",
+  },
   // VLSM
   {
     id: 501,

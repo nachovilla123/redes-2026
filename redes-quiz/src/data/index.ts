@@ -5,6 +5,8 @@ import { TOPIC4, flashcardsClase4 } from "./clase4";
 import { TOPIC5, flashcardsClase5 } from "./clase5";
 import { TOPIC6, flashcardsClase6 } from "./clase6";
 import { TOPIC7, flashcardsClase7 } from "./clase7";
+import { TOPIC8, flashcardsClase8 } from "./clase8";
+import { TOPIC9, flashcardsClase9 } from "./clase9";
 import type { Flashcard } from "./clase1";
 
 export type { Flashcard };
@@ -60,6 +62,18 @@ export const topics: Topic[] = [
     emoji: "🔒",
     ...TOPIC7,
     flashcards: flashcardsClase7,
+  },
+  {
+    slug: "cableado-estructurado",
+    emoji: "🔌",
+    ...TOPIC8,
+    flashcards: flashcardsClase8,
+  },
+  {
+    slug: "wlan-avanzado",
+    emoji: "📡",
+    ...TOPIC9,
+    flashcards: flashcardsClase9,
   },
 ];
 

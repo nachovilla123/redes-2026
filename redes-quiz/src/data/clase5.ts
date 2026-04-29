@@ -75,4 +75,23 @@ export const flashcardsClase5: Flashcard[] = [
     back: "Es la ruta que usa un router cuando el destino de un paquete no coincide con ninguna entrada específica de su tabla de rutas.\n\nSe representa como: 0.0.0.0/0\nCoincide con CUALQUIER destino (por eso es el 'último recurso').\n\nSe configura típicamente para que el tráfico desconocido salga hacia el ISP.\n\nAplicación: en redes pequeñas y en PCs, la 'default gateway' es el router que conoce el camino al resto de Internet.",
     tag: "Routing",
   },
+  // Retardo, pérdida y rendimiento (UD5 - Funcionamiento)
+  {
+    id: 412,
+    front: "¿Cuáles son los 4 tipos de retardo nodal en una red de conmutación de paquetes?",
+    back: "Cuando un paquete pasa por un router (nodo), sufre 4 tipos de retardo:\n\n1. Retardo de PROCESAMIENTO NODAL: tiempo que tarda el router en examinar el encabezado y decidir a dónde enviar el paquete. Generalmente microsegundos — despreciable en routers modernos.\n\n2. Retardo de COLA: tiempo esperando en la cola antes de poder transmitir. Depende del tráfico — puede ser 0 o muy alto si el enlace está congestionado.\n\n3. Retardo de TRANSMISIÓN: tiempo en poner todos los bits del paquete en el enlace. = Longitud del paquete (bits) / Velocidad del enlace (bps). Determinístico y predecible.\n\n4. Retardo de PROPAGACIÓN: tiempo que tarda la señal en viajar físicamente por el cable. = Distancia / Velocidad de propagación. Para fibra ≈ 2/3 de la velocidad de la luz.\n\nRetardo nodal total = suma de los 4.\n\nHerramienta para medirlo: Traceroute (tracert en Windows).",
+    tag: "Nivel Internet",
+  },
+  {
+    id: 413,
+    front: "¿Cuándo se pierde un paquete en una red IP? ¿Qué es la intensidad de tráfico?",
+    back: "Pérdida de paquetes: ocurre cuando un paquete llega a un router cuya cola está llena.\n• La cola tiene capacidad finita (memoria limitada)\n• Si no hay espacio → el router DESCARTA el paquete (drop)\n• El paquete se pierde — no llega al destino\n\nDesde el punto de vista del host origen: envió el paquete, pero nunca llega al destino.\n\nIntensidad de tráfico (La/R):\n• L = tamaño promedio del paquete (bits)\n• a = tasa de llegada de paquetes (paquetes/s)\n• R = velocidad del enlace (bits/s)\n• Si La/R → 1: la cola crece indefinidamente → retardo enorme y pérdidas\n• Si La/R < 1: la cola es manejable\n\nConclusión: el rendimiento de un nodo se mide tanto en retardo como en tasa de pérdida de paquetes.\n\nLas pérdidas de TCP las detecta el emisor (no llega el ACK) y retransmite.",
+    tag: "Nivel Internet",
+  },
+  {
+    id: 414,
+    front: "¿Qué es el throughput (rendimiento) de extremo a extremo y qué lo limita?",
+    back: "Throughput: velocidad real a la que el destino recibe datos del origen (bits/s).\n\nRegla del cuello de botella (bottleneck):\n• El throughput de extremo a extremo está limitado por el enlace más lento en el camino\n• Si hay dos enlaces Rs (servidor) y Rc (cliente), el throughput = min(Rs, Rc)\n\nEjemplo con un router:\n• Si Rs < Rc: el servidor es el cuello de botella → throughput = Rs\n• Si Rc < Rs: el cliente es el cuello de botella → throughput = Rc\n\nEscenario de tráfico compartido:\n• Si 10 usuarios comparten un enlace de R bps en el núcleo, cada uno obtiene aproximadamente R/10 bps\n• El enlace del núcleo puede convertirse en cuello de botella aunque Rs y Rc sean altos\n\nAnalogía: como una autopista con un túnel angosto en el medio — el flujo total está limitado por el ancho del túnel, no por las velocidades de entrada y salida.\n\nHerramienta para medir: iPerf, speedtest.net",
+    tag: "Nivel Internet",
+  },
 ];

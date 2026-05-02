@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Subredes y CIDR</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, system-ui, sans-serif; background: #0d1117; color: #e6edf3; padding: 20px; min-height: 100vh; }
+  .nav { margin-bottom: 16px; }
+  .nav a { color: #58a6ff; text-decoration: none; font-size: 13px; }
+  h1 { font-size: 28px; margin-bottom: 4px; }
+  .subtitle { color: #8b949e; margin-bottom: 20px; }
+  .layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; max-width: 1400px; margin: 0 auto; }
+  .panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+  .panel h2 { font-size: 16px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+  button { background: #238636; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; margin-right: 6px; }
+  button:hover { background: #2ea043; }
+  button.secondary { background: #30363d; }
+  .step { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed #30363d; }
+  .step:last-child { border: none; }
+  .step-title { font-weight: 600; margin-bottom: 6px; color: #58a6ff; }
+  .info-box { background: #0d1117; border-left: 3px solid #58a6ff; padding: 10px 12px; border-radius: 4px; font-size: 12px; color: #c9d1d9; line-height: 1.6; margin-bottom: 8px; }
+  .info-box code { background: #161b22; padding: 1px 5px; border-radius: 3px; color: #d29922; font-size: 11px; }
+
+  .ip-input { display: flex; gap: 6px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+  .ip-octet {
+    width: 70px;
+    background: #0d1117;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 10px;
+    font-family: 'SF Mono', Menlo, monospace;
+    font-size: 18px;
+    text-align: center;
+  }
+  .cidr-slider {
+    width: 100%;
+    margin-top: 8px;
+  }
+  .cidr-display {
+    font-family: 'SF Mono', Menlo, monospace;
+    font-size: 22px;
+    color: #d29922;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .bits {
+    font-family: 'SF Mono', Menlo, monospace;
+    font-size: 14px;
+    background: #0d1117;
+    padding: 14px;
+    border-radius: 6px;
+    border: 1px solid #30363d;
+    margin-bottom: 12px;
+    overflow-x: auto;
+  }
+  .bit-row { display: flex; gap: 1px; margin-bottom: 8px; align-items: center; }
+  .bit-label {
+    font-size: 11px;
+    color: #8b949e;
+    width: 70px;
+    flex-shrink: 0;
+  }
+  .bit { width: 22px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+  .bit-net { background: #58a6ff; color: white; }
+  .bit-host { background: #30363d; color: #8b949e; }
+  .bit-mask-on { background: #f85149; color: white; }
+  .bit-mask-off { background: #21262d; color: #6e7681; }
+  .bit-result { background: #3fb950; color: white; }
+  .octet-sep { width: 4px; }
+
+  .result-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #30363d; }
+  .result-row:last-child { border: none; }
+  .result-label { color: #8b949e; font-size: 13px; }
+  .result-value { font-family: 'SF Mono', Menlo, monospace; color: #e6edf3; font-size: 14px; font-weight: bold; }
+  .legend { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; font-size: 11px; }
+  .legend-item { display: flex; align-items: center; gap: 4px; }
+  .legend-dot { width: 14px; height: 14px; border-radius: 3px; }
+
+  .vlsm-list { font-family: 'SF Mono', Menlo, monospace; font-size: 12px; background: #0d1117; border-radius: 6px; padding: 10px; }
+  .vlsm-list div { margin-bottom: 6px; }
+  .container { max-width: 1400px; margin: 0 auto; }
+  .docs-panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+  .docs-panel h2 { font-size: 18px; margin-bottom: 12px; color: #58a6ff; }
+  .docs-panel h3 { font-size: 15px; margin: 16px 0 8px; color: #d29922; }
+  .docs-panel p { line-height: 1.7; color: #c9d1d9; margin-bottom: 10px; font-size: 14px; }
+  .docs-panel ul { list-style: none; padding-left: 0; margin: 8px 0; }
+  .docs-panel li { padding: 4px 0; padding-left: 16px; position: relative; line-height: 1.6; font-size: 14px; }
+  .docs-panel li::before { content: "›"; position: absolute; left: 0; color: #58a6ff; font-weight: bold; }
+  .docs-panel code { background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #d29922; font-size: 12px; }
+  .show-sim { background: linear-gradient(135deg, #238636, #1f6feb); color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; margin-top: 20px; box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3); transition: transform 0.15s; }
+  .show-sim:hover { transform: translateY(-2px); }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="nav"><a href="index.html">← Volver al hub</a></div>
+<h1>Direccionamiento IP, Subredes y CIDR</h1>
+<div class="subtitle">Mové la máscara y mirá cómo cambian los bits, la cantidad de hosts y los rangos.</div>
+
+<div class="docs-panel">
+  <h2>📖 Concepto</h2>
+  <p>Una IP es como una <b>dirección postal en dos partes</b>: el prefijo identifica la red (el barrio), el sufijo identifica al host (el departamento). La <b>máscara de subred</b> indica cuántos bits son la red.</p>
+
+  <h3>Formato IPv4</h3>
+  <p>32 bits escritos como 4 octetos: <code>192.168.1.100</code> = <code>11000000.10101000.00000001.01100100</code></p>
+
+  <h3>CIDR / máscara</h3>
+  <p>El número después de <code>/</code> indica cuántos bits son de red. <code>192.168.1.0/24</code> = 24 bits de red, 8 de host. <b>Hosts utilizables = 2^h − 2</b> (se reservan dirección de red y broadcast).</p>
+
+  <h3>Direcciones especiales por subred</h3>
+  <ul>
+    <li><b>Primera (host=00...0):</b> dirección de red — no se asigna a nadie</li>
+    <li><b>Última (host=11...1):</b> broadcast — llega a todos los hosts de la subred</li>
+  </ul>
+
+  <h3>Direcciones privadas (RFC 1918)</h3>
+  <ul>
+    <li><code>10.0.0.0/8</code> — empresas grandes</li>
+    <li><code>172.16.0.0/12</code> — empresas medianas</li>
+    <li><code>192.168.0.0/16</code> — hogares y PyMEs</li>
+  </ul>
+  <p>Nunca aparecen en internet — el NAT las traduce a una IP pública.</p>
+
+  <h3>VLSM</h3>
+  <p>Variable Length Subnet Mask: permite asignar máscaras distintas a cada subred. En vez de cortar el edificio en pisos iguales, hacés pisos según la cantidad de gente.</p>
+
+  <h3>Atajo mental</h3>
+  <p>Bits de host h → 2^h direcciones. Tabla rápida:<br>
+  <code>/24</code> = 256 · <code>/25</code> = 128 · <code>/26</code> = 64 · <code>/27</code> = 32 · <code>/28</code> = 16</p>
+
+  <button class="show-sim" id="show-sim">▶ Ver calculadora interactiva</button>
+</div>
+
+<div class="layout" id="sim" style="display:none">
+  <div class="panel">
+    <h2>Calculadora visual</h2>
+    <div class="ip-input">
+      <input class="ip-octet" id="o1" type="number" min="0" max="255" value="192">
+      <span style="font-size:24px;color:#8b949e">.</span>
+      <input class="ip-octet" id="o2" type="number" min="0" max="255" value="168">
+      <span style="font-size:24px;color:#8b949e">.</span>
+      <input class="ip-octet" id="o3" type="number" min="0" max="255" value="1">
+      <span style="font-size:24px;color:#8b949e">.</span>
+      <input class="ip-octet" id="o4" type="number" min="0" max="255" value="100">
+    </div>
+    <div class="cidr-display">/<span id="cidr-val">24</span></div>
+    <input type="range" min="1" max="32" value="24" class="cidr-slider" id="cidr-slider">
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#58a6ff"></div>Bits de red</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#30363d"></div>Bits de host</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f85149"></div>Máscara=1</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#21262d;border:1px solid #30363d"></div>Máscara=0</div>
+    </div>
+
+    <div class="bits" id="bits"></div>
+
+    <div>
+      <div class="result-row"><span class="result-label">Máscara</span><span class="result-value" id="mask">255.255.255.0</span></div>
+      <div class="result-row"><span class="result-label">Dirección de red</span><span class="result-value" id="network" style="color:#3fb950">192.168.1.0</span></div>
+      <div class="result-row"><span class="result-label">Primer host utilizable</span><span class="result-value" id="first-host">192.168.1.1</span></div>
+      <div class="result-row"><span class="result-label">Último host utilizable</span><span class="result-value" id="last-host">192.168.1.254</span></div>
+      <div class="result-row"><span class="result-label">Broadcast</span><span class="result-value" id="broadcast" style="color:#f85149">192.168.1.255</span></div>
+      <div class="result-row"><span class="result-label">Total direcciones</span><span class="result-value" id="total">256</span></div>
+      <div class="result-row"><span class="result-label">Hosts utilizables</span><span class="result-value" id="usable" style="color:#d29922">254</span></div>
+      <div class="result-row"><span class="result-label">Clase histórica</span><span class="result-value" id="class">C</span></div>
+      <div class="result-row"><span class="result-label">Tipo</span><span class="result-value" id="type">Privada</span></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="step">
+      <div class="step-title">Cómo funciona</div>
+      <div class="info-box">
+        El <code>/N</code> indica cuántos bits de la izquierda son la <b>red</b>. Los restantes (32-N) son <b>host</b>. Hacer AND entre IP y máscara da la dirección de red.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-title">Direcciones reservadas</div>
+      <div class="info-box">
+        Por subred siempre se reservan 2: la primera (host=00...0 → red) y la última (host=11...1 → broadcast). Por eso <b>hosts utilizables = 2^h − 2</b>.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-title">Rangos privados (RFC 1918)</div>
+      <div class="info-box">
+        <code>10.0.0.0/8</code> · <code>172.16.0.0/12</code> · <code>192.168.0.0/16</code><br>
+        Nunca aparecen en internet — el NAT las traduce a una IP pública.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-title">Ejemplo VLSM</div>
+      <div class="info-box">Tenés <code>200.10.10.0/24</code> y necesitás 3 subredes con 100, 50 y 20 hosts:</div>
+      <div class="vlsm-list">
+        <div>👥 100 hosts → <b style="color:#58a6ff">/25</b> (126 utilizables)</div>
+        <div>👥 50 hosts → <b style="color:#3fb950">/26</b> (62 utilizables)</div>
+        <div>👥 20 hosts → <b style="color:#d29922">/27</b> (30 utilizables)</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-title">Atajo mental</div>
+      <div class="info-box">
+        Bits de host <b>h</b> → <b>2^h</b> direcciones. Tabla rápida:<br>
+        h=8 → 256 (/24) · h=7 → 128 (/25) · h=6 → 64 (/26) · h=5 → 32 (/27) · h=4 → 16 (/28)
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function ipToBits(o1, o2, o3, o4) {
+  return [o1, o2, o3, o4].map(o => o.toString(2).padStart(8, '0')).join('');
+}
+function bitsToIp(bits) {
+  const o = [];
+  for (let i = 0; i < 4; i++) o.push(parseInt(bits.slice(i * 8, i * 8 + 8), 2));
+  return o.join('.');
+}
+
+function getInputs() {
+  const o = ['o1', 'o2', 'o3', 'o4'].map(id => Math.max(0, Math.min(255, parseInt(document.getElementById(id).value) || 0)));
+  const cidr = parseInt(document.getElementById('cidr-slider').value);
+  return { o, cidr };
+}
+
+function compute() {
+  const { o, cidr } = getInputs();
+  document.getElementById('cidr-val').textContent = cidr;
+
+  const ipBits = ipToBits(...o);
+  const maskBits = '1'.repeat(cidr) + '0'.repeat(32 - cidr);
+  const netBits = ipBits.split('').map((b, i) => (b === '1' && maskBits[i] === '1') ? '1' : '0').join('');
+  const bcastBits = netBits.slice(0, cidr) + '1'.repeat(32 - cidr);
+
+  // Render bit grid
+  const bitsEl = document.getElementById('bits');
+  function row(label, bitStr, classifier) {
+    const wrap = document.createElement('div');
+    wrap.className = 'bit-row';
+    const lbl = document.createElement('div'); lbl.className = 'bit-label'; lbl.textContent = label;
+    wrap.appendChild(lbl);
+    bitStr.split('').forEach((b, i) => {
+      const bit = document.createElement('div');
+      bit.className = 'bit ' + classifier(b, i);
+      bit.textContent = b;
+      wrap.appendChild(bit);
+      if ((i + 1) % 8 === 0 && i < 31) {
+        const sep = document.createElement('div'); sep.className = 'octet-sep'; wrap.appendChild(sep);
+      }
+    });
+    return wrap;
+  }
+
+  bitsEl.innerHTML = '';
+  bitsEl.appendChild(row('IP', ipBits, (b, i) => i < cidr ? 'bit-net' : 'bit-host'));
+  bitsEl.appendChild(row('Máscara', maskBits, (b) => b === '1' ? 'bit-mask-on' : 'bit-mask-off'));
+  bitsEl.appendChild(row('Red (AND)', netBits, () => 'bit-result'));
+
+  // Decimal results
+  const maskDec = bitsToIp(maskBits);
+  const netDec = bitsToIp(netBits);
+  const bcastDec = bitsToIp(bcastBits);
+  const total = Math.pow(2, 32 - cidr);
+  const usable = total > 2 ? total - 2 : 0;
+
+  // First/last host
+  let firstHost = '—', lastHost = '—';
+  if (total > 2) {
+    const fh = netBits.slice(0, 31) + '1';
+    const lh = bcastBits.slice(0, 31) + '0';
+    firstHost = bitsToIp(fh);
+    lastHost = bitsToIp(lh);
+  }
+
+  document.getElementById('mask').textContent = maskDec + '  (/' + cidr + ')';
+  document.getElementById('network').textContent = netDec;
+  document.getElementById('first-host').textContent = firstHost;
+  document.getElementById('last-host').textContent = lastHost;
+  document.getElementById('broadcast').textContent = bcastDec;
+  document.getElementById('total').textContent = total.toLocaleString('es');
+  document.getElementById('usable').textContent = usable.toLocaleString('es');
+
+  // Class
+  let cls = 'E';
+  if (o[0] < 128) cls = 'A';
+  else if (o[0] < 192) cls = 'B';
+  else if (o[0] < 224) cls = 'C';
+  else if (o[0] < 240) cls = 'D (Multicast)';
+  document.getElementById('class').textContent = cls;
+
+  // Type
+  let type = 'Pública';
+  if (o[0] === 10) type = 'Privada (RFC1918 — 10.0.0.0/8)';
+  else if (o[0] === 172 && o[1] >= 16 && o[1] <= 31) type = 'Privada (RFC1918 — 172.16.0.0/12)';
+  else if (o[0] === 192 && o[1] === 168) type = 'Privada (RFC1918 — 192.168.0.0/16)';
+  else if (o[0] === 127) type = 'Loopback (127.0.0.0/8)';
+  else if (o[0] === 169 && o[1] === 254) type = 'Link-local (APIPA)';
+  else if (o[0] >= 224) type = 'Multicast / Reservada';
+  document.getElementById('type').textContent = type;
+}
+
+document.getElementById('cidr-slider').oninput = compute;
+['o1','o2','o3','o4'].forEach(id => document.getElementById(id).oninput = compute);
+
+document.getElementById('show-sim').onclick = () => {
+  document.getElementById('sim').style.display = '';
+  document.getElementById('sim').scrollIntoView({ behavior: 'smooth' });
+};
+
+compute();
+</script>
+</div>
+</body>
+</html>

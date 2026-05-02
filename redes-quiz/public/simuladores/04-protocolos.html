@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Protocolos — las reglas del juego</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, system-ui, sans-serif; background: #0d1117; color: #e6edf3; padding: 20px; min-height: 100vh; }
+  .nav { margin-bottom: 16px; }
+  .nav a { color: #58a6ff; text-decoration: none; font-size: 13px; }
+  h1 { font-size: 28px; margin-bottom: 4px; }
+  .subtitle { color: #8b949e; margin-bottom: 20px; }
+  .container { max-width: 1400px; margin: 0 auto; }
+
+  .docs-panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+  .docs-panel h2 { font-size: 18px; margin-bottom: 12px; color: #58a6ff; }
+  .docs-panel h3 { font-size: 15px; margin: 16px 0 8px; color: #d29922; }
+  .docs-panel p { line-height: 1.7; color: #c9d1d9; margin-bottom: 10px; font-size: 14px; }
+  .docs-panel ul { list-style: none; padding-left: 0; margin: 8px 0; }
+  .docs-panel li { padding: 4px 0; padding-left: 16px; position: relative; line-height: 1.6; font-size: 14px; }
+  .docs-panel li::before { content: "›"; position: absolute; left: 0; color: #58a6ff; font-weight: bold; }
+  .docs-panel code { background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #d29922; font-size: 12px; }
+  .pillar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 14px 0; }
+  .pillar { background: #0d1117; border-radius: 6px; padding: 12px; border-top: 3px solid; }
+  .pillar.syn { border-top-color: #58a6ff; }
+  .pillar.sem { border-top-color: #3fb950; }
+  .pillar.tim { border-top-color: #d29922; }
+  .pillar h4 { font-size: 14px; margin-bottom: 6px; }
+  .pillar p { font-size: 13px; line-height: 1.5; }
+
+  .show-sim {
+    background: linear-gradient(135deg, #238636, #1f6feb);
+    color: white; border: none; padding: 14px 28px; border-radius: 8px;
+    cursor: pointer; font-size: 15px; font-weight: 600; margin-top: 20px;
+    box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3);
+    transition: transform 0.15s;
+  }
+  .show-sim:hover { transform: translateY(-2px); }
+
+  .layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
+  .panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+  .panel h2 { font-size: 16px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+  button { background: #238636; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; margin-right: 6px; margin-bottom: 6px; }
+  button:hover { background: #2ea043; }
+  button.secondary { background: #30363d; }
+  button.danger { background: #da3633; }
+  svg { width: 100%; height: 480px; display: block; }
+  .step { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed #30363d; }
+  .step:last-child { border: none; }
+  .step-title { font-weight: 600; margin-bottom: 6px; color: #58a6ff; }
+  .info-box { background: #0d1117; border-left: 3px solid #58a6ff; padding: 10px 12px; border-radius: 4px; font-size: 12px; color: #c9d1d9; line-height: 1.6; margin-bottom: 8px; }
+  .info-box code { background: #161b22; padding: 1px 5px; border-radius: 3px; color: #d29922; font-size: 11px; }
+  select { background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 6px; padding: 6px 10px; font-size: 13px; width: 100%; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="nav"><a href="index.html">← Volver al hub</a></div>
+<h1>Protocolos — las reglas del juego</h1>
+<div class="subtitle">Cómo dos computadoras logran "hablar el mismo idioma".</div>
+
+<div class="docs-panel">
+  <h2>📖 Concepto</h2>
+  <p>Cuando dos personas se saludan en Argentina siguen un protocolo sin pensarlo: extender mano derecha, apretar fuerte, sacudir 2-3 veces, soltar. Si alguien rompe esa secuencia (mano izquierda, no suelta, sacude 20 veces), la situación se vuelve incómoda — el "protocolo" se rompió.</p>
+  <p>Un <b>protocolo</b> es exactamente eso: un conjunto de reglas que dos partes <b>acuerdan seguir</b> para comunicarse. Sin protocolo, no hay comunicación posible.</p>
+
+  <h3>Los 3 pilares de cualquier protocolo</h3>
+  <div class="pillar-grid">
+    <div class="pillar syn">
+      <h4 style="color:#58a6ff">📐 Sintaxis — la forma</h4>
+      <p>Cómo se ve el mensaje: estructura, campos, orden de bytes. <i>El sobre tiene remitente arriba a la izquierda y sello arriba a la derecha.</i></p>
+    </div>
+    <div class="pillar sem">
+      <h4 style="color:#3fb950">💡 Semántica — el significado</h4>
+      <p>Qué significa cada parte. <i>El campo "sucursal" en un formulario significa algo específico — escribir tu nombre ahí rompe la semántica.</i></p>
+    </div>
+    <div class="pillar tim">
+      <h4 style="color:#d29922">⏱️ Temporización — el cuándo</h4>
+      <p>Quién habla primero, cuánto se espera, qué pasa si no llega respuesta. <i>En walkie-talkie decís "cambio" para indicar que terminaste.</i></p>
+    </div>
+  </div>
+
+  <h3>Asincrónico vs Sincrónico</h3>
+  <ul>
+    <li><b>Asincrónico (WhatsApp):</b> cada mensaje tiene marca de inicio y fin. No hay un ritmo común. Cada carácter viaja con un bit de arranque y bit de parada.</li>
+    <li><b>Sincrónico (videollamada):</b> ambos están conectados al mismo tiempo, mismo "reloj" compartido. Más eficiente, requiere sintonía.</li>
+  </ul>
+
+  <h3>Características clave</h3>
+  <ul>
+    <li><b>Control de errores:</b> info extra para detectar si algo se corrompió.</li>
+    <li><b>Control de flujo:</b> el receptor puede decir "pará un poco" si llega rápido.</li>
+    <li><b>Control de secuencia:</b> los mensajes se numeran para reordenar si llegan desordenados.</li>
+    <li><b>Fragmentación:</b> los datos grandes se cortan en trozos para viajar.</li>
+    <li><b>Transparencia:</b> si los datos contienen un patrón que parece señal de control, se marca para no confundirse.</li>
+  </ul>
+
+  <p style="margin-top:14px;font-style:italic;color:#8b949e">Un protocolo no es magia — es un contrato. "Yo te mando los datos en este formato, vos respondés de esta manera". HTTP, TCP, IP, WiFi son protocolos: reglas documentadas que todos acordaron seguir.</p>
+
+  <button class="show-sim" id="show-sim">▶ Ver animación interactiva</button>
+</div>
+
+<div class="layout" id="sim" style="display:none">
+  <div class="panel">
+    <svg id="canvas" viewBox="0 0 800 480"></svg>
+  </div>
+  <div class="panel">
+    <h2>Probá distintos escenarios</h2>
+    <div class="step">
+      <div class="step-title">Escenario</div>
+      <select id="scenario">
+        <option value="ok">✓ Todo bien — protocolo correcto</option>
+        <option value="syn">✗ Sintaxis incorrecta (mano izquierda)</option>
+        <option value="sem">✗ Semántica incorrecta (palabras erróneas)</option>
+        <option value="tim">✗ Temporización mal (los dos hablan a la vez)</option>
+      </select>
+      <button id="run">▶ Reproducir</button>
+      <button id="reset" class="danger">Reset</button>
+    </div>
+
+    <div class="step">
+      <div class="step-title">Resultado</div>
+      <div class="info-box" id="explain">Elegí un escenario y dale play. Vas a ver qué pasa cuando se rompe cada uno de los 3 pilares.</div>
+    </div>
+
+    <div class="step">
+      <div class="step-title">Conclusión</div>
+      <div class="info-box">
+        Si cualquiera de los 3 pilares (sintaxis, semántica, temporización) falla, la comunicación se rompe. Por eso los protocolos definen los 3 con precisión.
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+function ns(t,a={},c=[]){const e=document.createElementNS('http://www.w3.org/2000/svg',t);for(const k in a)e.setAttribute(k,a[k]);c.forEach(x=>e.appendChild(x));return e;}
+const svg = document.getElementById('canvas');
+
+const A = { x: 150, y: 240, color: '#58a6ff', name: 'Alice' };
+const B = { x: 650, y: 240, color: '#3fb950', name: 'Bob' };
+
+function drawSetup() {
+  svg.innerHTML = '';
+  // Alice
+  svg.appendChild(ns('circle', { cx: A.x, cy: A.y - 30, r: 30, fill: '#21262d', stroke: A.color, 'stroke-width': 3 }));
+  svg.appendChild(ns('text', { x: A.x, y: A.y - 22, fill: 'white', 'font-size': 28, 'text-anchor': 'middle' })).textContent = '👩';
+  svg.appendChild(ns('text', { x: A.x, y: A.y + 28, fill: A.color, 'font-size': 14, 'text-anchor': 'middle', 'font-weight': 'bold' })).textContent = A.name;
+  // Bob
+  svg.appendChild(ns('circle', { cx: B.x, cy: B.y - 30, r: 30, fill: '#21262d', stroke: B.color, 'stroke-width': 3 }));
+  svg.appendChild(ns('text', { x: B.x, y: B.y - 22, fill: 'white', 'font-size': 28, 'text-anchor': 'middle' })).textContent = '🧑';
+  svg.appendChild(ns('text', { x: B.x, y: B.y + 28, fill: B.color, 'font-size': 14, 'text-anchor': 'middle', 'font-weight': 'bold' })).textContent = B.name;
+}
+drawSetup();
+
+let running = false;
+
+const SCENARIOS = {
+  ok: {
+    title: 'Protocolo correcto: apretón de manos',
+    steps: [
+      { from: 'A', to: 'B', text: 'Extiende mano derecha 🤚', color: '#58a6ff' },
+      { from: 'B', to: 'A', text: 'Toma la mano (también derecha) 🤝', color: '#3fb950' },
+      { from: '∞', to: '∞', text: 'Sacuden 2-3 veces, fuerza media', color: '#d29922' },
+      { from: 'A', to: 'B', text: 'Soltar', color: '#a371f7' },
+    ],
+    result: '✓ <b style="color:#3fb950">Comunicación exitosa.</b> Ambos siguieron las 3 reglas: sintaxis (mano derecha), semántica (apretón = saludo), temporización (turnos).',
+  },
+  syn: {
+    title: 'Sintaxis incorrecta',
+    steps: [
+      { from: 'A', to: 'B', text: 'Extiende mano izquierda 🤚 (mal!)', color: '#58a6ff' },
+      { from: 'B', to: 'A', text: '😕 ¿Qué hacés?', color: '#f85149' },
+      { from: '∞', to: '∞', text: 'Bob no sabe cómo responder', color: '#f85149' },
+    ],
+    result: '✗ <b style="color:#f85149">La sintaxis está rota.</b> Alice extendió la mano equivocada — la <i>forma</i> del mensaje no respeta el protocolo. Bob no puede procesarlo.<br><br>En redes equivale a: enviar un paquete con campos en el orden incorrecto. El receptor no sabe interpretarlo.',
+  },
+  sem: {
+    title: 'Semántica incorrecta',
+    steps: [
+      { from: 'A', to: 'B', text: 'Extiende mano derecha 🤚', color: '#58a6ff' },
+      { from: 'B', to: 'A', text: 'Le pone una galletita en la mano 🍪 (mal!)', color: '#f85149' },
+      { from: '∞', to: '∞', text: 'Alice queda confundida', color: '#f85149' },
+    ],
+    result: '✗ <b style="color:#f85149">La semántica está rota.</b> Bob respondió a un saludo con un objeto distinto. La <i>forma</i> es similar (un gesto con la mano) pero el <i>significado</i> es totalmente otro.<br><br>En redes equivale a: el campo está bien formado, pero su valor significa algo distinto a lo esperado.',
+  },
+  tim: {
+    title: 'Temporización rota',
+    steps: [
+      { from: 'A', to: 'B', text: 'Habla al mismo tiempo que Bob', color: '#58a6ff' },
+      { from: 'B', to: 'A', text: 'Habla al mismo tiempo que Alice', color: '#3fb950' },
+      { from: '∞', to: '∞', text: '💥 Colisión — nadie escucha al otro', color: '#f85149' },
+    ],
+    result: '✗ <b style="color:#f85149">La temporización está rota.</b> Los dos hablaron a la vez. Aunque la sintaxis y semántica estuvieran bien, sin <i>turnos</i> no se entiende nada.<br><br>En redes equivale a las <b>colisiones de Ethernet</b> en redes antiguas, o por qué WiFi usa CSMA/CA: para evitar que dos hablen simultáneamente.',
+  },
+};
+
+async function run() {
+  if (running) return;
+  running = true;
+  const sc = document.getElementById('scenario').value;
+  const data = SCENARIOS[sc];
+  drawSetup();
+  document.getElementById('explain').innerHTML = '<b>' + data.title + '</b><br><br>Mirá el dibujo...';
+
+  let yLine = 100;
+  for (const step of data.steps) {
+    if (step.from === '∞') {
+      // both speak at once or simultaneous event
+      if (sc === 'tim') await playCollision(step.text, step.color, yLine);
+      else await playMutual(step.text, step.color, yLine);
+    } else {
+      await playArrow(step.from, step.to, step.text, step.color, yLine);
+    }
+    yLine += 50;
+  }
+  document.getElementById('explain').innerHTML = data.result;
+  running = false;
+}
+
+function playArrow(fromId, toId, text, color, y) {
+  return new Promise(resolve => {
+    const from = fromId === 'A' ? A : B;
+    const to = toId === 'A' ? A : B;
+    const dot = ns('rect', { x: from.x - 60, y: y - 16, width: 120, height: 28, rx: 6, fill: color, stroke: 'white', 'stroke-width': 1.5 });
+    const lbl = ns('text', { x: from.x, y: y + 4, fill: 'white', 'font-size': 11, 'text-anchor': 'middle', 'font-weight': 'bold' });
+    lbl.textContent = text;
+    svg.appendChild(dot); svg.appendChild(lbl);
+
+    const start = performance.now();
+    function frame(t) {
+      const p = Math.min((t - start) / 1100, 1);
+      const x = from.x + (to.x - from.x) * p;
+      dot.setAttribute('x', x - 60);
+      lbl.setAttribute('x', x);
+      if (p < 1) requestAnimationFrame(frame);
+      else setTimeout(() => { dot.remove(); lbl.remove(); resolve(); }, 300);
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+function playMutual(text, color, y) {
+  return new Promise(resolve => {
+    const lbl = ns('text', { x: 400, y: y + 4, fill: color, 'font-size': 13, 'text-anchor': 'middle', 'font-weight': 'bold' });
+    lbl.textContent = text;
+    svg.appendChild(lbl);
+    setTimeout(() => { resolve(); }, 1200);
+  });
+}
+
+function playCollision(text, color, y) {
+  return new Promise(resolve => {
+    // both packets moving toward each other
+    const dotA = ns('rect', { x: A.x, y: y - 16, width: 80, height: 28, rx: 6, fill: A.color });
+    const dotB = ns('rect', { x: B.x - 80, y: y - 16, width: 80, height: 28, rx: 6, fill: B.color });
+    const labA = ns('text', { x: A.x + 40, y: y + 4, fill: 'white', 'font-size': 11, 'text-anchor': 'middle', 'font-weight': 'bold' }); labA.textContent = 'Hola';
+    const labB = ns('text', { x: B.x - 40, y: y + 4, fill: 'white', 'font-size': 11, 'text-anchor': 'middle', 'font-weight': 'bold' }); labB.textContent = 'Hola';
+    svg.appendChild(dotA); svg.appendChild(dotB); svg.appendChild(labA); svg.appendChild(labB);
+
+    const start = performance.now();
+    function frame(t) {
+      const p = Math.min((t - start) / 1000, 1);
+      const aX = A.x + (350 - A.x) * p;
+      const bX = B.x - 80 + (350 - 80 - (B.x - 80)) * p;
+      dotA.setAttribute('x', aX); labA.setAttribute('x', aX + 40);
+      dotB.setAttribute('x', bX); labB.setAttribute('x', bX + 40);
+      if (p < 1) requestAnimationFrame(frame);
+      else {
+        // collision
+        const boom = ns('text', { x: 400, y: y - 30, fill: '#f85149', 'font-size': 36, 'text-anchor': 'middle' });
+        boom.textContent = '💥';
+        svg.appendChild(boom);
+        const txt = ns('text', { x: 400, y: y + 30, fill: '#f85149', 'font-size': 13, 'text-anchor': 'middle', 'font-weight': 'bold' });
+        txt.textContent = text; svg.appendChild(txt);
+        setTimeout(() => {
+          dotA.remove(); dotB.remove(); labA.remove(); labB.remove();
+          resolve();
+        }, 1000);
+      }
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+document.getElementById('run').onclick = run;
+document.getElementById('reset').onclick = () => { drawSetup(); document.getElementById('explain').innerHTML = 'Elegí un escenario y dale play.'; };
+
+document.getElementById('show-sim').onclick = () => {
+  document.getElementById('sim').style.display = '';
+  document.getElementById('sim').scrollIntoView({ behavior: 'smooth' });
+};
+</script>
+</body>
+</html>

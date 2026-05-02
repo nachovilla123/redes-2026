@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Conmutación: circuitos vs paquetes</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, system-ui, sans-serif; background: #0d1117; color: #e6edf3; padding: 20px; min-height: 100vh; }
+  .nav { margin-bottom: 16px; }
+  .nav a { color: #58a6ff; text-decoration: none; font-size: 13px; }
+  h1 { font-size: 28px; margin-bottom: 4px; }
+  .subtitle { color: #8b949e; margin-bottom: 20px; }
+  .container { max-width: 1400px; margin: 0 auto; }
+
+  .docs-panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+  .docs-panel h2 { font-size: 18px; margin-bottom: 12px; color: #58a6ff; }
+  .docs-panel h3 { font-size: 15px; margin: 16px 0 8px; color: #d29922; }
+  .docs-panel p { line-height: 1.7; color: #c9d1d9; margin-bottom: 10px; font-size: 14px; }
+  .docs-panel ul { list-style: none; padding-left: 0; margin: 8px 0; }
+  .docs-panel li { padding: 4px 0; padding-left: 16px; position: relative; line-height: 1.6; font-size: 14px; }
+  .docs-panel li::before { content: "›"; position: absolute; left: 0; color: #58a6ff; font-weight: bold; }
+  .docs-panel code { background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #d29922; font-size: 12px; }
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
+  .compare-side { background: #0d1117; border-radius: 6px; padding: 14px; border-left: 3px solid; }
+  .compare-side.circ { border-left-color: #d29922; }
+  .compare-side.pkt { border-left-color: #3fb950; }
+  .compare-side h4 { font-size: 14px; margin-bottom: 8px; }
+  .show-sim {
+    background: linear-gradient(135deg, #238636, #1f6feb);
+    color: white; border: none; padding: 14px 28px; border-radius: 8px;
+    cursor: pointer; font-size: 15px; font-weight: 600; margin-top: 20px;
+    box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3);
+    transition: transform 0.15s;
+  }
+  .show-sim:hover { transform: translateY(-2px); }
+
+  .layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
+  .panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+  .panel h2 { font-size: 16px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+  button { background: #238636; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; margin-right: 6px; margin-bottom: 6px; }
+  button:hover { background: #2ea043; }
+  button.secondary { background: #30363d; }
+  button.danger { background: #da3633; }
+  svg { width: 100%; height: 280px; display: block; }
+  .step { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed #30363d; }
+  .step:last-child { border: none; }
+  .step-title { font-weight: 600; margin-bottom: 6px; color: #58a6ff; }
+  .info-box { background: #0d1117; border-left: 3px solid #58a6ff; padding: 10px 12px; border-radius: 4px; font-size: 12px; color: #c9d1d9; line-height: 1.6; margin-bottom: 8px; }
+  .info-box code { background: #161b22; padding: 1px 5px; border-radius: 3px; color: #d29922; font-size: 11px; }
+  .net-row { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+  .net-row h3 { font-size: 14px; margin-bottom: 8px; }
+  .net-row.circ h3 { color: #d29922; }
+  .net-row.pkt h3 { color: #3fb950; }
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+  .stat { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 8px; text-align: center; }
+  .stat-label { font-size: 10px; color: #8b949e; }
+  .stat-val { font-weight: bold; font-size: 16px; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="nav"><a href="index.html">← Volver al hub</a></div>
+<h1>Conmutación: circuitos vs paquetes</h1>
+<div class="subtitle">Las dos formas distintas en que viajan los datos por una red.</div>
+
+<div class="docs-panel">
+  <h2>📖 Concepto</h2>
+  <p>Cuando una red grande mueve datos entre dos puntos, hay <b>dos formas distintas</b> de hacerlo. La diferencia es: ¿reservás todo el camino antes, o mandás los datos en pedacitos por donde haya espacio?</p>
+
+  <div class="compare">
+    <div class="compare-side circ">
+      <h4 style="color:#d29922">🍽️ Conmutación de Circuitos = Reservar mesa</h4>
+      <p style="font-size:13px">Llamás al restaurante, reservás una mesa para las 9pm. Esa mesa es <b>tuya por 2 horas</b>, aunque la dejes vacía. El mozo está asignado a vos toda la noche.</p>
+      <ul>
+        <li>Camino dedicado y exclusivo</li>
+        <li>Reservado durante toda la comunicación</li>
+        <li>Aunque no envíes datos, el canal sigue tomado</li>
+        <li><b>Ejemplo:</b> red telefónica clásica (PSTN)</li>
+      </ul>
+    </div>
+    <div class="compare-side pkt">
+      <h4 style="color:#3fb950">📦 Conmutación de Paquetes = Pedir delivery</h4>
+      <p style="font-size:13px">Pedís sushi, pizza y helado. Cada uno sale de un lugar distinto, va por una ruta distinta, llega en distinto orden. Cuando los tres llegan, armás la cena.</p>
+      <ul>
+        <li>Datos divididos en paquetes pequeños</li>
+        <li>Cada paquete viaja independiente</li>
+        <li>Pueden llegar en distinto orden</li>
+        <li><b>Ejemplo:</b> Internet entera (HTTP, video, WhatsApp)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Comparación directa</h3>
+  <ul>
+    <li><b>Camino:</b> circuitos = dedicado · paquetes = compartido</li>
+    <li><b>Recursos:</b> circuitos = reservados siempre · paquetes = solo cuando hay datos</li>
+    <li><b>Orden:</b> circuitos = garantizado · paquetes = puede variar</li>
+    <li><b>Calidad:</b> circuitos = constante · paquetes = variable</li>
+    <li><b>Eficiencia:</b> circuitos = baja · paquetes = alta</li>
+  </ul>
+
+  <h3>¿Por qué ganó la conmutación de paquetes?</h3>
+  <p>Porque internet tiene miles de millones de usuarios. Si cada uno reservara un circuito por cada video que ve, la red colapsaría. Con paquetes, la misma infraestructura sirve a millones porque la mayoría no está enviando datos en cualquier instante dado — y los que sí, comparten el canal.</p>
+
+  <button class="show-sim" id="show-sim">▶ Ver animación interactiva</button>
+</div>
+
+<div class="layout" id="sim" style="display:none">
+  <div class="panel">
+    <div class="net-row circ">
+      <h3>Conmutación de Circuitos (PSTN)</h3>
+      <svg id="canvas-circ" viewBox="0 0 800 220"></svg>
+      <div class="stats-grid">
+        <div class="stat"><div class="stat-label">Mensajes enviados</div><div class="stat-val" id="circ-sent" style="color:#d29922">0</div></div>
+        <div class="stat"><div class="stat-label">Tiempo total</div><div class="stat-val" id="circ-time" style="color:#d29922">0s</div></div>
+        <div class="stat"><div class="stat-label">Eficiencia canal</div><div class="stat-val" id="circ-eff">—</div></div>
+      </div>
+    </div>
+    <div class="net-row pkt">
+      <h3>Conmutación de Paquetes (Internet)</h3>
+      <svg id="canvas-pkt" viewBox="0 0 800 220"></svg>
+      <div class="stats-grid">
+        <div class="stat"><div class="stat-label">Paquetes enviados</div><div class="stat-val" id="pkt-sent" style="color:#3fb950">0</div></div>
+        <div class="stat"><div class="stat-label">Tiempo total</div><div class="stat-val" id="pkt-time" style="color:#3fb950">0s</div></div>
+        <div class="stat"><div class="stat-label">Eficiencia canal</div><div class="stat-val" id="pkt-eff">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Ejecutar</h2>
+    <div class="step">
+      <div class="step-title">Comparación lado a lado</div>
+      <div class="info-box">
+        Imaginá que A quiere mandarle 4 mensajes a B. Dale play y mirá cómo lo hace cada modelo.
+      </div>
+      <button id="run">▶ Reproducir ambos</button>
+      <button id="reset" class="danger">Reset</button>
+    </div>
+    <div class="step">
+      <div class="step-title">Lo que vas a ver</div>
+      <div class="info-box">
+        <b>Circuitos:</b> primero se "reserva" todo el camino (línea naranja), después los mensajes viajan uno por uno por ese camino dedicado. El canal queda ocupado todo el tiempo.<br><br>
+        <b>Paquetes:</b> los 4 mensajes se mandan al toque, cada uno toma una ruta diferente y comparten los routers con otros usuarios.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-title">Tip de parcial</div>
+      <div class="info-box">
+        En conmutación de circuitos hay <b>3 fases</b>: establecimiento del circuito, transferencia de datos, liberación del circuito. En paquetes no hay establecimiento — cada paquete contiene la información de ruteo y se manda solo.
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+function ns(t,a={},c=[]){const e=document.createElementNS('http://www.w3.org/2000/svg',t);for(const k in a)e.setAttribute(k,a[k]);c.forEach(x=>e.appendChild(x));return e;}
+
+const svgC = document.getElementById('canvas-circ');
+const svgP = document.getElementById('canvas-pkt');
+
+function drawNetwork(svg, color) {
+  svg.innerHTML = '';
+  // A endpoint
+  svg.appendChild(ns('rect', { x: 30, y: 90, width: 60, height: 40, rx: 6, fill: '#21262d', stroke: '#58a6ff', 'stroke-width': 2 }));
+  svg.appendChild(ns('text', { x: 60, y: 115, fill: 'white', 'font-size': 14, 'text-anchor': 'middle', 'font-weight': 'bold' })).textContent = 'A';
+  // B endpoint
+  svg.appendChild(ns('rect', { x: 710, y: 90, width: 60, height: 40, rx: 6, fill: '#21262d', stroke: '#3fb950', 'stroke-width': 2 }));
+  svg.appendChild(ns('text', { x: 740, y: 115, fill: 'white', 'font-size': 14, 'text-anchor': 'middle', 'font-weight': 'bold' })).textContent = 'B';
+  // Routers in mesh
+  const routers = [
+    { id: 'R1', x: 200, y: 60 },
+    { id: 'R2', x: 200, y: 160 },
+    { id: 'R3', x: 400, y: 40 },
+    { id: 'R4', x: 400, y: 110 },
+    { id: 'R5', x: 400, y: 180 },
+    { id: 'R6', x: 600, y: 60 },
+    { id: 'R7', x: 600, y: 160 },
+  ];
+  // links
+  const links = [
+    [60, 110, 200, 60], [60, 110, 200, 160],
+    [200, 60, 400, 40], [200, 60, 400, 110],
+    [200, 160, 400, 110], [200, 160, 400, 180],
+    [400, 40, 600, 60], [400, 110, 600, 60], [400, 110, 600, 160],
+    [400, 180, 600, 160],
+    [600, 60, 740, 110], [600, 160, 740, 110],
+  ];
+  links.forEach(l => {
+    svg.appendChild(ns('line', { x1: l[0], y1: l[1], x2: l[2], y2: l[3], stroke: '#30363d', 'stroke-width': 1.5 }));
+  });
+  routers.forEach(r => {
+    svg.appendChild(ns('circle', { cx: r.x, cy: r.y, r: 12, fill: '#21262d', stroke: '#8b949e', 'stroke-width': 1.5 }));
+    svg.appendChild(ns('text', { x: r.x, y: r.y + 4, fill: '#8b949e', 'font-size': 9, 'text-anchor': 'middle' })).textContent = r.id;
+  });
+  return { routers, links, A: { x: 60, y: 110 }, B: { x: 740, y: 110 } };
+}
+
+let circState, pktState;
+function setup() {
+  circState = drawNetwork(svgC);
+  pktState = drawNetwork(svgP);
+}
+setup();
+
+let running = false;
+async function run() {
+  if (running) return;
+  running = true;
+  setup();
+  document.getElementById('circ-sent').textContent = '0';
+  document.getElementById('pkt-sent').textContent = '0';
+  document.getElementById('circ-eff').textContent = '—';
+  document.getElementById('pkt-eff').textContent = '—';
+
+  const circT0 = performance.now();
+  const pktT0 = performance.now();
+
+  // Run both in parallel
+  const circPromise = runCircuits(circT0);
+  const pktPromise = runPackets(pktT0);
+  await Promise.all([circPromise, pktPromise]);
+  running = false;
+}
+
+async function runCircuits(t0) {
+  // Phase 1: setup the circuit (reserve path A → R1 → R3 → R6 → B)
+  const path = [{ x: 60, y: 110 }, { x: 200, y: 60 }, { x: 400, y: 40 }, { x: 600, y: 60 }, { x: 740, y: 110 }];
+  for (let i = 0; i < path.length - 1; i++) {
+    const line = ns('line', { x1: path[i].x, y1: path[i].y, x2: path[i].x, y2: path[i].y, stroke: '#d29922', 'stroke-width': 4, opacity: 0.7 });
+    svgC.appendChild(line);
+    const start = performance.now();
+    await new Promise(res => {
+      function frame(t) {
+        const p = Math.min((t - start) / 350, 1);
+        line.setAttribute('x2', path[i].x + (path[i + 1].x - path[i].x) * p);
+        line.setAttribute('y2', path[i].y + (path[i + 1].y - path[i].y) * p);
+        if (p < 1) requestAnimationFrame(frame); else res();
+      }
+      requestAnimationFrame(frame);
+    });
+  }
+  const circRes = ns('text', { x: 400, y: 210, fill: '#d29922', 'font-size': 11, 'text-anchor': 'middle' });
+  circRes.textContent = '🔒 Circuito reservado'; svgC.appendChild(circRes);
+
+  // Phase 2: send 4 messages along reserved path
+  for (let i = 1; i <= 4; i++) {
+    await sendOnPath(svgC, path, i, '#d29922');
+    document.getElementById('circ-sent').textContent = i;
+  }
+  // Phase 3: release
+  await new Promise(r => setTimeout(r, 300));
+  circRes.textContent = '🔓 Circuito liberado';
+  const dt = ((performance.now() - t0) / 1000).toFixed(1);
+  document.getElementById('circ-time').textContent = dt + 's';
+  document.getElementById('circ-eff').textContent = '~30%';
+  document.getElementById('circ-eff').style.color = '#f85149';
+}
+
+async function runPackets(t0) {
+  const paths = [
+    [{ x: 60, y: 110 }, { x: 200, y: 60 }, { x: 400, y: 40 }, { x: 600, y: 60 }, { x: 740, y: 110 }],
+    [{ x: 60, y: 110 }, { x: 200, y: 160 }, { x: 400, y: 180 }, { x: 600, y: 160 }, { x: 740, y: 110 }],
+    [{ x: 60, y: 110 }, { x: 200, y: 60 }, { x: 400, y: 110 }, { x: 600, y: 60 }, { x: 740, y: 110 }],
+    [{ x: 60, y: 110 }, { x: 200, y: 160 }, { x: 400, y: 110 }, { x: 600, y: 160 }, { x: 740, y: 110 }],
+  ];
+  // launch all at once with small staggered offsets
+  const tasks = paths.map((p, i) => new Promise(async resolve => {
+    await new Promise(r => setTimeout(r, i * 200));
+    await sendOnPath(svgP, p, i + 1, '#3fb950', true);
+    document.getElementById('pkt-sent').textContent = i + 1;
+    resolve();
+  }));
+  await Promise.all(tasks);
+  const dt = ((performance.now() - t0) / 1000).toFixed(1);
+  document.getElementById('pkt-time').textContent = dt + 's';
+  document.getElementById('pkt-eff').textContent = '~95%';
+  document.getElementById('pkt-eff').style.color = '#3fb950';
+}
+
+function sendOnPath(svg, path, num, color, fast) {
+  return new Promise(resolve => {
+    const dot = ns('rect', { x: path[0].x - 12, y: path[0].y - 9, width: 24, height: 18, rx: 3, fill: color, stroke: 'white', 'stroke-width': 1 });
+    const lbl = ns('text', { x: path[0].x, y: path[0].y + 4, fill: 'white', 'font-size': 10, 'text-anchor': 'middle', 'font-weight': 'bold' });
+    lbl.textContent = num;
+    svg.appendChild(dot); svg.appendChild(lbl);
+
+    let segIdx = 0;
+    let segStart = performance.now();
+    const segDur = fast ? 250 : 350;
+
+    function frame(t) {
+      const elapsed = t - segStart;
+      const p = Math.min(elapsed / segDur, 1);
+      const a = path[segIdx], b = path[segIdx + 1];
+      const x = a.x + (b.x - a.x) * p;
+      const y = a.y + (b.y - a.y) * p;
+      dot.setAttribute('x', x - 12); dot.setAttribute('y', y - 9);
+      lbl.setAttribute('x', x); lbl.setAttribute('y', y + 4);
+      if (p >= 1) {
+        segIdx++;
+        if (segIdx >= path.length - 1) {
+          setTimeout(() => { dot.remove(); lbl.remove(); resolve(); }, 100);
+          return;
+        }
+        segStart = t;
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+document.getElementById('run').onclick = run;
+document.getElementById('reset').onclick = () => { setup(); document.getElementById('circ-sent').textContent = '0'; document.getElementById('pkt-sent').textContent = '0'; document.getElementById('circ-time').textContent = '0s'; document.getElementById('pkt-time').textContent = '0s'; document.getElementById('circ-eff').textContent = '—'; document.getElementById('pkt-eff').textContent = '—'; };
+
+document.getElementById('show-sim').onclick = () => {
+  document.getElementById('sim').style.display = '';
+  document.getElementById('sim').scrollIntoView({ behavior: 'smooth' });
+};
+</script>
+</body>
+</html>

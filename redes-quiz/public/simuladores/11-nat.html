@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>NAT — el portero del edificio</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, system-ui, sans-serif; background: #0d1117; color: #e6edf3; padding: 20px; min-height: 100vh; }
+  .nav { margin-bottom: 16px; }
+  .nav a { color: #58a6ff; text-decoration: none; font-size: 13px; }
+  h1 { font-size: 28px; margin-bottom: 4px; }
+  .subtitle { color: #8b949e; margin-bottom: 20px; }
+  .layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; max-width: 1400px; margin: 0 auto; }
+  .panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+  .panel h2 { font-size: 16px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+  button { background: #238636; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; margin-right: 6px; margin-bottom: 6px; }
+  button:hover { background: #2ea043; }
+  button.secondary { background: #30363d; }
+  button.danger { background: #da3633; }
+  button:disabled { opacity: 0.5; }
+  svg { width: 100%; height: 480px; display: block; }
+  .step { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed #30363d; }
+  .step:last-child { border: none; }
+  .step-title { font-weight: 600; margin-bottom: 6px; color: #58a6ff; }
+  .info-box { background: #0d1117; border-left: 3px solid #58a6ff; padding: 10px 12px; border-radius: 4px; font-size: 12px; color: #c9d1d9; line-height: 1.6; margin-bottom: 8px; }
+  .info-box code { background: #161b22; padding: 1px 5px; border-radius: 3px; color: #d29922; font-size: 11px; }
+  select { background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 6px; padding: 6px 10px; font-size: 13px; margin-right: 6px; }
+  .nat-table { width: 100%; border-collapse: collapse; font-family: 'SF Mono', Menlo, monospace; font-size: 11px; margin-top: 8px; }
+  .nat-table th { background: #1f6feb; color: white; padding: 6px; text-align: left; font-size: 10px; text-transform: uppercase; }
+  .nat-table td { padding: 6px; border-top: 1px solid #30363d; color: #c9d1d9; }
+  .nat-table tr:nth-child(even) td { background: #0d1117; }
+  .nat-table tr.new td { animation: flash 1s; }
+  @keyframes flash { 0% { background: #d29922; } 100% { background: transparent; } }
+  .controls-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; }
+  .controls-row label { font-size: 13px; color: #8b949e; }
+  .log { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 10px; max-height: 160px; overflow-y: auto; font-family: 'SF Mono', Menlo, monospace; font-size: 11px; line-height: 1.6; }
+  .container { max-width: 1400px; margin: 0 auto; }
+  .docs-panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+  .docs-panel h2 { font-size: 18px; margin-bottom: 12px; color: #58a6ff; }
+  .docs-panel h3 { font-size: 15px; margin: 16px 0 8px; color: #d29922; }
+  .docs-panel p { line-height: 1.7; color: #c9d1d9; margin-bottom: 10px; font-size: 14px; }
+  .docs-panel ul { list-style: none; padding-left: 0; margin: 8px 0; }
+  .docs-panel li { padding: 4px 0; padding-left: 16px; position: relative; line-height: 1.6; font-size: 14px; }
+  .docs-panel li::before { content: "›"; position: absolute; left: 0; color: #58a6ff; font-weight: bold; }
+  .docs-panel code { background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #d29922; font-size: 12px; }
+  .show-sim { background: linear-gradient(135deg, #238636, #1f6feb); color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; margin-top: 20px; box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3); transition: transform 0.15s; }
+  .show-sim:hover { transform: translateY(-2px); }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="nav"><a href="index.html">← Volver al hub</a></div>
+<h1>NAT — el portero del edificio</h1>
+<div class="subtitle">Cómo varios dispositivos comparten una sola IP pública saliendo a internet.</div>
+
+<div class="docs-panel">
+  <h2>📖 Concepto</h2>
+  <p>Hay ~8.000 millones de personas pero IPv4 solo permite ~4.300 millones de direcciones. Matemáticamente no alcanza. La solución: que muchos dispositivos <b>compartan una sola IP pública</b>, gracias a <b>NAT (Network Address Translation)</b>.</p>
+
+  <h3>Analogía: la empresa con una sola línea externa</h3>
+  <p>Una empresa tiene 200 empleados pero <b>una sola línea telefónica pública</b>. Cuando alguien de afuera llama, la recepcionista atiende y transfiere al interno correcto. Cuando un empleado llama hacia afuera, la recepcionista gestiona la llamada.</p>
+  <ul>
+    <li><b>Tu router:</b> tiene 1 IP pública (la que ve internet)</li>
+    <li><b>Tus dispositivos:</b> tienen IPs privadas (192.168.x.x)</li>
+    <li><b>El router:</b> es la recepcionista — gestiona conexiones entrantes y salientes</li>
+  </ul>
+
+  <h3>PAT (Port Address Translation)</h3>
+  <p>Variante de NAT donde múltiples dispositivos comparten <b>la misma IP pública</b> diferenciándose por <b>puerto</b>. Es lo que tenés en tu casa.</p>
+
+  <h3>Tipos de NAT</h3>
+  <ul>
+    <li><b>Estático:</b> 1 IP privada → siempre la misma IP pública. Usado para servidores accesibles desde internet.</li>
+    <li><b>Dinámico:</b> mapeo a un pool de IPs públicas según disponibilidad.</li>
+    <li><b>PAT / Sobrecarga:</b> muchas IPs privadas → 1 IP pública usando puertos. El más común.</li>
+  </ul>
+
+  <h3>Ventajas y desventajas</h3>
+  <ul>
+    <li>✓ <b>Ahorro de IPs públicas</b></li>
+    <li>✓ <b>Seguridad implícita:</b> internet no puede iniciar conexiones a tus dispositivos privados</li>
+    <li>✗ <b>Complica P2P:</b> videollamadas, torrents, juegos online — el otro lado a veces necesita iniciar la conexión</li>
+    <li>✗ <b>Más procesamiento</b> en el router: lee y modifica cada paquete</li>
+  </ul>
+
+  <p style="font-style:italic;color:#8b949e">NAT es la razón por la que IPv4 todavía funciona a pesar de que las IPs se "acabaron" hace años. IPv6 quiere hacer NAT innecesario, pero mientras tanto NAT sostiene la red.</p>
+
+  <button class="show-sim" id="show-sim">▶ Ver animación interactiva</button>
+</div>
+
+<div class="layout" id="sim" style="display:none">
+  <div class="panel">
+    <svg id="canvas" viewBox="0 0 800 480"></svg>
+    <div style="margin-top:12px">
+      <h2 style="margin:0 0 8px;font-size:14px;">Tabla NAT del router</h2>
+      <table class="nat-table" id="nat-table">
+        <thead>
+          <tr>
+            <th>IP:Puerto privado</th>
+            <th>↔</th>
+            <th>IP:Puerto público</th>
+            <th>Destino</th>
+          </tr>
+        </thead>
+        <tbody id="nat-body">
+          <tr><td colspan="4" style="text-align:center;color:#6e7681">— vacía — empezá enviando una conexión</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Controles</h2>
+    <div class="step">
+      <div class="step-title">Iniciar conexión saliente</div>
+      <div class="info-box">
+        Elegí desde qué dispositivo de tu LAN salir y a qué servidor externo conectarte. El router va a traducir tu IP privada a la pública.
+      </div>
+      <div class="controls-row">
+        <label>Desde:</label>
+        <select id="src">
+          <option value="0">PC1 (192.168.1.10)</option>
+          <option value="1">Celular (192.168.1.20)</option>
+          <option value="2">TV (192.168.1.30)</option>
+        </select>
+      </div>
+      <div class="controls-row">
+        <label>Hacia:</label>
+        <select id="dst">
+          <option value="0">Google (142.250.80.46:443)</option>
+          <option value="1">Netflix (54.200.18.40:443)</option>
+          <option value="2">YouTube (172.217.1.100:443)</option>
+        </select>
+      </div>
+      <button id="send">Enviar conexión</button>
+      <button id="reset" class="danger">Limpiar tabla</button>
+    </div>
+    <div class="step">
+      <div class="step-title">¿Qué hace el router?</div>
+      <div class="info-box" id="explain">
+        Cuando un paquete sale de tu LAN, el router <b>reemplaza</b> la IP privada por la pública y guarda la traducción para cuando vuelva la respuesta.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-title">Log</div>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PUBLIC_IP = '181.12.45.67';
+const devices = [
+  { id: 'PC1', priv: '192.168.1.10', x: 60, y: 80, color: '#58a6ff' },
+  { id: 'Celu', priv: '192.168.1.20', x: 60, y: 200, color: '#3fb950' },
+  { id: 'TV', priv: '192.168.1.30', x: 60, y: 320, color: '#d29922' },
+];
+const servers = [
+  { id: 'Google', ip: '142.250.80.46', port: 443, x: 700, y: 80, color: '#f85149' },
+  { id: 'Netflix', ip: '54.200.18.40', port: 443, x: 700, y: 200, color: '#ec4899' },
+  { id: 'YouTube', ip: '172.217.1.100', port: 443, x: 700, y: 320, color: '#a371f7' },
+];
+const router = { x: 350, y: 200 };
+let natTable = [];
+let nextSrcPort = 52341;
+const svg = document.getElementById('canvas');
+const logEl = document.getElementById('log');
+
+function ns(t, a={}, c=[]) { const e=document.createElementNS('http://www.w3.org/2000/svg',t); for(const k in a)e.setAttribute(k,a[k]); c.forEach(x=>e.appendChild(x)); return e; }
+
+function render() {
+  svg.innerHTML = '';
+  // LAN box
+  svg.appendChild(ns('rect', { x: 30, y: 40, width: 240, height: 380, rx: 8, fill: '#0d111777', stroke: '#30363d', 'stroke-dasharray': '5 5' }));
+  const lanT = ns('text', { x: 150, y: 30, fill: '#8b949e', 'font-size': 12, 'text-anchor': 'middle' }); lanT.textContent = 'LAN privada (192.168.1.0/24)'; svg.appendChild(lanT);
+
+  // Internet
+  svg.appendChild(ns('rect', { x: 530, y: 40, width: 240, height: 380, rx: 8, fill: '#0d111777', stroke: '#30363d', 'stroke-dasharray': '5 5' }));
+  const inetT = ns('text', { x: 650, y: 30, fill: '#8b949e', 'font-size': 12, 'text-anchor': 'middle' }); inetT.textContent = 'Internet (IPs públicas)'; svg.appendChild(inetT);
+
+  // Devices
+  devices.forEach(d => {
+    svg.appendChild(ns('rect', { x: d.x, y: d.y, width: 180, height: 70, rx: 6, fill: d.color + '22', stroke: d.color, 'stroke-width': 2 }));
+    const t1 = ns('text', { x: d.x + 90, y: d.y + 28, fill: 'white', 'font-size': 14, 'text-anchor': 'middle', 'font-weight': 'bold' });
+    t1.textContent = d.id; svg.appendChild(t1);
+    const t2 = ns('text', { x: d.x + 90, y: d.y + 50, fill: d.color, 'font-size': 11, 'text-anchor': 'middle', 'font-family': 'monospace' });
+    t2.textContent = d.priv; svg.appendChild(t2);
+    // line to router
+    svg.appendChild(ns('line', { x1: d.x + 180, y1: d.y + 35, x2: router.x, y2: router.y + 50, stroke: '#30363d', 'stroke-width': 1 }));
+  });
+
+  // Router
+  svg.appendChild(ns('rect', { x: router.x - 40, y: router.y, width: 100, height: 100, rx: 8, fill: '#21262d', stroke: '#d29922', 'stroke-width': 3 }));
+  const rT = ns('text', { x: router.x + 10, y: router.y + 30, fill: 'white', 'font-size': 14, 'text-anchor': 'middle', 'font-weight': 'bold' }); rT.textContent = 'ROUTER'; svg.appendChild(rT);
+  const rT2 = ns('text', { x: router.x + 10, y: router.y + 52, fill: '#8b949e', 'font-size': 10, 'text-anchor': 'middle' }); rT2.textContent = 'NAT'; svg.appendChild(rT2);
+  const rIp1 = ns('text', { x: router.x + 10, y: router.y + 72, fill: '#3fb950', 'font-size': 9, 'text-anchor': 'middle', 'font-family': 'monospace' }); rIp1.textContent = '192.168.1.1'; svg.appendChild(rIp1);
+  const rIp2 = ns('text', { x: router.x + 10, y: router.y + 88, fill: '#f85149', 'font-size': 9, 'text-anchor': 'middle', 'font-family': 'monospace' }); rIp2.textContent = PUBLIC_IP; svg.appendChild(rIp2);
+
+  // Servers
+  servers.forEach(s => {
+    svg.appendChild(ns('rect', { x: s.x - 90, y: s.y, width: 180, height: 70, rx: 6, fill: s.color + '22', stroke: s.color, 'stroke-width': 2 }));
+    const t1 = ns('text', { x: s.x, y: s.y + 28, fill: 'white', 'font-size': 14, 'text-anchor': 'middle', 'font-weight': 'bold' });
+    t1.textContent = s.id; svg.appendChild(t1);
+    const t2 = ns('text', { x: s.x, y: s.y + 50, fill: s.color, 'font-size': 11, 'text-anchor': 'middle', 'font-family': 'monospace' });
+    t2.textContent = s.ip + ':' + s.port; svg.appendChild(t2);
+    svg.appendChild(ns('line', { x1: router.x + 60, y1: router.y + 50, x2: s.x - 90, y2: s.y + 35, stroke: '#30363d', 'stroke-width': 1 }));
+  });
+}
+
+function renderTable() {
+  const body = document.getElementById('nat-body');
+  if (natTable.length === 0) {
+    body.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#6e7681">— vacía — empezá enviando una conexión</td></tr>';
+    return;
+  }
+  body.innerHTML = natTable.map((e, i) => `
+    <tr ${i === natTable.length - 1 ? 'class="new"' : ''}>
+      <td style="color:${e.deviceColor}">${e.priv}:${e.privPort}</td>
+      <td>↔</td>
+      <td style="color:#f85149">${PUBLIC_IP}:${e.pubPort}</td>
+      <td style="color:#8b949e">${e.dst}:${e.dstPort}</td>
+    </tr>
+  `).join('');
+}
+
+function addLog(msg, color = '#c9d1d9') {
+  const e = document.createElement('div');
+  e.style.color = color;
+  e.innerHTML = msg;
+  logEl.insertBefore(e, logEl.firstChild);
+}
+
+async function animatePacket(srcId, dstId, isReturn) {
+  const src = devices[srcId];
+  const dst = servers[dstId];
+  const color = isReturn ? dst.color : src.color;
+  const path = isReturn
+    ? [{ x: dst.x, y: dst.y + 35 }, { x: router.x + 10, y: router.y + 50 }, { x: src.x + 90, y: src.y + 35 }]
+    : [{ x: src.x + 90, y: src.y + 35 }, { x: router.x + 10, y: router.y + 50 }, { x: dst.x, y: dst.y + 35 }];
+
+  const dot = ns('circle', { cx: path[0].x, cy: path[0].y, r: 9, fill: color, stroke: 'white', 'stroke-width': 2 });
+  svg.appendChild(dot);
+
+  for (let i = 0; i < path.length - 1; i++) {
+    const a = path[i], b = path[i + 1];
+    const start = performance.now();
+    await new Promise(r => {
+      function frame(t) {
+        const p = Math.min((t - start) / 800, 1);
+        dot.setAttribute('cx', a.x + (b.x - a.x) * p);
+        dot.setAttribute('cy', a.y + (b.y - a.y) * p);
+        if (p < 1) requestAnimationFrame(frame);
+        else r();
+      }
+      requestAnimationFrame(frame);
+    });
+    if (i === 0) {
+      // pause at router with translation flash
+      const tFlash = ns('text', { x: router.x + 10, y: router.y - 8, fill: '#d29922', 'font-size': 12, 'text-anchor': 'middle', 'font-weight': 'bold' });
+      tFlash.textContent = isReturn ? '🔍 NAT lookup' : '🔄 NAT translate';
+      svg.appendChild(tFlash);
+      await new Promise(r => setTimeout(r, 600));
+      tFlash.remove();
+    }
+  }
+  setTimeout(() => dot.remove(), 200);
+}
+
+document.getElementById('send').onclick = async () => {
+  const srcId = parseInt(document.getElementById('src').value);
+  const dstId = parseInt(document.getElementById('dst').value);
+  const src = devices[srcId];
+  const dst = servers[dstId];
+  const privPort = nextSrcPort++;
+  const pubPort = privPort; // PAT could remap, simpler: use same number unless conflict
+
+  addLog(`<b style="color:${src.color}">${src.id}</b> → <b style="color:${dst.color}">${dst.id}</b>: paquete sale de <code>${src.priv}:${privPort}</code> hacia <code>${dst.ip}:${dst.port}</code>`);
+
+  await animatePacket(srcId, dstId, false);
+
+  natTable.push({
+    priv: src.priv, privPort,
+    pubPort,
+    dst: dst.ip, dstPort: dst.port,
+    deviceColor: src.color,
+  });
+  renderTable();
+  addLog(`📋 Router NAT: agrega entrada <code style="color:#d29922">${src.priv}:${privPort} ↔ ${PUBLIC_IP}:${pubPort}</code>. Reescribe origen y reenvía.`, '#d29922');
+
+  // Server response
+  await new Promise(r => setTimeout(r, 400));
+  addLog(`📥 Respuesta de <b style="color:${dst.color}">${dst.id}</b> llega a <code>${PUBLIC_IP}:${pubPort}</code>. Router busca en tabla y reenvía a <code style="color:${src.color}">${src.priv}:${privPort}</code>.`, '#3fb950');
+  await animatePacket(srcId, dstId, true);
+
+  document.getElementById('explain').innerHTML = `
+    1. <b>${src.id}</b> generó un paquete con origen <code>${src.priv}:${privPort}</code><br>
+    2. El <b>router</b> reescribió el origen a <code>${PUBLIC_IP}:${pubPort}</code> y guardó la traducción<br>
+    3. <b>${dst.id}</b> respondió a <code>${PUBLIC_IP}:${pubPort}</code> (la IP pública que vio)<br>
+    4. El router buscó <code>${pubPort}</code> en su tabla, encontró <code>${src.priv}</code> y reenvió la respuesta<br><br>
+    Sin NAT, los 3 dispositivos necesitarían 3 IPs públicas. Con NAT, comparten 1.
+  `;
+};
+
+document.getElementById('reset').onclick = () => {
+  natTable = [];
+  nextSrcPort = 52341;
+  renderTable();
+  logEl.innerHTML = '';
+};
+
+document.getElementById('show-sim').onclick = () => {
+  document.getElementById('sim').style.display = '';
+  document.getElementById('sim').scrollIntoView({ behavior: 'smooth' });
+};
+
+render();
+renderTable();
+addLog('Tabla NAT lista. Iniciá una conexión saliente para verla en acción.', '#58a6ff');
+</script>
+</div>
+</body>
+</html>

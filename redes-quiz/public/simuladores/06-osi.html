@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Modelo OSI — encapsulamiento</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, system-ui, sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    padding: 20px;
+    min-height: 100vh;
+  }
+  .nav { margin-bottom: 16px; }
+  .nav a { color: #58a6ff; text-decoration: none; font-size: 13px; }
+  .nav a:hover { text-decoration: underline; }
+  h1 { font-size: 28px; margin-bottom: 4px; }
+  .subtitle { color: #8b949e; margin-bottom: 20px; }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .panel {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .panel h2 {
+    font-size: 16px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #30363d;
+  }
+  button {
+    background: #238636;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    margin-right: 6px;
+    margin-bottom: 6px;
+  }
+  button:hover { background: #2ea043; }
+  button.secondary { background: #30363d; }
+  button.secondary:hover { background: #484f58; }
+  button.danger { background: #da3633; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .stage {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 20px;
+    min-height: 540px;
+    position: relative;
+    overflow: hidden;
+  }
+  .layer-stack { display: flex; flex-direction: column; gap: 6px; }
+  .layer {
+    display: flex;
+    align-items: center;
+    background: #161b22;
+    border: 2px solid #30363d;
+    border-radius: 6px;
+    padding: 10px 14px;
+    transition: all 0.4s ease;
+    position: relative;
+  }
+  .layer.active {
+    border-color: var(--c);
+    box-shadow: 0 0 20px var(--c)44;
+    background: linear-gradient(90deg, var(--c)22, transparent);
+  }
+  .layer-num {
+    background: var(--c);
+    color: #0d1117;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold;
+    font-size: 13px;
+    margin-right: 12px;
+  }
+  .layer-info { flex: 1; }
+  .layer-name { font-weight: 600; font-size: 14px; }
+  .layer-detail { font-size: 11px; color: #8b949e; margin-top: 2px; }
+
+  .pdu-area {
+    margin-top: 24px;
+    padding: 18px;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+  }
+  .pdu-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #8b949e;
+    margin-bottom: 8px;
+  }
+  .pdu {
+    display: flex;
+    align-items: stretch;
+    border-radius: 6px;
+    overflow: hidden;
+    font-family: 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+    min-height: 50px;
+    transition: all 0.4s;
+  }
+  .pdu-segment {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.4s;
+    animation: slideIn 0.4s ease;
+    border-right: 1px solid rgba(0,0,0,0.3);
+    white-space: nowrap;
+  }
+  .pdu-segment:last-child { border-right: none; }
+  @keyframes slideIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  .pdu-data { background: #6e7681; flex: 2; }
+
+  .step {
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed #30363d;
+  }
+  .step:last-child { border: none; }
+  .step-title {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #58a6ff;
+  }
+  .info-box {
+    background: #0d1117;
+    border-left: 3px solid var(--c, #58a6ff);
+    padding: 10px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #c9d1d9;
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+  .info-box code {
+    background: #161b22;
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: #d29922;
+    font-size: 11px;
+  }
+  .controls-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .mode-pills { display: flex; gap: 4px; margin-bottom: 12px; }
+  .mode-pill {
+    padding: 6px 12px;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #8b949e;
+  }
+  .mode-pill.active { background: #1f6feb; color: white; border-color: #1f6feb; }
+  .data-input {
+    width: 100%;
+    background: #0d1117;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 8px;
+    font-family: 'SF Mono', Menlo, monospace;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+  .container { max-width: 1400px; margin: 0 auto; }
+  .docs-panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+  .docs-panel h2 { font-size: 18px; margin-bottom: 12px; color: #58a6ff; }
+  .docs-panel h3 { font-size: 15px; margin: 16px 0 8px; color: #d29922; }
+  .docs-panel p { line-height: 1.7; color: #c9d1d9; margin-bottom: 10px; font-size: 14px; }
+  .docs-panel ul { list-style: none; padding-left: 0; margin: 8px 0; }
+  .docs-panel li { padding: 4px 0; padding-left: 16px; position: relative; line-height: 1.6; font-size: 14px; }
+  .docs-panel li::before { content: "›"; position: absolute; left: 0; color: #58a6ff; font-weight: bold; }
+  .docs-panel code { background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #d29922; font-size: 12px; }
+  .show-sim { background: linear-gradient(135deg, #238636, #1f6feb); color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; margin-top: 20px; box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3); transition: transform 0.15s; }
+  .show-sim:hover { transform: translateY(-2px); }
+  .layers7 { display: flex; flex-direction: column; gap: 4px; margin: 12px 0; }
+  .layer7 { background: #0d1117; border-radius: 6px; padding: 8px 12px; display: flex; gap: 12px; align-items: center; border-left: 3px solid; font-size: 13px; }
+  .layer7-num { font-weight: bold; min-width: 28px; }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="nav"><a href="index.html">← Volver al hub</a></div>
+<h1>Modelo OSI — encapsulamiento</h1>
+<div class="subtitle">Mirá cómo cada capa procesa los datos. Por defecto se va de L1 a L7 (recibiendo) — los bits llegan al cable y suben hasta la aplicación.</div>
+
+<div class="docs-panel">
+  <h2>📖 Concepto</h2>
+  <p>El <b>Modelo OSI</b> divide la comunicación de red en <b>7 capas</b> donde cada una hace una tarea específica. Es como mandar plata al exterior por un banco: hay 7 departamentos que intervienen, y si uno falla la cadena se rompe.</p>
+
+  <h3>Las 7 capas (de abajo hacia arriba)</h3>
+  <div class="layers7">
+    <div class="layer7" style="border-left-color:#fb8500"><span class="layer7-num" style="color:#fb8500">L1</span><b>Física</b> — bits crudos: voltajes, frecuencias, cables, fibra, ondas. Un repetidor trabaja solo acá.</div>
+    <div class="layer7" style="border-left-color:#d29922"><span class="layer7-num" style="color:#d29922">L2</span><b>Enlace</b> — entre dos dispositivos directamente conectados. Detecta y corrige errores. Acá viven las MAC. Switch.</div>
+    <div class="layer7" style="border-left-color:#3fb950"><span class="layer7-num" style="color:#3fb950">L3</span><b>Red</b> — lleva datos a través de múltiples saltos. Acá viven las IPs. Router.</div>
+    <div class="layer7" style="border-left-color:#58a6ff"><span class="layer7-num" style="color:#58a6ff">L4</span><b>Transporte</b> — datos completos, en orden, sin pérdidas. Acá viven los puertos. TCP/UDP.</div>
+    <div class="layer7" style="border-left-color:#ec4899"><span class="layer7-num" style="color:#ec4899">L5</span><b>Sesión</b> — controla el diálogo: apertura, cierre, recuperación.</div>
+    <div class="layer7" style="border-left-color:#a371f7"><span class="layer7-num" style="color:#a371f7">L6</span><b>Presentación</b> — formato, compresión, cifrado (TLS).</div>
+    <div class="layer7" style="border-left-color:#f85149"><span class="layer7-num" style="color:#f85149">L7</span><b>Aplicación</b> — lo que el usuario toca: HTTP, SMTP, FTP, DNS.</div>
+  </div>
+
+  <h3>Encapsulamiento — las muñecas rusas</h3>
+  <p>Al enviar, cada capa <b>agrega su header</b> a los datos (de L7 hacia L1). Al recibir, cada capa <b>quita su header</b> (de L1 hacia L7). El header solo lo lee la capa equivalente del otro lado.</p>
+
+  <h3>OSI vs TCP/IP</h3>
+  <p>OSI es el modelo <b>teórico</b> diseñado en los 80. TCP/IP es el modelo <b>real</b> que ya existía y ganó porque ya estaba implementado. OSI sirve hoy como modelo conceptual para enseñar; TCP/IP es lo que corre realmente.</p>
+
+  <h3>Mnemónico</h3>
+  <p style="font-size:14px"><b>"Fui En el Router, Tomé Sopa Por Ahí"</b><br>
+  <span style="color:#8b949e">Física → Enlace → Red → Transporte → Sesión → Presentación → Aplicación</span></p>
+
+  <button class="show-sim" id="show-sim">▶ Ver animación interactiva</button>
+</div>
+
+<div class="layout" id="sim" style="display:none">
+  <div class="panel">
+    <div class="mode-pills">
+      <div class="mode-pill active" data-mode="recv">Recibiendo (L1 → L7) ↑</div>
+      <div class="mode-pill" data-mode="send">Enviando (L7 → L1) ↓</div>
+    </div>
+    <div class="stage">
+      <div class="layer-stack" id="stack"></div>
+      <div class="pdu-area">
+        <div class="pdu-label" id="pdu-label">PDU actual</div>
+        <div class="pdu" id="pdu"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Controlá la simulación</h2>
+    <div class="step">
+      <div class="step-title">Datos del mensaje</div>
+      <input class="data-input" id="data" value="Hola Google" maxlength="40">
+      <div class="controls-row">
+        <button id="step">Avanzar capa →</button>
+        <button id="auto" class="secondary">Reproducir todo</button>
+        <button id="reset" class="danger">Reset</button>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-title">¿Qué está pasando?</div>
+      <div class="info-box" id="explanation">Apretá <b>Avanzar capa</b> para empezar. En modo "Recibiendo" los bits llegan a L1 y van subiendo capa por capa hasta L7. Cada capa quita su header.</div>
+    </div>
+    <div class="step">
+      <div class="step-title">Mnemónico</div>
+      <div class="info-box">
+        <b>"Fui En el Router, Tomé Sopa Por Ahí"</b><br>
+        <span style="color:#8b949e">Física → Enlace → Red → Transporte → Sesión → Presentación → Aplicación</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-title">Tip de parcial</div>
+      <div class="info-box">
+        Una <code>PDU</code> (Protocol Data Unit) cambia de nombre por capa: <b>L4</b> = segmento, <b>L3</b> = paquete, <b>L2</b> = trama, <b>L1</b> = bits.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Layers ordered L1 → L7 (ascendente). layers[0]=L1, layers[6]=L7.
+const layers = [
+  { n: 1, name: 'Física',       detail: 'Bits, voltajes, ondas', color: '#fb8500', pdu: 'Bits',     header: '',     trailer: '' },
+  { n: 2, name: 'Enlace',       detail: 'MAC, frames Ethernet/WiFi', color: '#d29922', pdu: 'Trama', header: 'ETH|MAC', trailer: 'CRC' },
+  { n: 3, name: 'Red',          detail: 'IP — direccionamiento y ruteo', color: '#3fb950', pdu: 'Paquete', header: 'IP', trailer: '' },
+  { n: 4, name: 'Transporte',   detail: 'TCP/UDP — puertos, fiabilidad', color: '#58a6ff', pdu: 'Segmento', header: 'TCP|443', trailer: '' },
+  { n: 5, name: 'Sesión',       detail: 'Apertura/cierre del diálogo', color: '#ec4899', pdu: 'Datos', header: '', trailer: '' },
+  { n: 6, name: 'Presentación', detail: 'Formato, compresión, cifrado TLS', color: '#a371f7', pdu: 'Datos', header: '', trailer: '' },
+  { n: 7, name: 'Aplicación',   detail: 'HTTP, FTP, SMTP, DNS', color: '#f85149', pdu: 'Datos', header: '', trailer: '' },
+];
+
+let mode = 'recv'; // 'recv' (L1→L7, default) | 'send' (L7→L1)
+let stepIdx = -1;  // -1 = nothing yet, 0..6 = how many layers processed
+let userData = 'Hola Google';
+let autoPlaying = false;
+
+const stack = document.getElementById('stack');
+const pdu = document.getElementById('pdu');
+const expl = document.getElementById('explanation');
+const pduLabel = document.getElementById('pdu-label');
+
+// Maps stepIdx (0..6) to the array index of the currently active layer
+function activeLayerArrIdx() {
+  if (stepIdx < 0) return -1;
+  return mode === 'recv' ? stepIdx : (6 - stepIdx);
+}
+
+function renderStack() {
+  stack.innerHTML = '';
+  const activeIdx = activeLayerArrIdx();
+  // Visual: L1 arriba, L7 abajo. Como layers[0]=L1, iteración normal con flex-column → L1 arriba.
+  layers.forEach((l, i) => {
+    const div = document.createElement('div');
+    div.className = 'layer';
+    div.style.setProperty('--c', l.color);
+    if (i === activeIdx) div.classList.add('active');
+    div.innerHTML = `
+      <div class="layer-num">${l.n}</div>
+      <div class="layer-info">
+        <div class="layer-name">${l.name}</div>
+        <div class="layer-detail">${l.detail} · PDU: ${l.pdu}</div>
+      </div>
+    `;
+    stack.appendChild(div);
+  });
+}
+
+function renderPdu() {
+  pdu.innerHTML = '';
+  if (stepIdx < 0) {
+    const seg = document.createElement('div');
+    seg.className = 'pdu-segment pdu-data';
+    if (mode === 'recv') {
+      seg.textContent = '— bits llegando del cable —';
+      pduLabel.textContent = 'Estado inicial: bits crudos en el medio físico';
+    } else {
+      seg.textContent = userData;
+      pduLabel.textContent = 'Estado inicial: datos del usuario en la aplicación';
+    }
+    pdu.appendChild(seg);
+    return;
+  }
+
+  // Headers en orden EXTERIOR → INTERIOR del frame:
+  // [ETH | IP | TCP | datos | CRC]
+  // Capas que tienen header: L2 (idx 1), L3 (idx 2), L4 (idx 3)
+  // L5/L6/L7 no agregan header visible en este modelo simplificado.
+  const fullHeaders = [
+    { layer: layers[1], side: 'header' }, // L2 ETH|MAC
+    { layer: layers[2], side: 'header' }, // L3 IP
+    { layer: layers[3], side: 'header' }, // L4 TCP|443
+  ];
+  const trailer = layers[1]; // L2 CRC
+
+  if (mode === 'recv') {
+    // stepIdx i = i layers procesadas (L1, L2, ..., L_{i+1})
+    // Cuántos headers ya se quitaron (de afuera hacia adentro: L2, L3, L4)
+    // Al procesar L1 (stepIdx 0): nada se quitó aún. Frame completo.
+    // Al procesar L2 (stepIdx 1): se quita ETH+CRC.
+    // Al procesar L3 (stepIdx 2): se quita IP.
+    // Al procesar L4 (stepIdx 3): se quita TCP. Quedan solo datos.
+    // L5,L6,L7 no quitan headers visibles → PDU sigue siendo solo datos.
+    let headersStripped = 0;
+    if (stepIdx >= 1) headersStripped = 1; // L2 procesada
+    if (stepIdx >= 2) headersStripped = 2; // L3 procesada
+    if (stepIdx >= 3) headersStripped = 3; // L4 procesada (todos los headers visibles fuera)
+
+    const visibleHeaders = fullHeaders.slice(headersStripped);
+    visibleHeaders.forEach(h => {
+      const seg = document.createElement('div');
+      seg.className = 'pdu-segment';
+      seg.style.background = h.layer.color;
+      seg.textContent = h.layer.header;
+      pdu.appendChild(seg);
+    });
+
+    const dataSeg = document.createElement('div');
+    dataSeg.className = 'pdu-segment pdu-data';
+    dataSeg.textContent = userData;
+    pdu.appendChild(dataSeg);
+
+    // Trailer (CRC) only present until L2 is processed (stepIdx >= 1 strips it)
+    if (stepIdx < 1) {
+      const tSeg = document.createElement('div');
+      tSeg.className = 'pdu-segment';
+      tSeg.style.background = trailer.color;
+      tSeg.textContent = trailer.trailer;
+      pdu.appendChild(tSeg);
+    }
+
+    const activeLayer = layers[stepIdx];
+    pduLabel.textContent = `Capa ${activeLayer.n} (${activeLayer.name}) procesando — PDU: ${activeLayer.pdu}`;
+  } else {
+    // SEND mode: stepIdx i = i layers procesadas (L7, L6, ..., L_{7-i})
+    // Active layer arr index = 6 - stepIdx
+    // Headers que ya se agregaron (de adentro hacia afuera): solo L4(stepIdx>=3), L3(>=4), L2(>=5)
+    // L7,L6,L5 no agregan header visible.
+    // stepIdx 0: L7 → solo datos
+    // stepIdx 1: L6 → solo datos
+    // stepIdx 2: L5 → solo datos
+    // stepIdx 3: L4 agrega TCP → [TCP|datos]
+    // stepIdx 4: L3 agrega IP → [IP|TCP|datos]
+    // stepIdx 5: L2 agrega ETH y CRC → [ETH|IP|TCP|datos|CRC]
+    // stepIdx 6: L1 convierte a bits → "bits"
+    if (stepIdx === 6) {
+      const seg = document.createElement('div');
+      seg.className = 'pdu-segment pdu-data';
+      seg.textContent = '01010100 01001000 01000101 ...';
+      seg.style.background = layers[0].color;
+      pdu.appendChild(seg);
+      pduLabel.textContent = 'Capa 1 (Física) — bits saliendo al medio';
+      return;
+    }
+
+    let headersAdded = []; // outer to inner
+    if (stepIdx >= 5) headersAdded.push(fullHeaders[0]); // ETH (L2)
+    if (stepIdx >= 4) headersAdded.push(fullHeaders[1]); // IP (L3)
+    if (stepIdx >= 3) headersAdded.push(fullHeaders[2]); // TCP (L4)
+
+    // headersAdded está al revés todavía. Para outer-to-inner:
+    // Si stepIdx 5: ETH, IP, TCP → orden visual [ETH][IP][TCP][datos][CRC]
+    // Si stepIdx 4: IP, TCP → [IP][TCP][datos]
+    // Si stepIdx 3: TCP → [TCP][datos]
+    // Mi push ya está outer→inner cuando stepIdx avanza, así que está bien.
+    headersAdded.forEach(h => {
+      const seg = document.createElement('div');
+      seg.className = 'pdu-segment';
+      seg.style.background = h.layer.color;
+      seg.textContent = h.layer.header;
+      pdu.appendChild(seg);
+    });
+
+    const dataSeg = document.createElement('div');
+    dataSeg.className = 'pdu-segment pdu-data';
+    dataSeg.textContent = userData;
+    pdu.appendChild(dataSeg);
+
+    if (stepIdx >= 5) {
+      const tSeg = document.createElement('div');
+      tSeg.className = 'pdu-segment';
+      tSeg.style.background = trailer.color;
+      tSeg.textContent = trailer.trailer;
+      pdu.appendChild(tSeg);
+    }
+
+    const activeLayer = layers[6 - stepIdx];
+    pduLabel.textContent = `Capa ${activeLayer.n} (${activeLayer.name}) procesando — PDU: ${activeLayer.pdu}`;
+  }
+}
+
+const explanations = {
+  recv: [
+    '<b>Capa 1 — Física</b>: llegan bits desde el medio (cable/WiFi) como señales eléctricas, ópticas o de radio. Se reconstruye la trama y se pasa a L2.',
+    '<b>Capa 2 — Enlace</b>: revisa el <code>CRC</code> al final — si está corrupto, descarta. Mira la <code>MAC destino</code>; si es para nosotros, quita el header Ethernet y el CRC. Sube a L3.',
+    '<b>Capa 3 — Red</b>: mira la <code>IP destino</code>. Si soy el destino final, quita el header IP y entrega a L4. Si fuera un router intermedio, lo rerutea por otra interfaz.',
+    '<b>Capa 4 — Transporte</b>: TCP verifica checksum, número de secuencia y <code>puerto destino</code> (ej: 443 → HTTPS). Quita el header TCP y entrega los datos a la aplicación correspondiente.',
+    '<b>Capa 5 — Sesión</b>: identifica a qué sesión pertenece el dato (qué conexión abierta, qué diálogo en curso).',
+    '<b>Capa 6 — Presentación</b>: descifra (TLS) y descomprime los datos al formato que entiende la aplicación.',
+    '<b>Capa 7 — Aplicación</b>: la aplicación finalmente lee los datos del usuario. ¡Llegó el mensaje!'
+  ],
+  send: [
+    '<b>Capa 7 — Aplicación</b>: tu app crea los datos. Ejemplo: HTTP arma una solicitud <code>GET /</code>. Los datos cruzan a L6.',
+    '<b>Capa 6 — Presentación</b>: cifra con TLS y comprime si hace falta. Asegura que el formato sea entendible por el receptor.',
+    '<b>Capa 5 — Sesión</b>: gestiona la apertura y cierre del diálogo entre las dos partes. En TCP/IP esta capa está mezclada con L4.',
+    '<b>Capa 4 — Transporte</b>: TCP agrega su header con <code>puerto origen 52341 → puerto destino 443</code>, número de secuencia y ACK. Acá nace el <i>segmento</i>.',
+    '<b>Capa 3 — Red</b>: IP agrega su header con <code>IP origen → IP destino</code> y TTL. Ahora es un <i>paquete</i>. Cada router del camino mira solo este header.',
+    '<b>Capa 2 — Enlace</b>: Ethernet agrega <code>MAC origen | MAC destino</code> y al final un <code>CRC</code> para detectar errores. Es una <i>trama</i>.',
+    '<b>Capa 1 — Física</b>: la trama se convierte en bits y se manda al cable/WiFi como señales eléctricas, luz u ondas. ¡Sale al medio!'
+  ]
+};
+
+function updateExplanation() {
+  if (stepIdx < 0) {
+    expl.innerHTML = mode === 'recv'
+      ? 'Llegaron bits desde el cable. Apretá <b>Avanzar capa</b> y mirá cómo cada capa procesa y quita su envoltura, capa 1 → 7.'
+      : 'Tu aplicación tiene datos listos para enviar. Apretá <b>Avanzar capa</b> y mirá cómo cada capa los envuelve, capa 7 → 1.';
+    return;
+  }
+  expl.innerHTML = explanations[mode][stepIdx];
+}
+
+document.getElementById('step').onclick = () => {
+  if (stepIdx < layers.length - 1) {
+    stepIdx++;
+    userData = document.getElementById('data').value || 'Hola Google';
+    renderStack();
+    renderPdu();
+    updateExplanation();
+  }
+};
+
+document.getElementById('auto').onclick = async () => {
+  if (autoPlaying) return;
+  autoPlaying = true;
+  while (stepIdx < layers.length - 1) {
+    document.getElementById('step').click();
+    await new Promise(r => setTimeout(r, 1100));
+  }
+  autoPlaying = false;
+};
+
+document.getElementById('reset').onclick = () => {
+  stepIdx = -1;
+  renderStack();
+  renderPdu();
+  updateExplanation();
+};
+
+document.querySelectorAll('.mode-pill').forEach(p => {
+  p.onclick = () => {
+    document.querySelectorAll('.mode-pill').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    mode = p.dataset.mode;
+    stepIdx = -1;
+    renderStack();
+    renderPdu();
+    updateExplanation();
+  };
+});
+
+document.getElementById('data').oninput = e => {
+  userData = e.target.value || 'Hola';
+  renderPdu();
+};
+
+document.getElementById('show-sim').onclick = () => {
+  document.getElementById('sim').style.display = '';
+  document.getElementById('sim').scrollIntoView({ behavior: 'smooth' });
+};
+
+renderStack();
+renderPdu();
+updateExplanation();
+</script>
+</div>
+</body>
+</html>

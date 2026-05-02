@@ -31,6 +31,7 @@ export const flashcardsClase3: Flashcard[] = [
     front: "¿Cuáles son los 3 tipos de emisión en una LAN?",
     back: "Unicast: dirigida a un único host (una sola interfaz). El más común.\n\nMulticast: dirigida a un grupo de hosts que se suscribieron. El grupo puede cambiar dinámicamente.\n\nBroadcast: dirigida a TODOS los hosts de la LAN. Dirección: FF:FF:FF:FF:FF:FF.\n\nRegla: las direcciones multicast y broadcast NUNCA aparecen como dirección de origen, solo como destino.",
     tag: "Ethernet",
+    simulator: { animationId: "cast-types", label: "Unicast vs Multicast vs Broadcast" },
   },
   {
     id: 205,
@@ -44,7 +45,7 @@ export const flashcardsClase3: Flashcard[] = [
     front: "¿Qué es la tabla CAM de un switch?",
     back: "Content Addressable Memory: tabla que mapea direcciones MAC → puerto del switch.\n\nCómo se llena:\n• El switch aprende la MAC de origen de cada trama que llega y la asocia al puerto por donde llegó.\n• Las entradas tienen un tiempo de vida (típicamente 5 min): si no hay actividad, se borran para contemplar la movilidad.\n\nCómo se usa:\n• Llega trama con destino X → busca X en la tabla → envía por ese puerto.\n• Si no está → envía por TODOS los puertos activos (flooding).",
     tag: "Switch",
-    simulator: { url: "/simuladores/09-vlan.html", label: "Switch y VLANs" },
+    simulator: { animationId: "cam-table", label: "Tabla CAM aprendiendo" },
   },
   {
     id: 207,

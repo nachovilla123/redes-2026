@@ -44,7 +44,7 @@ export const flashcardsClase4: Flashcard[] = [
     front: "¿Qué es Stop-and-Wait y cuál es su limitación?",
     back: "Protocolo ARQ básico: se manda un paquete, se espera el ACK, recién entonces se manda el siguiente.\n\nAnalogía: mandar cartas y esperar respuesta antes de escribir la siguiente. Si el correo tarda 5 días en cada sentido, escribís una carta por semana aunque podrías escribir 10.\n\nLimitación: el canal está vacío la mayor parte del tiempo esperando ACKs. Es muy ineficiente cuando el RTT (Round Trip Time) es grande.",
     tag: "ARQ",
-    simulator: { url: "/simuladores/15-arq.html", label: "ARQ y ventanas deslizantes" },
+    simulator: { animationId: "arq-comparison", label: "Stop-and-Wait vs Go-Back-N" },
   },
   {
     id: 307,
@@ -58,7 +58,7 @@ export const flashcardsClase4: Flashcard[] = [
     front: "¿Cómo funciona Go-Back-N?",
     back: "El transmisor puede enviar hasta N paquetes sin ACK.\n\nSi uno tiene error o se pierde:\n• El receptor descarta ese paquete y TODOS los siguientes (aunque llegaron bien)\n• El transmisor retrocede y reenvía desde el paquete problemático en adelante\n\nAnalogía: cinta transportadora — si el paquete 3 está dañado, el inspector tira los paquetes 3, 4 y 5, aunque 4 y 5 estaban bien.\n\nVentaja: el receptor es simple (no necesita buffer).\nDesventaja: se reenvían paquetes que llegaron bien → desperdicio.",
     tag: "ARQ",
-    simulator: { url: "/simuladores/15-arq.html", label: "ARQ y ventanas deslizantes" },
+    simulator: { animationId: "arq-comparison", label: "Stop-and-Wait vs Go-Back-N" },
   },
   {
     id: 309,

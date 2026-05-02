@@ -71,7 +71,7 @@ export const flashcardsClase6: Flashcard[] = [
     front: "¿Cuáles son los 4 mensajes del proceso DORA?",
     back: "D — DHCPDISCOVER: el cliente sin IP envía broadcast '¿hay algún servidor DHCP?'\n   (IP origen: 0.0.0.0, destino: 255.255.255.255, UDP 68→67)\n\nO — DHCPOFFER: el servidor responde con una IP propuesta y parámetros de red\n\nR — DHCPREQUEST: el cliente acepta la oferta (broadcast para que todos los servidores lo sepan)\n\nA — DHCPACK: el servidor confirma. El cliente recién ahora configura su interfaz.\n\nSi la IP ya estaba ocupada → DHCPNAK (negative ACK) en lugar de DHCPACK.",
     tag: "DHCP",
-    simulator: { url: "/simuladores/dns-dhcp.html", label: "DNS y DHCP" },
+    simulator: { animationId: "dhcp-dora", label: "DORA paso a paso" },
   },
   {
     id: 506,
@@ -107,7 +107,7 @@ export const flashcardsClase6: Flashcard[] = [
     front: "¿Cuál es la diferencia entre resolución DNS iterativa y recursiva?",
     back: "Iterativa (la que usa el resolver en la práctica):\n• El resolver le pregunta a cada servidor\n• Cada servidor responde 'no sé, pero preguntale a tal'\n• El resolver hace todo el trabajo hasta obtener la respuesta final\n\nRecursiva:\n• El servidor al que le preguntás hace todo el trabajo él solo\n• Devuelve directamente la respuesta final\n• Los root servers NO la soportan (sería demasiada carga)\n\nFlujo típico: PC → resolver (recursivo) → root (iterativo) → TLD (iterativo) → autoritativo (respuesta final) → resolver → PC",
     tag: "DNS",
-    simulator: { url: "/simuladores/dns-dhcp.html", label: "DNS y DHCP" },
+    simulator: { animationId: "dns-resolution", label: "Resolución DNS paso a paso" },
   },
   {
     id: 511,

@@ -10,7 +10,10 @@ export interface QuizQuestion {
 }
 
 export interface FlashcardSimulator {
-  url: string;
+  /** URL de un HTML estático en /public/simuladores (se abre en iframe) */
+  url?: string;
+  /** ID de una mini-animación React registrada en src/components/animations */
+  animationId?: string;
   label?: string;
 }
 
@@ -108,7 +111,7 @@ export const flashcards: Flashcard[] = [
     front: "¿Qué es el ARQ y cuáles son sus mecanismos?",
     back: "Pedido de Repetición Automático (Automatic Repeat reQuest): control de errores que combina:\n• Detección de error\n• ACK positivo (reconocimiento de recepción correcta)\n• Retransmisión después de timeout\n• NAK (reconocimiento negativo) y retransmisión inmediata",
     tag: "Errores",
-    simulator: { url: "/simuladores/15-arq.html", label: "ARQ y ventanas deslizantes" },
+    simulator: { animationId: "arq-comparison", label: "Stop-and-Wait vs Go-Back-N" },
   },
   {
     id: 13,

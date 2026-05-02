@@ -63,14 +63,14 @@ export const flashcardsClase5: Flashcard[] = [
     front: "¿Cuáles son los tres campos clave del header IPv4 para la fragmentación?",
     back: "Identification (ID) — 16 bits:\nIdentifica a qué datagrama original pertenece el fragmento. Todos los fragmentos del mismo datagrama tienen el MISMO ID.\n\nFlags — 3 bits (solo 2 se usan):\n• Bit DF (Don't Fragment): 1 = no fragmentar, 0 = se puede fragmentar\n• Bit MF (More Fragments): 1 = hay más fragmentos después, 0 = este es el último\n\nFragment Offset — 13 bits:\nPosición de este fragmento dentro del datagrama original, en unidades de 8 bytes.\nEjemplo: offset=75 → el fragmento empieza en el byte 75 × 8 = 600.",
     tag: "Fragmentación",
-    simulator: { url: "/simuladores/17-fragmentacion.html", label: "Fragmentación IPv4" },
+    simulator: { animationId: "ip-fragmentation", label: "Fragmentación IP paso a paso" },
   },
   {
     id: 409,
     front: "¿Cómo se calcula la fragmentación? (fórmula y ejemplo)",
     back: "Fórmula:\n• Payload por fragmento = MTU − 20 (header IP), redondeado hacia abajo al múltiplo de 8\n• Offset de cada fragmento = posición inicial del payload ÷ 8\n• MF = 1 en todos excepto el último\n\nEjemplo: MTU destino = 620 bytes, datagrama = 1500 bytes (20 IP + 1480 datos)\n• Datos por fragmento: 620 − 20 = 600 bytes (ya es múltiplo de 8 ✓)\n• Fragmento 1: 600 bytes, MF=1, Offset=0\n• Fragmento 2: 600 bytes, MF=1, Offset=600/8=75\n• Fragmento 3: 280 bytes, MF=0, Offset=1200/8=150",
     tag: "Fragmentación",
-    simulator: { url: "/simuladores/17-fragmentacion.html", label: "Fragmentación IPv4" },
+    simulator: { animationId: "ip-fragmentation", label: "Fragmentación IP paso a paso" },
   },
   {
     id: 410,

@@ -9,11 +9,17 @@ export interface QuizQuestion {
   explanation: string;
 }
 
+export interface FlashcardSimulator {
+  url: string;
+  label?: string;
+}
+
 export interface Flashcard {
   id: number;
   front: string;
   back: string;
   tag: string;
+  simulator?: FlashcardSimulator;
 }
 
 export const TOPIC = {
@@ -28,48 +34,56 @@ export const flashcards: Flashcard[] = [
     front: "¿Cuáles son los 5 componentes del modelo de comunicaciones?",
     back: "Fuente → Transmisor → Sistema de Transmisión → Receptor → Destino\n\nLa fuente genera los datos, el transmisor los convierte en señales, el sistema de transmisión los transporta, el receptor los convierte de nuevo y el destino los consume.",
     tag: "Modelo",
+    simulator: { url: "/simuladores/01-modelo-comunicaciones.html", label: "Modelo de comunicaciones" },
   },
   {
     id: 2,
     front: "¿Qué es una LAN?",
     back: "Local Area Network: red de alcance reducido (edificio o campus pequeño), generalmente pertenece a una misma organización, con velocidades altas. Hoy usa conmutación (switches).",
     tag: "Tipos de red",
+    simulator: { url: "/simuladores/02-tipos-redes.html", label: "Tipos de redes" },
   },
   {
     id: 3,
     front: "¿Qué es una MAN?",
     back: "Metropolitan Area Network: alcance intermedio entre LAN y WAN. Cubre una ciudad. Puede ser privada o pública, de alta velocidad.",
     tag: "Tipos de red",
+    simulator: { url: "/simuladores/02-tipos-redes.html", label: "Tipos de redes" },
   },
   {
     id: 4,
     front: "¿Qué es una WAN?",
     back: "Wide Area Network: gran extensión geográfica. Utiliza circuitos comunes a otras redes. Sus tecnologías principales son conmutación de circuitos y conmutación de paquetes.",
     tag: "Tipos de red",
+    simulator: { url: "/simuladores/02-tipos-redes.html", label: "Tipos de redes" },
   },
   {
     id: 5,
     front: "¿Qué es una GAN?",
     back: "Global Area Network: red compuesta de distintas redes de computadoras interconectadas, con cobertura geográfica ilimitada. Se la conoce como 'internet' (minúscula). No confundir con 'la Internet' (red específica).",
     tag: "Tipos de red",
+    simulator: { url: "/simuladores/02-tipos-redes.html", label: "Tipos de redes" },
   },
   {
     id: 6,
     front: "Conmutación de circuitos vs. conmutación de paquetes",
     back: "Circuitos: se establece un camino dedicado para toda la duración de la comunicación (ej: red telefónica).\n\nPaquetes: los datos se envían en pequeños paquetes que circulan por distintos nodos sin respetar secuencia fija.",
     tag: "Conmutación",
+    simulator: { url: "/simuladores/03-conmutacion.html", label: "Conmutación: circuitos vs paquetes" },
   },
   {
     id: 7,
     front: "¿Cuáles son los 3 elementos de un protocolo?",
     back: "• Sintaxis: formatos de mensajes y niveles de señal\n• Semántica: información de control y manejo de errores\n• Temporizaciones: adaptación de velocidades y secuenciamiento",
     tag: "Protocolos",
+    simulator: { url: "/simuladores/04-protocolos.html", label: "Protocolos" },
   },
   {
     id: 8,
     front: "Diferencia entre protocolo asincrónico y sincrónico",
     back: "Asincrónico: datos NO transferidos a velocidad constante. El inicio de cada carácter se marca con un bit de arranque y el fin con un bit de parada.\n\nSincrónico: datos a velocidad constante, con sincronismo entre transmisor y receptor. Se subclasifica en orientado al carácter y orientado al bit.",
     tag: "Protocolos",
+    simulator: { url: "/simuladores/04-protocolos.html", label: "Protocolos" },
   },
   {
     id: 9,
@@ -94,6 +108,7 @@ export const flashcards: Flashcard[] = [
     front: "¿Qué es el ARQ y cuáles son sus mecanismos?",
     back: "Pedido de Repetición Automático (Automatic Repeat reQuest): control de errores que combina:\n• Detección de error\n• ACK positivo (reconocimiento de recepción correcta)\n• Retransmisión después de timeout\n• NAK (reconocimiento negativo) y retransmisión inmediata",
     tag: "Errores",
+    simulator: { url: "/simuladores/15-arq.html", label: "ARQ y ventanas deslizantes" },
   },
   {
     id: 13,
@@ -106,6 +121,7 @@ export const flashcards: Flashcard[] = [
     front: "¿Para qué sirve la arquitectura de protocolos en capas?",
     back: "Permite separar las tareas de comunicación en módulos independientes (capas apiladas) donde:\n• Cada capa se implementa por separado\n• Las funciones existen en ambos extremos de la comunicación\n• Las capas equivalentes de cada extremo se comunican entre sí\n• Los cambios en una capa no afectan a las demás",
     tag: "Arquitectura",
+    simulator: { url: "/simuladores/05-arquitectura-capas.html", label: "Arquitectura en capas" },
   },
 ];
 

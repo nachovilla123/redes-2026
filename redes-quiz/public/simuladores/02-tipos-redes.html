@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Tipos de redes — LAN, MAN, WAN, GAN</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, system-ui, sans-serif; background: #0d1117; color: #e6edf3; padding: 20px; min-height: 100vh; }
+  .nav { margin-bottom: 16px; }
+  .nav a { color: #58a6ff; text-decoration: none; font-size: 13px; }
+  h1 { font-size: 28px; margin-bottom: 4px; }
+  .subtitle { color: #8b949e; margin-bottom: 20px; }
+  .layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; max-width: 1400px; margin: 0 auto; }
+  .panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+  .panel h2 { font-size: 16px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+  button { background: #238636; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; margin-right: 6px; margin-bottom: 6px; }
+  button:hover { background: #2ea043; }
+  button.secondary { background: #30363d; }
+  svg { width: 100%; height: 540px; display: block; }
+  .step { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed #30363d; }
+  .step:last-child { border: none; }
+  .step-title { font-weight: 600; margin-bottom: 6px; color: #58a6ff; }
+  .info-box { background: #0d1117; border-left: 3px solid var(--c, #58a6ff); padding: 10px 12px; border-radius: 4px; font-size: 12px; color: #c9d1d9; line-height: 1.6; margin-bottom: 8px; }
+  .info-box code { background: #161b22; padding: 1px 5px; border-radius: 3px; color: #d29922; font-size: 11px; }
+  .scope-pills { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+  .pill { padding: 8px 14px; background: #0d1117; border: 1px solid #30363d; border-radius: 20px; cursor: pointer; font-size: 12px; color: #8b949e; }
+  .pill.active { color: white; border-width: 2px; }
+  .pill[data-net="LAN"].active { background: #3fb95033; border-color: #3fb950; }
+  .pill[data-net="MAN"].active { background: #58a6ff33; border-color: #58a6ff; }
+  .pill[data-net="WAN"].active { background: #d2992233; border-color: #d29922; }
+  .pill[data-net="GAN"].active { background: #f8514933; border-color: #f85149; }
+  .stats-row { display: flex; gap: 8px; margin-top: 8px; }
+  .stat { flex: 1; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 8px; text-align: center; }
+  .stat-label { font-size: 10px; color: #8b949e; text-transform: uppercase; }
+  .stat-value { font-weight: bold; font-size: 14px; margin-top: 2px; }
+  .container { max-width: 1400px; margin: 0 auto; }
+  .docs-panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+  .docs-panel h2 { font-size: 18px; margin-bottom: 12px; color: #58a6ff; }
+  .docs-panel h3 { font-size: 15px; margin: 16px 0 8px; color: #d29922; }
+  .docs-panel p { line-height: 1.7; color: #c9d1d9; margin-bottom: 10px; font-size: 14px; }
+  .docs-panel ul { list-style: none; padding-left: 0; margin: 8px 0; }
+  .docs-panel li { padding: 4px 0; padding-left: 16px; position: relative; line-height: 1.6; font-size: 14px; }
+  .docs-panel li::before { content: "›"; position: absolute; left: 0; color: #58a6ff; font-weight: bold; }
+  .docs-panel code { background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #d29922; font-size: 12px; }
+  .show-sim { background: linear-gradient(135deg, #238636, #1f6feb); color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; margin-top: 20px; box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3); transition: transform 0.15s; }
+  .show-sim:hover { transform: translateY(-2px); }
+  .nets-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 12px 0; }
+  .net-card { background: #0d1117; border-radius: 6px; padding: 12px; border-left: 3px solid; }
+  .net-card h4 { font-size: 14px; margin-bottom: 4px; }
+  .net-card p { font-size: 13px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="nav"><a href="index.html">← Volver al hub</a></div>
+<h1>Tipos de redes — LAN, MAN, WAN, GAN</h1>
+<div class="subtitle">Hacé clic en cada nivel para ver el alcance, ejemplos y velocidad típica.</div>
+
+<div class="docs-panel">
+  <h2>📖 Concepto</h2>
+  <p>Las redes se clasifican según su <b>alcance geográfico</b>. Pensá en los medios de transporte: caminar (tu casa), colectivo (la ciudad), avión (entre países), sistema global combinado (todo el planeta). Las redes funcionan igual.</p>
+
+  <div class="nets-grid">
+    <div class="net-card" style="border-left-color:#3fb950">
+      <h4 style="color:#3fb950">🏠 LAN — Local Area Network</h4>
+      <p><b>Alcance:</b> un edificio o campus.<br>
+      <b>Ejemplo:</b> WiFi de tu casa (notebook + celu + Smart TV), red de un aula UTN.<br>
+      <b>Velocidad:</b> muy alta (las distancias son cortas).</p>
+    </div>
+    <div class="net-card" style="border-left-color:#58a6ff">
+      <h4 style="color:#58a6ff">🏙️ MAN — Metropolitan Area Network</h4>
+      <p><b>Alcance:</b> una ciudad.<br>
+      <b>Ejemplo:</b> red de Fibertel/Telecentro en Buenos Aires, sistema de cámaras de tráfico.<br>
+      <b>Dueño:</b> empresa privada o pública.</p>
+    </div>
+    <div class="net-card" style="border-left-color:#d29922">
+      <h4 style="color:#d29922">🌎 WAN — Wide Area Network</h4>
+      <p><b>Alcance:</b> países o continentes.<br>
+      <b>Ejemplo:</b> conectarte a un servidor de Amazon en EE.UU. — tu paquete cruza cables submarinos transatlánticos.<br>
+      <b>Tipos:</b> conmutación de circuitos (PSTN, vieja) o paquetes (moderna).</p>
+    </div>
+    <div class="net-card" style="border-left-color:#f85149">
+      <h4 style="color:#f85149">🌐 GAN — Global Area Network</h4>
+      <p><b>Alcance:</b> ilimitado, el planeta entero.<br>
+      <b>Ejemplo:</b> Internet (con I mayúscula). "internet" en minúscula = cualquier conjunto de redes interconectadas.<br>
+      <b>Compuesta por:</b> miles de LANs, MANs y WANs interconectadas.</p>
+    </div>
+  </div>
+
+  <h3>Estructura jerárquica</h3>
+  <p>Tu LAN → conecta a la MAN del ISP → que es parte de una WAN troncal → que forma parte de Internet (GAN). Cada red más grande "envuelve" a las más chicas.</p>
+
+  <p style="font-style:italic;color:#8b949e">⚠️ Diferencia clave: <b>Internet</b> (con I mayúscula) es la GAN específica que todos usamos. <b>internet</b> (minúscula) es el concepto genérico — cualquier conjunto de redes interconectadas.</p>
+
+  <button class="show-sim" id="show-sim">▶ Ver animación interactiva</button>
+</div>
+
+<div class="layout" id="sim" style="display:none">
+  <div class="panel">
+    <div class="scope-pills">
+      <div class="pill active" data-net="LAN">🏠 LAN</div>
+      <div class="pill" data-net="MAN">🏙️ MAN</div>
+      <div class="pill" data-net="WAN">🌎 WAN</div>
+      <div class="pill" data-net="GAN">🌐 GAN / Internet</div>
+    </div>
+    <svg id="canvas" viewBox="0 0 800 540"></svg>
+  </div>
+
+  <div class="panel">
+    <h2 id="net-title" style="color:#3fb950">LAN — Local Area Network</h2>
+    <div class="step">
+      <div class="step-title">Alcance</div>
+      <div class="info-box" id="scope-box">Un edificio o campus pequeño.</div>
+    </div>
+    <div class="step">
+      <div class="step-title">Stats</div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-label">Tamaño</div><div class="stat-value" id="size">~100m</div></div>
+        <div class="stat"><div class="stat-label">Velocidad</div><div class="stat-value" id="speed" style="color:#3fb950">muy alta</div></div>
+        <div class="stat"><div class="stat-label">Latencia</div><div class="stat-value" id="lat" style="color:#3fb950">&lt;1ms</div></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-title">Ejemplos</div>
+      <div class="info-box" id="examples-box">WiFi de tu casa, red de un aula, oficinas conectadas por Ethernet.</div>
+    </div>
+    <div class="step">
+      <div class="step-title">Tecnologías típicas</div>
+      <div class="info-box" id="tech-box">Ethernet (cable) o WiFi (inalámbrica).</div>
+    </div>
+    <div class="step">
+      <div class="step-title">Estructura jerárquica</div>
+      <div class="info-box">
+        Tu LAN → conecta a una MAN del ISP → que se conecta a una WAN troncal → que forma parte de Internet (GAN).<br><br>
+        Cada red más grande "envuelve" a las más chicas.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function ns(t,a={},c=[]){const e=document.createElementNS('http://www.w3.org/2000/svg',t);for(const k in a)e.setAttribute(k,a[k]);c.forEach(x=>e.appendChild(x));return e;}
+const svg = document.getElementById('canvas');
+
+const NETS = {
+  LAN: {
+    title: 'LAN — Local Area Network', color: '#3fb950',
+    scope: 'Un edificio o campus pequeño. Una sola organización es dueña.',
+    size: '~100m', speed: 'muy alta', lat: '<1ms',
+    examples: 'WiFi de tu casa (notebook + celu + Smart TV), red de un aula UTN, oficinas conectadas por Ethernet.',
+    tech: 'Ethernet (cable) o WiFi (inalámbrica). 1Gbps es común.',
+  },
+  MAN: {
+    title: 'MAN — Metropolitan Area Network', color: '#58a6ff',
+    scope: 'Una ciudad. Puede ser privada (Telecentro, Fibertel) o pública.',
+    size: '~50km', speed: 'alta', lat: '~5ms',
+    examples: 'Red de Fibertel/Telecentro en Buenos Aires, sistema de cámaras de tráfico de la ciudad.',
+    tech: 'Fibra óptica metropolitana, redes WiMAX.',
+  },
+  WAN: {
+    title: 'WAN — Wide Area Network', color: '#d29922',
+    scope: 'Países o continentes. Infraestructura compartida entre operadores.',
+    size: '~1000km', speed: 'variable', lat: '20–200ms',
+    examples: 'Cuando accedés a un servidor de Amazon en EE.UU., tu paquete cruza una WAN. Cables submarinos transatlánticos.',
+    tech: 'Conmutación de circuitos (vieja, telefonía PSTN) o conmutación de paquetes (moderna, internet).',
+  },
+  GAN: {
+    title: 'GAN — Global Area Network (Internet)', color: '#f85149',
+    scope: 'El planeta entero. Es una red de redes — incluye LANs, MANs y WANs interconectadas.',
+    size: 'global', speed: 'mixta', lat: '~50–300ms',
+    examples: 'Internet (con I mayúscula): la GAN específica que todos usamos. "internet" en minúscula = cualquier conjunto de redes interconectadas.',
+    tech: 'IP (Internet Protocol), TCP/UDP, BGP entre operadores.',
+  },
+};
+
+let active = 'LAN';
+
+function render() {
+  svg.innerHTML = '';
+
+  // Background gradients per zone
+  const bgs = [
+    { net: 'GAN', cx: 400, cy: 270, r: 260, color: '#f85149' },
+    { net: 'WAN', cx: 400, cy: 270, r: 200, color: '#d29922' },
+    { net: 'MAN', cx: 400, cy: 270, r: 140, color: '#58a6ff' },
+    { net: 'LAN', cx: 400, cy: 270, r: 80,  color: '#3fb950' },
+  ];
+
+  bgs.forEach(b => {
+    const isActive = b.net === active;
+    svg.appendChild(ns('circle', {
+      cx: b.cx, cy: b.cy, r: b.r,
+      fill: b.color + (isActive ? '22' : '0d'),
+      stroke: b.color,
+      'stroke-width': isActive ? 3 : 1,
+      'stroke-dasharray': isActive ? '0' : '4 4',
+    }));
+    const lbl = ns('text', {
+      x: b.cx, y: b.cy - b.r + 18,
+      fill: b.color, 'font-size': isActive ? 16 : 12,
+      'text-anchor': 'middle', 'font-weight': 'bold',
+      opacity: isActive ? 1 : 0.6,
+    });
+    lbl.textContent = b.net;
+    svg.appendChild(lbl);
+  });
+
+  // Center: LAN with devices
+  drawHouse(400, 270, active === 'LAN');
+
+  // Around LAN: city buildings (MAN scope)
+  if (active === 'MAN' || active === 'WAN' || active === 'GAN') {
+    drawBuilding(310, 220);
+    drawBuilding(490, 320);
+    drawBuilding(330, 320);
+    drawBuilding(490, 220);
+  }
+
+  // Country outline (WAN)
+  if (active === 'WAN' || active === 'GAN') {
+    drawDistantCity(220, 380);
+    drawDistantCity(580, 180);
+  }
+
+  // World icon (GAN)
+  if (active === 'GAN') {
+    drawWorld(140, 100);
+    drawWorld(660, 440);
+  }
+}
+
+function drawHouse(cx, cy, highlight) {
+  const fill = highlight ? '#3fb95033' : '#21262d';
+  const stroke = highlight ? '#3fb950' : '#30363d';
+  svg.appendChild(ns('rect', { x: cx - 30, y: cy - 20, width: 60, height: 40, rx: 4, fill, stroke, 'stroke-width': 2 }));
+  const t = ns('text', { x: cx, y: cy + 5, fill: 'white', 'font-size': 18, 'text-anchor': 'middle' });
+  t.textContent = '🏠'; svg.appendChild(t);
+  // small devices
+  if (highlight) {
+    [[-50, 0, '💻'], [0, -45, '📱'], [50, 0, '📺']].forEach(([dx, dy, ic]) => {
+      const x = cx + dx, y = cy + dy;
+      const ic_t = ns('text', { x: x, y: y + 5, fill: '#3fb950', 'font-size': 16, 'text-anchor': 'middle' });
+      ic_t.textContent = ic; svg.appendChild(ic_t);
+      svg.appendChild(ns('line', { x1: cx, y1: cy, x2: x, y2: y, stroke: '#3fb950', 'stroke-width': 1, 'stroke-dasharray': '2 2', opacity: 0.6 }));
+    });
+  }
+}
+
+function drawBuilding(x, y) {
+  svg.appendChild(ns('rect', { x: x - 16, y: y - 20, width: 32, height: 40, rx: 2, fill: '#21262d', stroke: '#58a6ff', 'stroke-width': 1.5 }));
+  // windows
+  [0, 1].forEach(r => {
+    [0, 1].forEach(c => {
+      svg.appendChild(ns('rect', { x: x - 10 + c * 12, y: y - 14 + r * 14, width: 6, height: 8, fill: '#58a6ff44' }));
+    });
+  });
+}
+
+function drawDistantCity(x, y) {
+  svg.appendChild(ns('text', { x, y, fill: '#d29922', 'font-size': 22, 'text-anchor': 'middle' })).textContent = '🏙️';
+  svg.appendChild(ns('line', { x1: 400, y1: 270, x2: x, y2: y, stroke: '#d29922', 'stroke-width': 1.5, 'stroke-dasharray': '5 3', opacity: 0.6 }));
+}
+
+function drawWorld(x, y) {
+  svg.appendChild(ns('text', { x, y, fill: '#f85149', 'font-size': 28, 'text-anchor': 'middle' })).textContent = '🌐';
+}
+
+function selectNet(net) {
+  active = net;
+  document.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p.dataset.net === net));
+  const n = NETS[net];
+  document.getElementById('net-title').textContent = n.title;
+  document.getElementById('net-title').style.color = n.color;
+  document.getElementById('scope-box').textContent = n.scope;
+  document.getElementById('size').textContent = n.size;
+  document.getElementById('speed').textContent = n.speed;
+  document.getElementById('lat').textContent = n.lat;
+  document.getElementById('examples-box').textContent = n.examples;
+  document.getElementById('tech-box').textContent = n.tech;
+  document.querySelectorAll('.info-box').forEach(b => b.style.setProperty('--c', n.color));
+  render();
+}
+
+document.querySelectorAll('.pill').forEach(p => {
+  p.onclick = () => selectNet(p.dataset.net);
+});
+
+document.getElementById('show-sim').onclick = () => {
+  document.getElementById('sim').style.display = '';
+  document.getElementById('sim').scrollIntoView({ behavior: 'smooth' });
+};
+
+render();
+</script>
+</div>
+</body>
+</html>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { use } from "react";
 import { getTopicBySlug, type Flashcard } from "@/data/index";
@@ -39,6 +39,16 @@ function FlashcardSession({
   const [isFlipped, setIsFlipped] = useState(false);
   const [roundDone, setRoundDone] = useState(false);
   const [generatingPDF, setGeneratingPDF] = useState(false);
+  const [simulatorOpen, setSimulatorOpen] = useState<{ url: string; label?: string } | null>(null);
+
+  useEffect(() => {
+    if (!simulatorOpen) return;
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setSimulatorOpen(null);
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [simulatorOpen]);
 
   async function handleDownloadPDF(cardIndices: number[]) {
     setGeneratingPDF(true);
@@ -253,11 +263,24 @@ function FlashcardSession({
         ) : (
           <div
             key={`back-${currentCardIdx}`}
-            className="card-face cursor-pointer select-none h-full min-h-40 bg-slate-800 border border-slate-600 rounded-2xl flex flex-col p-5 sm:p-8 overflow-y-auto"
-            onClick={flip}
+            className="card-face select-none h-full min-h-40 bg-slate-800 border border-slate-600 rounded-2xl flex flex-col p-5 sm:p-8 overflow-y-auto"
           >
-            <span className="text-xs text-blue-400 uppercase tracking-widest font-medium mb-4">Respuesta</span>
-            <p className="text-slate-100 text-sm sm:text-base leading-relaxed whitespace-pre-line">{card.back}</p>
+            <div className="cursor-pointer" onClick={flip}>
+              <span className="text-xs text-blue-400 uppercase tracking-widest font-medium mb-4 block">Respuesta</span>
+              <p className="text-slate-100 text-sm sm:text-base leading-relaxed whitespace-pre-line">{card.back}</p>
+            </div>
+            {card.simulator && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSimulatorOpen({ url: card.simulator!.url, label: card.simulator!.label });
+                }}
+                className="mt-5 inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold rounded-xl px-4 py-3 transition-colors text-sm self-start"
+              >
+                🎬 Ver animación{card.simulator.label ? `: ${card.simulator.label}` : ""}
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -295,7 +318,55 @@ function FlashcardSession({
             </button>
           </div>
         )}
+
       </div>
+
+      {/* ── Modal del simulador ──────────────────────────────────── */}
+      {simulatorOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col p-3 sm:p-6"
+          onClick={() => setSimulatorOpen(null)}
+        >
+          <div
+            className="w-full max-w-6xl mx-auto bg-slate-950 border border-slate-800 rounded-2xl flex flex-col overflow-hidden flex-1"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-900">
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="text-xl">🎬</span>
+                <div className="min-w-0">
+                  <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Simulador</p>
+                  <p className="text-white font-semibold text-sm truncate">{simulatorOpen.label ?? "Animación"}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <a
+                  href={simulatorOpen.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-slate-400 hover:text-white text-xs transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-800"
+                  title="Abrir en nueva pestaña"
+                >
+                  ↗ Pestaña nueva
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setSimulatorOpen(null)}
+                  className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-lg leading-none flex items-center justify-center transition-colors"
+                  title="Cerrar (Esc)"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+            <iframe
+              src={simulatorOpen.url}
+              className="flex-1 w-full bg-slate-950"
+              title={simulatorOpen.label ?? "Simulador"}
+            />
+          </div>
+        </div>
+      )}
     </main>
   );
 }

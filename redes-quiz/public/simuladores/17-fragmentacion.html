@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Fragmentación IPv4</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, system-ui, sans-serif; background: #0d1117; color: #e6edf3; padding: 20px; min-height: 100vh; }
+  .nav { margin-bottom: 16px; }
+  .nav a { color: #58a6ff; text-decoration: none; font-size: 13px; }
+  h1 { font-size: 28px; margin-bottom: 4px; }
+  .subtitle { color: #8b949e; margin-bottom: 20px; }
+  .layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; max-width: 1400px; margin: 0 auto; }
+  .panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+  .panel h2 { font-size: 16px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+  .step { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed #30363d; }
+  .step:last-child { border: none; }
+  .step-title { font-weight: 600; margin-bottom: 6px; color: #58a6ff; }
+  .info-box { background: #0d1117; border-left: 3px solid #58a6ff; padding: 10px 12px; border-radius: 4px; font-size: 12px; color: #c9d1d9; line-height: 1.6; margin-bottom: 8px; }
+  .info-box code { background: #161b22; padding: 1px 5px; border-radius: 3px; color: #d29922; font-size: 11px; }
+  .controls-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
+  .controls-row label { font-size: 13px; color: #8b949e; min-width: 100px; }
+  input[type=number] { background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 6px; padding: 6px 10px; font-size: 13px; width: 100px; }
+  input[type=checkbox] { transform: scale(1.2); }
+
+  .pipeline { display: flex; flex-direction: column; gap: 16px; }
+  .link {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .link-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .link-name { font-weight: bold; font-size: 14px; }
+  .link-mtu { color: #d29922; font-family: monospace; font-size: 13px; }
+  .frag-bar { display: flex; gap: 4px; margin-top: 8px; min-height: 50px; }
+  .frag {
+    background: linear-gradient(135deg, #58a6ff, #3fb950);
+    border-radius: 4px;
+    padding: 8px;
+    color: white;
+    font-size: 11px;
+    font-family: 'SF Mono', Menlo, monospace;
+    text-align: center;
+    flex: 0 0 auto;
+    min-width: 80px;
+  }
+  .frag.split { background: linear-gradient(135deg, #d29922, #f85149); }
+  .frag-info { font-weight: bold; font-size: 13px; }
+  .frag-detail { font-size: 10px; margin-top: 3px; opacity: 0.9; }
+
+  .frag-table { width: 100%; border-collapse: collapse; font-family: 'SF Mono', Menlo, monospace; font-size: 12px; }
+  .frag-table th { background: #1f6feb; color: white; padding: 8px; text-align: center; font-size: 11px; }
+  .frag-table td { padding: 8px; border-top: 1px solid #30363d; text-align: center; color: #c9d1d9; }
+  .frag-table td.last { color: #f85149; font-weight: bold; }
+
+  .alert {
+    background: #f8514922;
+    border-left: 3px solid #f85149;
+    padding: 10px 12px;
+    border-radius: 4px;
+    color: #ffa198;
+    font-size: 13px;
+    margin: 10px 0;
+  }
+  .ok {
+    background: #3fb95022;
+    border-left: 3px solid #3fb950;
+    padding: 10px 12px;
+    border-radius: 4px;
+    color: #56d364;
+    font-size: 13px;
+    margin: 10px 0;
+  }
+  .container { max-width: 1400px; margin: 0 auto; }
+  .docs-panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+  .docs-panel h2 { font-size: 18px; margin-bottom: 12px; color: #58a6ff; }
+  .docs-panel h3 { font-size: 15px; margin: 16px 0 8px; color: #d29922; }
+  .docs-panel p { line-height: 1.7; color: #c9d1d9; margin-bottom: 10px; font-size: 14px; }
+  .docs-panel ul { list-style: none; padding-left: 0; margin: 8px 0; }
+  .docs-panel li { padding: 4px 0; padding-left: 16px; position: relative; line-height: 1.6; font-size: 14px; }
+  .docs-panel li::before { content: "›"; position: absolute; left: 0; color: #58a6ff; font-weight: bold; }
+  .docs-panel code { background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #d29922; font-size: 12px; }
+  .show-sim { background: linear-gradient(135deg, #238636, #1f6feb); color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; margin-top: 20px; box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3); transition: transform 0.15s; }
+  .show-sim:hover { transform: translateY(-2px); }
+  .mtu-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0; }
+  .mtu-table th { background: #21262d; padding: 6px; text-align: left; font-size: 11px; color: #8b949e; }
+  .mtu-table td { padding: 6px; border-top: 1px solid #30363d; color: #c9d1d9; }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="nav"><a href="index.html">← Volver al hub</a></div>
+<h1>Fragmentación IPv4</h1>
+<div class="subtitle">Calculá ID, MF y Fragment Offset cuando un paquete excede el MTU del próximo enlace.</div>
+
+<div class="docs-panel">
+  <h2>📖 Concepto</h2>
+  <p>Cada tecnología de red tiene un <b>MTU</b> (Maximum Transmission Unit) — el máximo de bytes que puede transportar en una sola trama. Si un paquete IP es más grande que el MTU del próximo enlace, hay dos opciones: descartarlo, o <b>fragmentarlo</b>.</p>
+
+  <h3>MTU típicos</h3>
+  <table class="mtu-table">
+    <tr><th>Tecnología</th><th>MTU</th></tr>
+    <tr><td>Ethernet</td><td>1500 bytes</td></tr>
+    <tr><td>WiFi (802.11)</td><td>2304 bytes</td></tr>
+    <tr><td>PPP (WAN)</td><td>576 - 1500 bytes</td></tr>
+  </table>
+
+  <h3>¿Cuándo se fragmenta?</h3>
+  <p>Cuando el paquete > MTU del próximo enlace <b>Y</b> el bit <code>DF</code> (Don't Fragment) está en 0.</p>
+  <p>Si DF=1 y el paquete no entra → router <b>descarta</b> + ICMP "Fragmentation Needed" al origen.</p>
+
+  <h3>Campos del header IPv4 para fragmentación</h3>
+  <ul>
+    <li><b>Identification (16 bits):</b> identifica a qué datagrama pertenece. Todos los fragmentos del mismo datagrama tienen el <b>mismo ID</b>.</li>
+    <li><b>DF (1 bit):</b> 1 = no fragmentar, 0 = se puede.</li>
+    <li><b>MF — More Fragments (1 bit):</b> 1 = hay más fragmentos, 0 = este es el último.</li>
+    <li><b>Fragment Offset (13 bits):</b> posición del fragmento dentro del datagrama original, <b>en unidades de 8 bytes</b>.</li>
+  </ul>
+
+  <h3>Cómo calcular</h3>
+  <p>Datos por fragmento = <code>MTU − IP_header</code>, redondeado <b>hacia abajo</b> al múltiplo de 8 (porque el offset se cuenta en bloques de 8 bytes).</p>
+
+  <h3>¿Quién reensambla?</h3>
+  <p><b>Solo el destino final</b>. Los routers intermedios no reensamblan — solo fragmentan más si hace falta. Si un fragmento se pierde, se descarta el datagrama completo y TCP (o la app) tiene que reenviar.</p>
+
+  <p style="font-style:italic;color:#8b949e">Tip: <b>IP fragmenta sin garantizar entrega</b>. Las garantías las da TCP encima.</p>
+
+  <button class="show-sim" id="show-sim">▶ Ver calculadora interactiva</button>
+</div>
+
+<div class="layout" id="sim" style="display:none">
+  <div class="panel">
+    <h2>Datagrama original</h2>
+    <div class="controls-row">
+      <label>IP header (bytes):</label>
+      <input type="number" id="ip-hdr" value="20" min="20" max="60" step="4">
+    </div>
+    <div class="controls-row">
+      <label>Payload (bytes):</label>
+      <input type="number" id="payload" value="1480" min="1" max="65515">
+    </div>
+    <div class="controls-row">
+      <label>ID del datagrama:</label>
+      <input type="number" id="ident" value="42" min="0" max="65535">
+    </div>
+    <div class="controls-row">
+      <label>Bit DF activado:</label>
+      <input type="checkbox" id="df">
+    </div>
+
+    <h2 style="margin-top:20px">Recorrido por enlaces</h2>
+    <div class="controls-row">
+      <label>MTU enlace 1:</label>
+      <input type="number" id="mtu1" value="1500" min="68">
+    </div>
+    <div class="controls-row">
+      <label>MTU enlace 2:</label>
+      <input type="number" id="mtu2" value="620" min="68">
+    </div>
+    <div class="controls-row">
+      <label>MTU enlace 3:</label>
+      <input type="number" id="mtu3" value="1500" min="68">
+    </div>
+
+    <div class="pipeline" id="pipeline" style="margin-top:16px"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Resultado</h2>
+    <div id="result-area"></div>
+
+    <div class="step">
+      <div class="step-title">Reglas clave</div>
+      <div class="info-box">
+        Se fragmenta cuando: paquete > MTU <b>y</b> DF=0.<br>
+        Si DF=1 y no entra → router descarta + ICMP "fragmentation needed".
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-title">Cómo calcular</div>
+      <div class="info-box">
+        Datos por fragmento = <code>MTU − IP_hdr</code>, redondeado <b>hacia abajo</b> al múltiplo de 8 (porque el offset se cuenta en unidades de 8 bytes).
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-title">Campos del header</div>
+      <div class="info-box">
+        <b>ID</b> (16b): el mismo en todos los fragmentos del mismo datagrama.<br>
+        <b>MF</b> (1b): 1 = hay más, 0 = último fragmento.<br>
+        <b>Fragment Offset</b> (13b): posición del fragmento dentro del datagrama original, <b>en unidades de 8 bytes</b>.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-title">¿Quién reensambla?</div>
+      <div class="info-box">
+        <b>Solo el destino final</b>. Los routers del medio no reensamblan, solo fragmentan más si hace falta. Si un fragmento se pierde, se descarta el datagrama completo.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function fragment(ipHdr, payload, mtu, baseId) {
+  const dataPerFrag = Math.floor((mtu - ipHdr) / 8) * 8;
+  if (dataPerFrag <= 0) return null;
+  const frags = [];
+  let bytesLeft = payload;
+  let offset = 0;
+  while (bytesLeft > 0) {
+    const dataInThis = Math.min(dataPerFrag, bytesLeft);
+    const isLast = bytesLeft <= dataPerFrag;
+    frags.push({
+      id: baseId,
+      total: dataInThis + ipHdr,
+      payload: dataInThis,
+      mf: isLast ? 0 : 1,
+      offset: offset / 8,
+      offsetBytes: offset,
+    });
+    offset += dataInThis;
+    bytesLeft -= dataInThis;
+  }
+  return frags;
+}
+
+function compute() {
+  const ipHdr = parseInt(document.getElementById('ip-hdr').value);
+  const payload = parseInt(document.getElementById('payload').value);
+  const id = parseInt(document.getElementById('ident').value);
+  const df = document.getElementById('df').checked;
+  const mtus = [parseInt(document.getElementById('mtu1').value), parseInt(document.getElementById('mtu2').value), parseInt(document.getElementById('mtu3').value)];
+
+  const totalSize = ipHdr + payload;
+  // Initial datagram is the input
+  let currentFrags = [{ id, total: totalSize, payload, mf: 0, offset: 0, offsetBytes: 0 }];
+
+  const pipelineEl = document.getElementById('pipeline');
+  pipelineEl.innerHTML = '';
+  const resultEl = document.getElementById('result-area');
+  let resultHtml = '';
+  let dropped = false;
+
+  for (let i = 0; i < mtus.length; i++) {
+    const mtu = mtus[i];
+    const link = document.createElement('div');
+    link.className = 'link';
+    const linkHeader = `<div class="link-header"><span class="link-name">Enlace ${i + 1}</span><span class="link-mtu">MTU = ${mtu} bytes</span></div>`;
+
+    if (dropped) {
+      link.innerHTML = linkHeader + '<div style="color:#6e7681;font-size:12px">— paquete ya descartado —</div>';
+      pipelineEl.appendChild(link);
+      continue;
+    }
+
+    // Check each fragment against MTU
+    const newFrags = [];
+    let needsFrag = false;
+    let dfDrop = false;
+
+    for (const f of currentFrags) {
+      if (f.total > mtu) {
+        if (df) { dfDrop = true; break; }
+        needsFrag = true;
+        // sub-fragment
+        const sub = fragment(ipHdr, f.payload, mtu, f.id);
+        if (!sub) { dfDrop = true; break; }
+        // adjust offsets relative to original datagram
+        for (let s = 0; s < sub.length; s++) {
+          const isLastSub = s === sub.length - 1;
+          newFrags.push({
+            id: f.id,
+            total: sub[s].total,
+            payload: sub[s].payload,
+            mf: isLastSub ? f.mf : 1, // if original wasn't last, all subs have MF=1; if original was last, only sub-last keeps original MF
+            offset: (f.offsetBytes + sub[s].offsetBytes) / 8,
+            offsetBytes: f.offsetBytes + sub[s].offsetBytes,
+          });
+        }
+      } else {
+        newFrags.push(f);
+      }
+    }
+
+    if (dfDrop) {
+      dropped = true;
+      link.innerHTML = linkHeader + `<div class="alert">⚠️ <b>DF=1</b> y el paquete (${currentFrags[0].total}B) > MTU (${mtu}B) → router <b>descarta</b> + envía ICMP "Fragmentation Needed" al origen.</div>`;
+      pipelineEl.appendChild(link);
+      continue;
+    }
+
+    currentFrags = newFrags;
+
+    // Render fragments visually
+    let bar = '<div class="frag-bar">';
+    currentFrags.forEach(f => {
+      const cls = needsFrag ? 'frag split' : 'frag';
+      bar += `<div class="${cls}" style="flex:${f.total}"><div class="frag-info">${f.total}B</div><div class="frag-detail">off=${f.offset} MF=${f.mf}</div></div>`;
+    });
+    bar += '</div>';
+
+    const status = needsFrag
+      ? `<div style="color:#d29922;font-size:12px;margin-bottom:6px">🔧 Se fragmentó (paquete entrante > MTU)</div>`
+      : `<div style="color:#3fb950;font-size:12px;margin-bottom:6px">✓ Pasa entero (cabe en el MTU)</div>`;
+
+    link.innerHTML = linkHeader + status + bar;
+    pipelineEl.appendChild(link);
+  }
+
+  // Result table
+  if (dropped) {
+    resultHtml = '<div class="alert"><b>Paquete descartado.</b> Con DF=1 el router no puede fragmentar y devuelve ICMP al origen.</div>';
+  } else {
+    resultHtml = '<div class="ok">Llega al destino en <b>' + currentFrags.length + ' fragmento(s)</b>. El destino los reensambla.</div>';
+    resultHtml += '<table class="frag-table" style="margin-top:8px"><thead><tr><th>#</th><th>Total</th><th>Payload</th><th>ID</th><th>MF</th><th>Offset</th></tr></thead><tbody>';
+    currentFrags.forEach((f, i) => {
+      const lastClass = f.mf === 0 ? 'last' : '';
+      resultHtml += `<tr><td>${i + 1}</td><td>${f.total}</td><td>${f.payload}</td><td>${f.id}</td><td class="${lastClass}">${f.mf}</td><td>${f.offset}</td></tr>`;
+    });
+    resultHtml += '</tbody></table>';
+    resultHtml += '<div style="font-size:11px;color:#8b949e;margin-top:6px">Offset en unidades de 8 bytes (multiplicar por 8 para bytes reales).</div>';
+  }
+
+  resultEl.innerHTML = resultHtml;
+}
+
+['ip-hdr', 'payload', 'ident', 'mtu1', 'mtu2', 'mtu3'].forEach(id => {
+  document.getElementById(id).oninput = compute;
+});
+document.getElementById('df').onchange = compute;
+
+document.getElementById('show-sim').onclick = () => {
+  document.getElementById('sim').style.display = '';
+  document.getElementById('sim').scrollIntoView({ behavior: 'smooth' });
+};
+
+compute();
+</script>
+</div>
+</body>
+</html>

@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simuladores Interactivos · Redes UTN-FRBA</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #020617;
+    color: #fff;
+    min-height: 100vh;
+    padding: 40px 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { width: 100%; max-width: 896px; margin: 0 auto; }
+
+  /* Header */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    gap: 16px;
+  }
+  .brand .tagline {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .brand h1 {
+    color: white;
+    font-size: 24px;
+    font-weight: 700;
+    margin-top: 2px;
+    line-height: 1.2;
+  }
+  .header-links {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .header-links a {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.15s;
+  }
+  .header-links a:hover { color: white; }
+  .header-links svg { width: 16px; height: 16px; fill: currentColor; }
+  .header-links .label { display: none; }
+  @media (min-width: 640px) { .header-links .label { display: inline; } }
+
+  /* Hero card */
+  .hero {
+    background: #0f172a;
+    border: 1px solid rgba(67, 56, 202, 0.6);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  @media (min-width: 768px) { .hero { padding: 32px; } }
+  .hero-flex {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  @media (min-width: 768px) {
+    .hero-flex { flex-direction: row; align-items: center; justify-content: space-between; }
+  }
+  .hero-info { display: flex; align-items: flex-start; gap: 16px; }
+  .hero-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(67, 56, 202, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .hero-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+  .hero-meta h2 { color: white; font-weight: 600; font-size: 18px; }
+  .hero-badge {
+    font-size: 11px;
+    background: rgba(67, 56, 202, 0.4);
+    color: #a5b4fc;
+    border: 1px solid rgba(67, 56, 202, 0.4);
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-weight: 500;
+  }
+  .hero-sub { color: #64748b; font-size: 12px; margin-bottom: 8px; }
+  .hero-desc { color: #94a3b8; font-size: 14px; line-height: 1.5; }
+  .hero-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #4f46e5;
+    color: white !important;
+    font-weight: 600;
+    border-radius: 12px;
+    padding: 12px 24px;
+    text-decoration: none;
+    font-size: 14px;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .hero-btn:hover { background: #6366f1; }
+
+  .section-tag {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    margin-top: 28px;
+  }
+
+  /* Card grid */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1024px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+
+  .card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: border-color 0.15s;
+    position: relative;
+  }
+  .card:hover { border-color: #334155; }
+  .card.disabled { opacity: 0.55; }
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: #1e293b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .card-text { min-width: 0; flex: 1; }
+  .card-title {
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.35;
+  }
+  .card-sub {
+    color: #64748b;
+    font-size: 12px;
+    margin-top: 2px;
+  }
+  .card-desc {
+    color: #94a3b8;
+    font-size: 13px;
+    line-height: 1.5;
+    flex: 1;
+  }
+  .card-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: #4f46e5;
+    color: white !important;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 10px 16px;
+    text-decoration: none;
+    font-size: 13px;
+    transition: background 0.15s;
+    margin-top: auto;
+  }
+  .card-btn:hover { background: #6366f1; }
+  .card-btn.disabled {
+    background: #1e293b;
+    color: #64748b !important;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  footer {
+    margin-top: 40px;
+    border-top: 1px solid #1e293b;
+    padding-top: 24px;
+  }
+  footer p {
+    color: #475569;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <div class="brand">
+        <p class="tagline">UTN · FRBA · Redes de Información</p>
+        <h1>Simuladores Interactivos</h1>
+      </div>
+      <div class="header-links">
+        <a href="https://ar.linkedin.com/in/ignaciovillarruel" target="_blank" rel="noopener noreferrer" title="LinkedIn">
+          <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          <span class="label">Ignacio Villarruel</span>
+        </a>
+        <a href="https://github.com/nachovilla123/redes-2026" target="_blank" rel="noopener noreferrer" title="GitHub">
+          <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span class="label">redes-2026</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="hero">
+      <div class="hero-flex">
+        <div class="hero-info">
+          <div class="hero-icon">🧱</div>
+          <div>
+            <div class="hero-meta">
+              <h2>Modelo OSI · Encapsulamiento</h2>
+              <span class="hero-badge">Visual</span>
+            </div>
+            <p class="hero-sub">7 capas · 2 modos · ideal para empezar</p>
+            <p class="hero-desc">El simulador más visual: mirá cómo cada capa agrega su header al enviar y lo quita al recibir. Recomendado como punto de entrada al hub.</p>
+          </div>
+        </div>
+        <a href="06-osi.html" class="hero-btn">Empezar ahora →</a>
+      </div>
+    </div>
+
+    <p class="section-tag">Fundamentos</p>
+    <div class="grid">
+      <div class="card">
+        <div class="card-top">
+          <div class="card-icon">📡</div>
+          <div class="card-text">
+            <h2 class="card-title">Modelo de comunicaciones</h2>
+            <p class="card-sub">Cap. 01 · 5 componentes</p>
+          </div>
+        </div>
+        <p class="card-desc">Fuente, transmisor, sistema, receptor y destino — siempre los 5 en cualquier comunicación.</p>
+        <a href="01-modelo-comunicaciones.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card">
+        <div class="card-top">
+          <div class="card-icon">🌐</div>
+          <div class="card-text">
+            <h2 class="card-title">Tipos de redes</h2>
+            <p class="card-sub">Cap. 02 · LAN/MAN/WAN/GAN</p>
+          </div>
+        </div>
+        <p class="card-desc">Cómo se clasifican las redes según el alcance: tu casa, la ciudad, el país, el planeta.</p>
+        <a href="02-tipos-redes.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card">
+        <div class="card-top">
+          <div class="card-icon">🔀</div>
+          <div class="card-text">
+            <h2 class="card-title">Conmutación: circuitos vs paquetes</h2>
+            <p class="card-sub">Cap. 03 · Telefonía vs internet</p>
+          </div>
+        </div>
+        <p class="card-desc">Reservar mesa vs delivery por Rappi — animación lado a lado de los dos modelos.</p>
+        <a href="03-conmutacion.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card">
+        <div class="card-top">
+          <div class="card-icon">🤝</div>
+          <div class="card-text">
+            <h2 class="card-title">Protocolos</h2>
+            <p class="card-sub">Cap. 04 · Sintaxis, semántica, tiempo</p>
+          </div>
+        </div>
+        <p class="card-desc">Las reglas que dos máquinas acuerdan para comunicarse — y qué pasa cuando alguna se rompe.</p>
+        <a href="04-protocolos.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card">
+        <div class="card-top">
+          <div class="card-icon">📚</div>
+          <div class="card-text">
+            <h2 class="card-title">Arquitectura en capas</h2>
+            <p class="card-sub">Cap. 05 · PDUs · 3 niveles</p>
+          </div>
+        </div>
+        <p class="card-desc">Por qué las redes se organizan en capas — encapsulamiento como las muñecas rusas.</p>
+        <a href="05-arquitectura-capas.html" class="card-btn">Ver en acción →</a>
+      </div>
+    </div>
+
+    <p class="section-tag">Modelos OSI y TCP/IP</p>
+    <div class="grid">
+      <div class="card">
+        <div class="card-top">
+          <div class="card-icon">🧱</div>
+          <div class="card-text">
+            <h2 class="card-title">Modelo OSI · 7 capas</h2>
+            <p class="card-sub">Cap. 06 · Encapsulamiento</p>
+          </div>
+        </div>
+        <p class="card-desc">Mirá cómo cada capa agrega su header al enviar y lo quita al recibir, capa por capa.</p>
+        <a href="06-osi.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card">
+        <div class="card-top">
+          <div class="card-icon">🔌</div>
+          <div class="card-text">
+            <h2 class="card-title">TCP/IP · handshake y puertos</h2>
+            <p class="card-sub">Cap. 07 · TCP vs UDP</p>
+          </div>
+        </div>
+        <p class="card-desc">3-way handshake animado, comparativa con pérdida configurable, y para qué sirven los puertos.</p>
+        <a href="07-tcp-ip.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card disabled">
+        <div class="card-top">
+          <div class="card-icon">⚙️</div>
+          <div class="card-text">
+            <h2 class="card-title">Control de flujo y errores</h2>
+            <p class="card-sub">Cap. 08 · Próximamente</p>
+          </div>
+        </div>
+        <p class="card-desc">CRC, paridad, ARQ básico — los mecanismos que detectan y corrigen errores.</p>
+        <span class="card-btn disabled">Pendiente</span>
+      </div>
+    </div>
+
+    <p class="section-tag">Direccionamiento y switching</p>
+    <div class="grid">
+      <div class="card">
+        <div class="card-top">
+          <div class="card-icon">🏷️</div>
+          <div class="card-text">
+            <h2 class="card-title">Switch y VLANs · 802.1Q</h2>
+            <p class="card-sub">Cap. 09 · Tag en el trunk</p>
+          </div>
+        </div>
+        <p class="card-desc">Asigná VLANs, mandá broadcasts y mirá cómo el tag 802.1Q viaja por el trunk.</p>
+        <a href="09-vlan.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card">
+        <div class="card-top">
+          <div class="card-icon">🔢</div>
+          <div class="card-text">
+            <h2 class="card-title">IP, subredes y CIDR</h2>
+            <p class="card-sub">Cap. 10 · Calculadora visual</p>
+          </div>
+        </div>
+        <p class="card-desc">Mové la máscara y mirá cómo cambian los bits, los rangos de hosts, broadcast y red.</p>
+        <a href="10-subredes.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card">
+        <div class="card-top">
+          <div class="card-icon">🚪</div>
+          <div class="card-text">
+            <h2 class="card-title">NAT / PAT</h2>
+            <p class="card-sub">Cap. 11 · Tabla de traducción</p>
+          </div>
+        </div>
+        <p class="card-desc">Mirá la tabla NAT del router traduciendo IPs privadas a públicas en tiempo real.</p>
+        <a href="11-nat.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card disabled">
+        <div class="card-top">
+          <div class="card-icon">🔒</div>
+          <div class="card-text">
+            <h2 class="card-title">VPN · túnel cifrado</h2>
+            <p class="card-sub">Cap. 12 · Próximamente</p>
+          </div>
+        </div>
+        <p class="card-desc">El túnel virtual sobre internet pública — cómo se cifra el tráfico extremo a extremo.</p>
+        <span class="card-btn disabled">Pendiente</span>
+      </div>
+      <div class="card disabled">
+        <div class="card-top">
+          <div class="card-icon">🛡️</div>
+          <div class="card-text">
+            <h2 class="card-title">ACL · listas de control</h2>
+            <p class="card-sub">Cap. 13 · Próximamente</p>
+          </div>
+        </div>
+        <p class="card-desc">El portero con lista — qué tráfico se permite y cuál se descarta en un router.</p>
+        <span class="card-btn disabled">Pendiente</span>
+      </div>
+    </div>
+
+    <p class="section-tag">Wireless y transporte</p>
+    <div class="grid">
+      <div class="card disabled">
+        <div class="card-top">
+          <div class="card-icon">📶</div>
+          <div class="card-text">
+            <h2 class="card-title">WiFi 802.11 · CSMA/CA</h2>
+            <p class="card-sub">Cap. 14 · Próximamente</p>
+          </div>
+        </div>
+        <p class="card-desc">Nodo oculto, RTS/CTS, evitando colisiones en el aire — cómo el WiFi maneja el medio compartido.</p>
+        <span class="card-btn disabled">Pendiente</span>
+      </div>
+      <div class="card">
+        <div class="card-top">
+          <div class="card-icon">🔁</div>
+          <div class="card-text">
+            <h2 class="card-title">ARQ y ventanas deslizantes</h2>
+            <p class="card-sub">Cap. 15 · 3 protocolos</p>
+          </div>
+        </div>
+        <p class="card-desc">Stop-and-Wait vs Go-Back-N vs Selective Repeat con pérdidas configurables y stats.</p>
+        <a href="15-arq.html" class="card-btn">Ver en acción →</a>
+      </div>
+    </div>
+
+    <p class="section-tag">Routing y fragmentación</p>
+    <div class="grid">
+      <div class="card">
+        <div class="card-top">
+          <div class="card-icon">🛤️</div>
+          <div class="card-text">
+            <h2 class="card-title">Routing · tablas y next-hop</h2>
+            <p class="card-sub">Cap. 16 · RIP/OSPF/BGP</p>
+          </div>
+        </div>
+        <p class="card-desc">Hacé clic en cada router para ver su tabla y trazar rutas entre redes.</p>
+        <a href="16-routing.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card">
+        <div class="card-top">
+          <div class="card-icon">🧩</div>
+          <div class="card-text">
+            <h2 class="card-title">Fragmentación IPv4</h2>
+            <p class="card-sub">Cap. 17 · MTU · MF · Offset</p>
+          </div>
+        </div>
+        <p class="card-desc">Cambiá MTUs y mirá los fragmentos generados con su ID, MF y Fragment Offset.</p>
+        <a href="17-fragmentacion.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card disabled">
+        <div class="card-top">
+          <div class="card-icon">📐</div>
+          <div class="card-text">
+            <h2 class="card-title">VLSM · ejercicios</h2>
+            <p class="card-sub">Cap. 18 · Próximamente</p>
+          </div>
+        </div>
+        <p class="card-desc">Subnetting de longitud variable resuelto paso a paso con casos del final de Cicerchia.</p>
+        <span class="card-btn disabled">Pendiente</span>
+      </div>
+    </div>
+
+    <p class="section-tag">Servicios de red</p>
+    <div class="grid">
+      <div class="card">
+        <div class="card-top">
+          <div class="card-icon">🏷️</div>
+          <div class="card-text">
+            <h2 class="card-title">DNS y DHCP</h2>
+            <p class="card-sub">DORA + resolución recursiva</p>
+          </div>
+        </div>
+        <p class="card-desc">El proceso DORA del DHCP y la resolución DNS recursiva paso a paso por la jerarquía.</p>
+        <a href="dns-dhcp.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card disabled">
+        <div class="card-top">
+          <div class="card-icon">🌍</div>
+          <div class="card-text">
+            <h2 class="card-title">HTTP / HTTPS</h2>
+            <p class="card-sub">Próximamente</p>
+          </div>
+        </div>
+        <p class="card-desc">Request/response, métodos, status codes y headers — el protocolo de la web.</p>
+        <span class="card-btn disabled">Pendiente</span>
+      </div>
+      <div class="card disabled">
+        <div class="card-top">
+          <div class="card-icon">🔐</div>
+          <div class="card-text">
+            <h2 class="card-title">TLS / JWT</h2>
+            <p class="card-sub">Próximamente</p>
+          </div>
+        </div>
+        <p class="card-desc">Handshake TLS, cadena de certificados y tokens JWT para autenticación.</p>
+        <span class="card-btn disabled">Pendiente</span>
+      </div>
+      <div class="card disabled">
+        <div class="card-top">
+          <div class="card-icon">⚡</div>
+          <div class="card-text">
+            <h2 class="card-title">HTTP/3 y QUIC</h2>
+            <p class="card-sub">Próximamente</p>
+          </div>
+        </div>
+        <p class="card-desc">El sucesor de HTTP/2 sobre UDP — cómo QUIC reduce la latencia de las conexiones.</p>
+        <span class="card-btn disabled">Pendiente</span>
+      </div>
+    </div>
+
+    <footer>
+      <p>⚠️ Tomá el contenido con consideración — puede contener errores. Si encontrás algo incorrecto, abrí un issue en el repositorio.</p>
+    </footer>
+
+  </div>
+</body>
+</html>

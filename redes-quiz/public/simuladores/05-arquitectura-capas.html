@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Arquitectura en capas y PDUs</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, system-ui, sans-serif; background: #0d1117; color: #e6edf3; padding: 20px; min-height: 100vh; }
+  .nav { margin-bottom: 16px; }
+  .nav a { color: #58a6ff; text-decoration: none; font-size: 13px; }
+  h1 { font-size: 28px; margin-bottom: 4px; }
+  .subtitle { color: #8b949e; margin-bottom: 20px; }
+  .container { max-width: 1400px; margin: 0 auto; }
+
+  .docs-panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+  .docs-panel h2 { font-size: 18px; margin-bottom: 12px; color: #58a6ff; }
+  .docs-panel h3 { font-size: 15px; margin: 16px 0 8px; color: #d29922; }
+  .docs-panel p { line-height: 1.7; color: #c9d1d9; margin-bottom: 10px; font-size: 14px; }
+  .docs-panel ul { list-style: none; padding-left: 0; margin: 8px 0; }
+  .docs-panel li { padding: 4px 0; padding-left: 16px; position: relative; line-height: 1.6; font-size: 14px; }
+  .docs-panel li::before { content: "›"; position: absolute; left: 0; color: #58a6ff; font-weight: bold; }
+  .docs-panel code { background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #d29922; font-size: 12px; }
+  .layers-doc { display: flex; flex-direction: column; gap: 6px; margin: 14px 0; }
+  .layer-doc { background: #0d1117; border-radius: 6px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; border-left: 4px solid; }
+  .layer-doc.app { border-left-color: #f85149; }
+  .layer-doc.tx  { border-left-color: #58a6ff; }
+  .layer-doc.net { border-left-color: #d29922; }
+  .layer-doc-num { font-weight: bold; font-size: 16px; color: #fff; }
+  .layer-doc-info { flex: 1; font-size: 13px; }
+
+  .show-sim {
+    background: linear-gradient(135deg, #238636, #1f6feb);
+    color: white; border: none; padding: 14px 28px; border-radius: 8px;
+    cursor: pointer; font-size: 15px; font-weight: 600; margin-top: 20px;
+    box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3);
+    transition: transform 0.15s;
+  }
+  .show-sim:hover { transform: translateY(-2px); }
+
+  .layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
+  .panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+  .panel h2 { font-size: 16px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+  button { background: #238636; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; margin-right: 6px; margin-bottom: 6px; }
+  button:hover { background: #2ea043; }
+  button.secondary { background: #30363d; }
+  button.danger { background: #da3633; }
+  .stage { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 24px; min-height: 460px; }
+  .stack { display: flex; flex-direction: column; gap: 8px; }
+  .stack-row { display: flex; align-items: stretch; gap: 16px; min-height: 70px; }
+  .layer-box { flex: 0 0 200px; display: flex; align-items: center; padding: 14px; border-radius: 8px; border: 2px solid; transition: all 0.4s; }
+  .layer-box.app { background: #f8514922; border-color: #f85149; }
+  .layer-box.tx  { background: #58a6ff22; border-color: #58a6ff; }
+  .layer-box.net { background: #d2992222; border-color: #d29922; }
+  .layer-box.active { box-shadow: 0 0 24px currentColor; }
+  .layer-name { font-weight: bold; font-size: 16px; }
+  .layer-desc { font-size: 11px; color: #8b949e; margin-top: 3px; }
+  .pdu-box { flex: 1; display: flex; align-items: center; padding: 8px; }
+  .pdu { display: flex; align-items: stretch; min-height: 50px; border-radius: 6px; overflow: hidden; font-family: 'SF Mono', Menlo, monospace; font-size: 12px; flex: 1; }
+  .pdu-seg { padding: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; text-align: center; animation: slideIn 0.4s; border-right: 1px solid rgba(0,0,0,0.3); white-space: nowrap; }
+  .pdu-seg:last-child { border-right: none; }
+  @keyframes slideIn { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .pdu-data { background: #6e7681; flex: 2; }
+  .step { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed #30363d; }
+  .step:last-child { border: none; }
+  .step-title { font-weight: 600; margin-bottom: 6px; color: #58a6ff; }
+  .info-box { background: #0d1117; border-left: 3px solid #58a6ff; padding: 10px 12px; border-radius: 4px; font-size: 12px; color: #c9d1d9; line-height: 1.6; margin-bottom: 8px; }
+  .info-box code { background: #161b22; padding: 1px 5px; border-radius: 3px; color: #d29922; font-size: 11px; }
+  .pills { display: flex; gap: 4px; margin-bottom: 12px; }
+  .pill { padding: 6px 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 20px; cursor: pointer; font-size: 12px; color: #8b949e; }
+  .pill.active { background: #1f6feb; color: white; border-color: #1f6feb; }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="nav"><a href="index.html">← Volver al hub</a></div>
+<h1>Arquitectura en capas y PDUs</h1>
+<div class="subtitle">Por qué las redes se organizan en capas y cómo cada capa "envuelve" los datos.</div>
+
+<div class="docs-panel">
+  <h2>📖 Concepto</h2>
+  <p>Cuando una empresa manda un paquete de Buenos Aires a Tokio por FedEx, hay <b>distintos niveles de responsabilidad</b> que no se mezclan:</p>
+  <ul>
+    <li><b>Vos (cliente):</b> decidís qué mandar, lo metés en una caja. No sabés cómo vuela el avión.</li>
+    <li><b>FedEx (servicio):</b> le pone número de seguimiento, garantiza la entrega. No le importa qué hay adentro.</li>
+    <li><b>El avión y el camión:</b> mueven el paquete físicamente. No saben si es FedEx o DHL.</li>
+  </ul>
+  <p>Cada nivel solo habla con su nivel equivalente del otro lado. El piloto no se mete con el contenido de la caja, FedEx no se mete con el manifiesto del avión. <b>Eso es una arquitectura en capas.</b></p>
+
+  <h3>El modelo simplificado de 3 capas (TCP/IP esencial)</h3>
+  <div class="layers-doc">
+    <div class="layer-doc app">
+      <div class="layer-doc-num" style="color:#f85149">L7</div>
+      <div class="layer-doc-info"><b>Aplicación</b> — lo que el usuario ve: email, web, transferencia de archivos. Ejemplos: HTTP, SMTP, FTP.</div>
+    </div>
+    <div class="layer-doc tx">
+      <div class="layer-doc-num" style="color:#58a6ff">L4</div>
+      <div class="layer-doc-info"><b>Transporte</b> — garantiza que los datos lleguen completos, en orden, sin pérdidas. Ejemplos: TCP, UDP.</div>
+    </div>
+    <div class="layer-doc net">
+      <div class="layer-doc-num" style="color:#d29922">L3-L1</div>
+      <div class="layer-doc-info"><b>Acceso a la red</b> — mueve los datos por la red concreta (Ethernet, WiFi, fibra). A las capas de arriba no les importa.</div>
+    </div>
+  </div>
+
+  <h3>PDU — Protocol Data Unit (las muñecas rusas)</h3>
+  <p>Cuando los datos viajan hacia abajo por las capas, <b>cada capa agrega su propia "etiqueta"</b> (header) con la info que su par del otro lado necesita.</p>
+  <p>En el destino, las capas se desempaquetan de afuera hacia adentro. Cada capa solo lee su propia etiqueta y le pasa el resto a la siguiente.</p>
+
+  <h3>¿Por qué capas y no todo junto?</h3>
+  <p><b>Sin capas:</b> si cambia la tecnología (aparece 5G), tenés que reescribir toda la aplicación.<br>
+  <b>Con capas:</b> cada una hace su trabajo y no sabe nada de las otras. Aparece 5G → solo cambiás la capa física. El resto sigue intacto.</p>
+
+  <h3>Direccionamiento en dos niveles</h3>
+  <ul>
+    <li><b>Dirección de red (IP):</b> el edificio. Identifica la computadora. Ejemplo: <code>192.168.1.10</code></li>
+    <li><b>Puerto:</b> el departamento. Identifica qué app dentro de esa máquina. Ejemplo: puerto 443 = HTTPS</li>
+  </ul>
+  <p>Sin las dos partes, la "carta" no llega al lugar correcto.</p>
+
+  <button class="show-sim" id="show-sim">▶ Ver animación interactiva</button>
+</div>
+
+<div class="layout" id="sim" style="display:none">
+  <div class="panel">
+    <div class="pills">
+      <div class="pill active" data-mode="encap">Encapsulando (envío) ↓</div>
+      <div class="pill" data-mode="decap">Desencapsulando (recibo) ↑</div>
+    </div>
+    <div class="stage">
+      <div class="stack" id="stack"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Controles</h2>
+    <div class="step">
+      <button id="step">Avanzar capa →</button>
+      <button id="auto" class="secondary">Reproducir</button>
+      <button id="reset" class="danger">Reset</button>
+    </div>
+
+    <div class="step">
+      <div class="step-title">Paso actual</div>
+      <div class="info-box" id="explain">Apretá "Avanzar capa". En modo Encapsular, los datos bajan de Aplicación a Red, agregando un header en cada capa.</div>
+    </div>
+
+    <div class="step">
+      <div class="step-title">Tip</div>
+      <div class="info-box">
+        Cada capa habla solo con la del mismo nivel del otro lado. El header que agrega L4 (TCP) solo lo lee el L4 del receptor — no L3 ni L7.
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+const layers = [
+  { id: 'app', name: 'Aplicación', desc: 'HTTP, datos del usuario', color: '#f85149', header: 'HTTP' },
+  { id: 'tx',  name: 'Transporte', desc: 'TCP — puertos, fiabilidad', color: '#58a6ff', header: 'TCP|443' },
+  { id: 'net', name: 'Acceso a la red', desc: 'IP + Ethernet + cable', color: '#d29922', header: 'IP|MAC' },
+];
+
+let mode = 'encap'; // 'encap' = top to bottom (sending), 'decap' = bottom to top (receiving)
+let stepIdx = -1; // -1 nothing yet, 0..2 layers processed
+const stack = document.getElementById('stack');
+const userData = 'Hola Google';
+
+function render() {
+  stack.innerHTML = '';
+  // visual order:
+  //  encap mode: App (top) → Net (bottom). Goes through layers[0], layers[1], layers[2] in that order.
+  //  decap mode: Net (top) → App (bottom). Goes through layers[2], layers[1], layers[0].
+  const visualLayers = mode === 'encap' ? [...layers] : [...layers].reverse();
+
+  visualLayers.forEach((l, vi) => {
+    const row = document.createElement('div');
+    row.className = 'stack-row';
+
+    // active layer index in the original `layers` array
+    let activeArrIdx = -1;
+    if (stepIdx >= 0) activeArrIdx = mode === 'encap' ? stepIdx : (layers.length - 1 - stepIdx);
+
+    const isActive = layers.indexOf(l) === activeArrIdx;
+    const lbox = document.createElement('div');
+    lbox.className = 'layer-box ' + l.id + (isActive ? ' active' : '');
+    lbox.innerHTML = `<div><div class="layer-name">${l.name}</div><div class="layer-desc">${l.desc}</div></div>`;
+
+    const pduBox = document.createElement('div');
+    pduBox.className = 'pdu-box';
+
+    // Decide what PDU to show in this row based on the mode and step
+    const arrIdx = layers.indexOf(l);
+    let pduSegments = [];
+    if (mode === 'encap') {
+      // PDU visible in this row only AFTER it's been processed
+      if (arrIdx <= stepIdx) {
+        // headers added: layers 0..arrIdx
+        // outer-to-inner order at this point: layers[0].header, layers[1].header, ..., layers[arrIdx].header, then data
+        for (let i = 0; i <= arrIdx; i++) {
+          pduSegments.push({ text: layers[i].header, color: layers[i].color });
+        }
+        pduSegments.push({ text: userData, isData: true });
+      }
+    } else {
+      // decap mode
+      // visualLayers index 0 = layers[2] (Net), index 1 = layers[1] (Tx), index 2 = layers[0] (App)
+      // After step 0: Net just received, full PDU visible.
+      // After step 1: Tx processed, removed Net header.
+      // After step 2: App processed, only data.
+      if (arrIdx >= layers.length - 1 - stepIdx) {
+        // headers still present from this layer downward (in encap order)
+        // when stepIdx 0: arrIdx 2 (Net) sees full PDU [App|Tx|Net|data]
+        // when stepIdx 1: arrIdx 1 (Tx) sees [App|Tx|data]
+        // when stepIdx 2: arrIdx 0 (App) sees [App|data] → actually we want only [data]
+        // simpler: count how many headers stripped
+        const stripCount = stepIdx; // 0..2
+        for (let i = 0; i < layers.length - stripCount; i++) {
+          pduSegments.push({ text: layers[i].header, color: layers[i].color });
+        }
+        pduSegments.push({ text: userData, isData: true });
+      }
+    }
+
+    if (pduSegments.length > 0) {
+      const pdu = document.createElement('div');
+      pdu.className = 'pdu';
+      pduSegments.forEach(s => {
+        const seg = document.createElement('div');
+        seg.className = 'pdu-seg' + (s.isData ? ' pdu-data' : '');
+        if (s.color) seg.style.background = s.color;
+        seg.textContent = s.text;
+        pdu.appendChild(seg);
+      });
+      pduBox.appendChild(pdu);
+    } else {
+      pduBox.innerHTML = '<div style="color:#6e7681;font-size:12px;font-style:italic">— sin datos aún —</div>';
+    }
+
+    row.appendChild(lbox);
+    row.appendChild(pduBox);
+    stack.appendChild(row);
+  });
+}
+
+const explanations = {
+  encap: [
+    '<b>Aplicación</b>: tu app crea los datos del usuario (ej: HTTP arma <code>GET /</code>). Agrega su info para identificar qué tipo de mensaje es.',
+    '<b>Transporte</b>: TCP agrega su header con <code>puerto destino 443</code>, número de secuencia y checksum. Los datos ahora son un <i>segmento</i>.',
+    '<b>Acceso a la red</b>: IP agrega <code>IP origen → IP destino</code>, Ethernet agrega <code>MAC origen | MAC destino</code>. Listo — el frame sale al cable.',
+  ],
+  decap: [
+    '<b>Acceso a la red</b>: llegan bits del cable. Se reconstruye la trama y se verifica el CRC. Si es para nosotros, se quita la info Ethernet/IP y se entrega a Transporte.',
+    '<b>Transporte</b>: TCP verifica número de secuencia y mira el puerto destino (443 → HTTPS). Quita su header y entrega los datos a la aplicación correspondiente.',
+    '<b>Aplicación</b>: la aplicación finalmente lee los datos del usuario. ¡Llegó el mensaje original!',
+  ],
+};
+
+function updateExplain() {
+  if (stepIdx < 0) {
+    document.getElementById('explain').innerHTML = mode === 'encap'
+      ? 'Tu aplicación tiene datos listos. Apretá <b>Avanzar capa</b> para ver cómo cada capa los envuelve.'
+      : 'Llegó un frame al cable. Apretá <b>Avanzar capa</b> para ver cómo cada capa lo desempaqueta hacia arriba.';
+    return;
+  }
+  document.getElementById('explain').innerHTML = explanations[mode][stepIdx];
+}
+
+document.getElementById('step').onclick = () => {
+  if (stepIdx < layers.length - 1) {
+    stepIdx++;
+    render();
+    updateExplain();
+  }
+};
+document.getElementById('auto').onclick = async () => {
+  while (stepIdx < layers.length - 1) {
+    document.getElementById('step').click();
+    await new Promise(r => setTimeout(r, 1300));
+  }
+};
+document.getElementById('reset').onclick = () => { stepIdx = -1; render(); updateExplain(); };
+
+document.querySelectorAll('.pill').forEach(p => {
+  p.onclick = () => {
+    document.querySelectorAll('.pill').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    mode = p.dataset.mode;
+    stepIdx = -1;
+    render();
+    updateExplain();
+  };
+});
+
+document.getElementById('show-sim').onclick = () => {
+  document.getElementById('sim').style.display = '';
+  document.getElementById('sim').scrollIntoView({ behavior: 'smooth' });
+};
+
+render();
+updateExplain();
+</script>
+</body>
+</html>

@@ -35,14 +35,62 @@
   .stat { flex: 1; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 10px; text-align: center; }
   .stat-label { font-size: 10px; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; }
   .stat-value { font-size: 22px; font-weight: bold; margin-top: 4px; }
+  .container { max-width: 1400px; margin: 0 auto; }
+  .docs-panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+  .docs-panel h2 { font-size: 18px; margin-bottom: 12px; color: #58a6ff; }
+  .docs-panel h3 { font-size: 15px; margin: 16px 0 8px; color: #d29922; }
+  .docs-panel p { line-height: 1.7; color: #c9d1d9; margin-bottom: 10px; font-size: 14px; }
+  .docs-panel ul { list-style: none; padding-left: 0; margin: 8px 0; }
+  .docs-panel li { padding: 4px 0; padding-left: 16px; position: relative; line-height: 1.6; font-size: 14px; }
+  .docs-panel li::before { content: "›"; position: absolute; left: 0; color: #58a6ff; font-weight: bold; }
+  .docs-panel code { background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #d29922; font-size: 12px; }
+  .show-sim { background: linear-gradient(135deg, #238636, #1f6feb); color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; margin-top: 20px; box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3); transition: transform 0.15s; }
+  .show-sim:hover { transform: translateY(-2px); }
+  .arq-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0; }
+  .arq-table th { background: #21262d; padding: 8px; text-align: left; color: #8b949e; font-size: 11px; }
+  .arq-table td { padding: 8px; border-top: 1px solid #30363d; color: #c9d1d9; }
 </style>
 </head>
 <body>
+<div class="container">
 <div class="nav"><a href="index.html">← Volver al hub</a></div>
 <h1>ARQ y ventanas deslizantes</h1>
 <div class="subtitle">Stop-and-Wait vs Go-Back-N vs Selective Repeat — comparalos con pérdidas reales.</div>
 
-<div class="layout">
+<div class="docs-panel">
+  <h2>📖 Concepto</h2>
+  <p>Mandar un paquete y esperar el ACK antes de mandar el siguiente es <b>ineficiente</b>. El canal pasa la mayor parte del tiempo esperando. La solución: <b>ventanas deslizantes</b> — mandás varios paquetes antes de esperar confirmación.</p>
+
+  <h3>Stop-and-Wait</h3>
+  <p>Mandás 1 paquete, esperás ACK, mandás el siguiente. <b>Simple pero ineficiente.</b> Es como mandar una carta y esperar la respuesta antes de escribir la siguiente.</p>
+
+  <h3>Go-Back-N (Vuelta-a-N)</h3>
+  <p>Mandás hasta N paquetes sin esperar ACK. Si uno se pierde, el receptor <b>descarta todos los siguientes</b> y vos reenviás <b>desde el paquete con error</b>.</p>
+  <p><i>Analogía: la cinta transportadora de una fábrica. Si el paquete 3 está dañado, el inspector tira los 3, 4 y 5 y pide que los manden de nuevo desde el 3.</i></p>
+
+  <h3>Selective Repeat</h3>
+  <p>Mandás hasta N paquetes. Si uno se pierde, el receptor <b>guarda los siguientes</b> y solo pide reenvío del específico que falló.</p>
+  <p><i>Analogía: rompecabezas en 10 sobres. El sobre 3 se pierde — guardás los sobres 4-10 y solo pedís el 3 de vuelta.</i></p>
+
+  <h3>Comparación</h3>
+  <table class="arq-table">
+    <tr><th></th><th>Stop-and-Wait</th><th>Go-Back-N</th><th>Selective Repeat</th></tr>
+    <tr><td><b>Paquetes en vuelo</b></td><td>1</td><td>Hasta N</td><td>Hasta N</td></tr>
+    <tr><td><b>Si hay error</b></td><td>Reenvía 1</td><td>Reenvía desde el error</td><td>Reenvía solo el fallido</td></tr>
+    <tr><td><b>Receptor</b></td><td>Mínimo</td><td>Bajo</td><td>Alto (necesita buffer)</td></tr>
+    <tr><td><b>Eficiencia</b></td><td>Muy baja</td><td>Media</td><td>Alta</td></tr>
+  </table>
+
+  <h3>¿Dónde se usa?</h3>
+  <ul>
+    <li><b>TCP:</b> usa un mecanismo similar a Selective Repeat con SACK (Selective ACK)</li>
+    <li><b>Capas bajas (enlace):</b> Go-Back-N es más común porque el receptor es más simple</li>
+  </ul>
+
+  <button class="show-sim" id="show-sim">▶ Ver animación interactiva</button>
+</div>
+
+<div class="layout" id="sim" style="display:none">
   <div class="panel">
     <div class="pills" id="protocol-pills">
       <div class="pill active" data-proto="saw">Stop-and-Wait</div>
@@ -342,8 +390,14 @@ document.querySelectorAll('.pill').forEach(p => {
   };
 });
 
+document.getElementById('show-sim').onclick = () => {
+  document.getElementById('sim').style.display = '';
+  document.getElementById('sim').scrollIntoView({ behavior: 'smooth' });
+};
+
 drawSetup();
 document.getElementById('proto-info').innerHTML = PROTO_INFO.saw.info;
 </script>
+</div>
 </body>
 </html>

@@ -13,17 +13,46 @@ xdg-open index.html   # Linux
 
 ## Simuladores disponibles
 
-| Cap. | Tema | Archivo | Qué se puede hacer |
-|---|---|---|---|
-| 06 | Modelo OSI | `06-osi.html` | Ver el encapsulamiento de las 7 capas en modo enviar y recibir |
-| 07 | TCP/IP | `07-tcp-ip.html` | 3-way handshake animado, comparativa TCP vs UDP con pérdida, puertos |
-| 09 | Switch y VLANs | `09-vlan.html` | Asignar VLANs, mandar broadcasts, ver tag 802.1Q en el trunk |
-| 10 | Subredes / CIDR | `10-subredes.html` | Calculadora visual de bits, máscara, broadcast |
-| 11 | NAT / PAT | `11-nat.html` | Tabla NAT en vivo traduciendo conexiones salientes |
-| 15 | ARQ / ventanas | `15-arq.html` | Stop-and-Wait vs Go-Back-N vs Selective Repeat con pérdidas |
-| 16 | Routing | `16-routing.html` | Tablas de rutas por router, trazado de rutas, comparativa RIP/OSPF/BGP |
-| 17 | Fragmentación IPv4 | `17-fragmentacion.html` | Cálculo de ID, MF, Fragment Offset según MTU |
-| —  | DNS y DHCP | `dns-dhcp.html` | DORA del DHCP + resolución DNS recursiva paso a paso |
+Cada simulador arranca con una sección de **documentación** explicando el concepto, y un botón **▶ Ver animación** que despliega la parte interactiva.
+
+### Fundamentos
+
+| Cap. | Tema | Archivo |
+|---|---|---|
+| 01 | Modelo de comunicaciones | `01-modelo-comunicaciones.html` |
+| 02 | Tipos de redes (LAN/MAN/WAN/GAN) | `02-tipos-redes.html` |
+| 03 | Conmutación: circuitos vs paquetes | `03-conmutacion.html` |
+| 04 | Protocolos (sintaxis, semántica, temporización) | `04-protocolos.html` |
+| 05 | Arquitectura en capas y PDUs | `05-arquitectura-capas.html` |
+
+### Modelos OSI y TCP/IP
+
+| Cap. | Tema | Archivo |
+|---|---|---|
+| 06 | Modelo OSI — encapsulamiento de las 7 capas | `06-osi.html` |
+| 07 | TCP/IP — handshake, TCP vs UDP, puertos | `07-tcp-ip.html` |
+
+### Direccionamiento y switching
+
+| Cap. | Tema | Archivo |
+|---|---|---|
+| 09 | Switch y VLANs (802.1Q) | `09-vlan.html` |
+| 10 | IP, subredes y CIDR | `10-subredes.html` |
+| 11 | NAT / PAT | `11-nat.html` |
+
+### Transporte y routing
+
+| Cap. | Tema | Archivo |
+|---|---|---|
+| 15 | ARQ y ventanas deslizantes | `15-arq.html` |
+| 16 | Routing — tablas, RIP/OSPF/BGP | `16-routing.html` |
+| 17 | Fragmentación IPv4 | `17-fragmentacion.html` |
+
+### Servicios
+
+| Tema | Archivo |
+|---|---|
+| DNS y DHCP — DORA + resolución recursiva | `dns-dhcp.html` |
 
 ## Estructura
 

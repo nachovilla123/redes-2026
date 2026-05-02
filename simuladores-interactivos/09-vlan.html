@@ -152,13 +152,55 @@
     color: #8b949e;
   }
   .tab.active { background: #1f6feb; color: white; border-color: #1f6feb; }
+  .nav { margin-bottom: 16px; }
+  .nav a { color: #58a6ff; text-decoration: none; font-size: 13px; }
+  .container { max-width: 1400px; margin: 0 auto; }
+  .docs-panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+  .docs-panel h2 { font-size: 18px; margin-bottom: 12px; color: #58a6ff; }
+  .docs-panel h3 { font-size: 15px; margin: 16px 0 8px; color: #d29922; }
+  .docs-panel p { line-height: 1.7; color: #c9d1d9; margin-bottom: 10px; font-size: 14px; }
+  .docs-panel ul { list-style: none; padding-left: 0; margin: 8px 0; }
+  .docs-panel li { padding: 4px 0; padding-left: 16px; position: relative; line-height: 1.6; font-size: 14px; }
+  .docs-panel li::before { content: "›"; position: absolute; left: 0; color: #58a6ff; font-weight: bold; }
+  .docs-panel code { background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #d29922; font-size: 12px; }
+  .show-sim { background: linear-gradient(135deg, #238636, #1f6feb); color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; margin-top: 20px; box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3); transition: transform 0.15s; }
+  .show-sim:hover { transform: translateY(-2px); }
 </style>
 </head>
 <body>
-  <h1>VLANs — Simulador interactivo</h1>
-  <div class="subtitle">Hacé clic en una PC para cambiar su VLAN. Después enviá un paquete y mirá qué pasa.</div>
+<div class="container">
+<div class="nav"><a href="index.html">← Volver al hub</a></div>
+<h1>VLANs — Simulador interactivo</h1>
+<div class="subtitle">Hacé clic en una PC para cambiar su VLAN. Después enviá un paquete y mirá qué pasa.</div>
 
-  <div class="layout">
+<div class="docs-panel">
+  <h2>📖 Concepto</h2>
+  <p>Una <b>VLAN</b> (Virtual LAN) divide un switch físico en varias redes lógicas independientes. Dispositivos en distintas VLANs <b>no se ven entre sí a nivel L2</b>, aunque estén conectados al mismo switch.</p>
+
+  <h3>¿Por qué usar VLANs?</h3>
+  <ul>
+    <li><b>Segmentación:</b> separar Ventas de Ingeniería sin necesidad de cableado físico distinto</li>
+    <li><b>Seguridad:</b> tráfico de Invitados no puede ver tráfico interno</li>
+    <li><b>Control de broadcast:</b> cada VLAN es su propio dominio de broadcast — un broadcast en VLAN 10 nunca llega a VLAN 20</li>
+    <li><b>Flexibilidad:</b> reorganizás equipos sin recablear</li>
+  </ul>
+
+  <h3>Access port vs Trunk port</h3>
+  <ul>
+    <li><b>Access port:</b> pertenece a una sola VLAN. Conecta dispositivos finales (PCs, impresoras). El frame viaja sin tag.</li>
+    <li><b>Trunk port:</b> transporta múltiples VLANs entre switches. Cada frame se etiqueta con <code>802.1Q</code> (4 bytes con el VLAN ID, hasta 4094 VLANs).</li>
+  </ul>
+
+  <h3>El tag 802.1Q</h3>
+  <p>Son 4 bytes que se insertan en el frame Ethernet. Contienen el <b>VLAN ID</b>. Cuando el frame sale por un puerto access, el switch <b>quita</b> el tag.</p>
+
+  <h3>¿Cómo se comunican entre VLANs?</h3>
+  <p>Necesitás un <b>router</b> o un <b>switch L3</b>. Esto se llama <i>inter-VLAN routing</i> (o <i>router-on-a-stick</i>). Sin eso, las VLANs quedan completamente aisladas — que muchas veces es exactamente lo que querés.</p>
+
+  <button class="show-sim" id="show-sim">▶ Ver animación interactiva</button>
+</div>
+
+<div class="layout" id="sim" style="display:none">
     <div class="canvas-wrap">
       <div class="legend">
         <div class="legend-item"><div class="legend-dot" style="border-color:#3fb950;background:#3fb95033"></div>VLAN 10 (Ventas)</div>
@@ -532,9 +574,15 @@ document.querySelectorAll('.tab').forEach(t => {
   };
 });
 
+document.getElementById('show-sim').onclick = () => {
+  document.getElementById('sim').style.display = '';
+  document.getElementById('sim').scrollIntoView({ behavior: 'smooth' });
+};
+
 render();
 refreshSelects();
 addLog('info', 'Listo. Hacé clic en una PC para cambiar su VLAN, o enviá un paquete para empezar.');
 </script>
+</div>
 </body>
 </html>

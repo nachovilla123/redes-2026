@@ -33,14 +33,59 @@
   .compare-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 8px; }
   .compare-table th { background: #21262d; padding: 6px; text-align: left; font-size: 10px; color: #8b949e; }
   .compare-table td { padding: 6px; border-top: 1px solid #30363d; }
+  .container { max-width: 1400px; margin: 0 auto; }
+  .docs-panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+  .docs-panel h2 { font-size: 18px; margin-bottom: 12px; color: #58a6ff; }
+  .docs-panel h3 { font-size: 15px; margin: 16px 0 8px; color: #d29922; }
+  .docs-panel p { line-height: 1.7; color: #c9d1d9; margin-bottom: 10px; font-size: 14px; }
+  .docs-panel ul { list-style: none; padding-left: 0; margin: 8px 0; }
+  .docs-panel li { padding: 4px 0; padding-left: 16px; position: relative; line-height: 1.6; font-size: 14px; }
+  .docs-panel li::before { content: "›"; position: absolute; left: 0; color: #58a6ff; font-weight: bold; }
+  .docs-panel code { background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #d29922; font-size: 12px; }
+  .show-sim { background: linear-gradient(135deg, #238636, #1f6feb); color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; margin-top: 20px; box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3); transition: transform 0.15s; }
+  .show-sim:hover { transform: translateY(-2px); }
 </style>
 </head>
 <body>
+<div class="container">
 <div class="nav"><a href="index.html">← Volver al hub</a></div>
 <h1>Routing — cómo viajan los paquetes</h1>
 <div class="subtitle">Cada router toma una decisión: ¿por qué interfaz mando este paquete? Mirá su tabla de rutas.</div>
 
-<div class="layout">
+<div class="docs-panel">
+  <h2>📖 Concepto</h2>
+  <p>Un router es como un punto de navegación en una ruta. Cuando un paquete llega, mira la dirección destino y decide: "para llegar allá, te mando por esta salida". Para tomar esa decisión, usa su <b>tabla de rutas</b>.</p>
+
+  <h3>Tipos de rutas</h3>
+  <ul>
+    <li><b>C - Connected:</b> red directamente conectada a una interfaz. Aprendida automáticamente.</li>
+    <li><b>S - Static:</b> configurada a mano por el admin. Simple, pero no se adapta si algo falla.</li>
+    <li><b>O - OSPF, R - RIP, D - EIGRP, B - BGP:</b> aprendidas dinámicamente por protocolos de routing.</li>
+  </ul>
+
+  <h3>Sistemas Autónomos (AS)</h3>
+  <p>Internet es una colección de redes independientes (tu ISP, Google, Amazon, Telecom...). Cada una es un <b>AS</b>, identificado por un <b>ASN</b>.</p>
+  <ul>
+    <li><b>IGP (Interior Gateway Protocol):</b> dentro de un AS. Ejemplos: RIP, OSPF, EIGRP</li>
+    <li><b>EGP (Exterior Gateway Protocol):</b> entre AS. Solo BGP</li>
+  </ul>
+
+  <h3>RIP — Routing Information Protocol</h3>
+  <p>Vector de distancia. Métrica: <b>cantidad de saltos</b> (máx 15). Lento para converger. <i>Como preguntarle a tu vecino "¿cuántas cuadras hasta el centro?"</i></p>
+
+  <h3>OSPF — Open Shortest Path First</h3>
+  <p>Estado de enlace (link-state). Métrica: <b>costo</b> (basado en ancho de banda). Sin límite de saltos. Usa Dijkstra. <i>Como tener el mapa completo de la ciudad y calcular vos mismo el mejor camino.</i></p>
+
+  <h3>BGP — Border Gateway Protocol</h3>
+  <p>El protocolo de routing <b>de internet</b>. Entre sistemas autónomos. No busca el camino más rápido sino el más "conveniente" según políticas comerciales. <i>Como acuerdos entre países sobre qué aviones cruzan qué espacio aéreo.</i></p>
+
+  <h3>Distancia administrativa</h3>
+  <p>Si una ruta se aprende por varios protocolos, gana el de menor distancia administrativa. Connected=0 · Static=1 · eBGP=20 · OSPF=110 · RIP=120 · iBGP=200</p>
+
+  <button class="show-sim" id="show-sim">▶ Ver animación interactiva</button>
+</div>
+
+<div class="layout" id="sim" style="display:none">
   <div class="panel">
     <svg id="canvas" viewBox="0 0 800 480"></svg>
     <div style="margin-top:12px">
@@ -306,8 +351,14 @@ document.getElementById('reset').onclick = () => {
   document.getElementById('trace').innerHTML = 'Elegí origen y destino. Vamos a ver router por router cómo se decide la ruta consultando cada tabla.';
 };
 
+document.getElementById('show-sim').onclick = () => {
+  document.getElementById('sim').style.display = '';
+  document.getElementById('sim').scrollIntoView({ behavior: 'smooth' });
+};
+
 render();
 renderTable();
 </script>
+</div>
 </body>
 </html>

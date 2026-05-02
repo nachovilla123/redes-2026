@@ -72,14 +72,64 @@
     font-size: 13px;
     margin: 10px 0;
   }
+  .container { max-width: 1400px; margin: 0 auto; }
+  .docs-panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+  .docs-panel h2 { font-size: 18px; margin-bottom: 12px; color: #58a6ff; }
+  .docs-panel h3 { font-size: 15px; margin: 16px 0 8px; color: #d29922; }
+  .docs-panel p { line-height: 1.7; color: #c9d1d9; margin-bottom: 10px; font-size: 14px; }
+  .docs-panel ul { list-style: none; padding-left: 0; margin: 8px 0; }
+  .docs-panel li { padding: 4px 0; padding-left: 16px; position: relative; line-height: 1.6; font-size: 14px; }
+  .docs-panel li::before { content: "›"; position: absolute; left: 0; color: #58a6ff; font-weight: bold; }
+  .docs-panel code { background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #d29922; font-size: 12px; }
+  .show-sim { background: linear-gradient(135deg, #238636, #1f6feb); color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; margin-top: 20px; box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3); transition: transform 0.15s; }
+  .show-sim:hover { transform: translateY(-2px); }
+  .mtu-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0; }
+  .mtu-table th { background: #21262d; padding: 6px; text-align: left; font-size: 11px; color: #8b949e; }
+  .mtu-table td { padding: 6px; border-top: 1px solid #30363d; color: #c9d1d9; }
 </style>
 </head>
 <body>
+<div class="container">
 <div class="nav"><a href="index.html">← Volver al hub</a></div>
 <h1>Fragmentación IPv4</h1>
 <div class="subtitle">Calculá ID, MF y Fragment Offset cuando un paquete excede el MTU del próximo enlace.</div>
 
-<div class="layout">
+<div class="docs-panel">
+  <h2>📖 Concepto</h2>
+  <p>Cada tecnología de red tiene un <b>MTU</b> (Maximum Transmission Unit) — el máximo de bytes que puede transportar en una sola trama. Si un paquete IP es más grande que el MTU del próximo enlace, hay dos opciones: descartarlo, o <b>fragmentarlo</b>.</p>
+
+  <h3>MTU típicos</h3>
+  <table class="mtu-table">
+    <tr><th>Tecnología</th><th>MTU</th></tr>
+    <tr><td>Ethernet</td><td>1500 bytes</td></tr>
+    <tr><td>WiFi (802.11)</td><td>2304 bytes</td></tr>
+    <tr><td>PPP (WAN)</td><td>576 - 1500 bytes</td></tr>
+  </table>
+
+  <h3>¿Cuándo se fragmenta?</h3>
+  <p>Cuando el paquete > MTU del próximo enlace <b>Y</b> el bit <code>DF</code> (Don't Fragment) está en 0.</p>
+  <p>Si DF=1 y el paquete no entra → router <b>descarta</b> + ICMP "Fragmentation Needed" al origen.</p>
+
+  <h3>Campos del header IPv4 para fragmentación</h3>
+  <ul>
+    <li><b>Identification (16 bits):</b> identifica a qué datagrama pertenece. Todos los fragmentos del mismo datagrama tienen el <b>mismo ID</b>.</li>
+    <li><b>DF (1 bit):</b> 1 = no fragmentar, 0 = se puede.</li>
+    <li><b>MF — More Fragments (1 bit):</b> 1 = hay más fragmentos, 0 = este es el último.</li>
+    <li><b>Fragment Offset (13 bits):</b> posición del fragmento dentro del datagrama original, <b>en unidades de 8 bytes</b>.</li>
+  </ul>
+
+  <h3>Cómo calcular</h3>
+  <p>Datos por fragmento = <code>MTU − IP_header</code>, redondeado <b>hacia abajo</b> al múltiplo de 8 (porque el offset se cuenta en bloques de 8 bytes).</p>
+
+  <h3>¿Quién reensambla?</h3>
+  <p><b>Solo el destino final</b>. Los routers intermedios no reensamblan — solo fragmentan más si hace falta. Si un fragmento se pierde, se descarta el datagrama completo y TCP (o la app) tiene que reenviar.</p>
+
+  <p style="font-style:italic;color:#8b949e">Tip: <b>IP fragmenta sin garantizar entrega</b>. Las garantías las da TCP encima.</p>
+
+  <button class="show-sim" id="show-sim">▶ Ver calculadora interactiva</button>
+</div>
+
+<div class="layout" id="sim" style="display:none">
   <div class="panel">
     <h2>Datagrama original</h2>
     <div class="controls-row">
@@ -279,7 +329,13 @@ function compute() {
 });
 document.getElementById('df').onchange = compute;
 
+document.getElementById('show-sim').onclick = () => {
+  document.getElementById('sim').style.display = '';
+  document.getElementById('sim').scrollIntoView({ behavior: 'smooth' });
+};
+
 compute();
 </script>
+</div>
 </body>
 </html>

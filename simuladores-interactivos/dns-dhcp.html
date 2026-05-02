@@ -27,14 +27,78 @@
   .tab { padding: 8px 14px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; cursor: pointer; font-size: 13px; color: #8b949e; }
   .tab.active { background: #1f6feb; color: white; border-color: #1f6feb; }
   .log { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 10px; font-family: 'SF Mono', Menlo, monospace; font-size: 11px; line-height: 1.6; max-height: 280px; overflow-y: auto; }
+  .container { max-width: 1400px; margin: 0 auto; }
+  .docs-panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+  .docs-panel h2 { font-size: 18px; margin-bottom: 12px; color: #58a6ff; }
+  .docs-panel h3 { font-size: 15px; margin: 16px 0 8px; color: #d29922; }
+  .docs-panel p { line-height: 1.7; color: #c9d1d9; margin-bottom: 10px; font-size: 14px; }
+  .docs-panel ul { list-style: none; padding-left: 0; margin: 8px 0; }
+  .docs-panel li { padding: 4px 0; padding-left: 16px; position: relative; line-height: 1.6; font-size: 14px; }
+  .docs-panel li::before { content: "›"; position: absolute; left: 0; color: #58a6ff; font-weight: bold; }
+  .docs-panel code { background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #d29922; font-size: 12px; }
+  .show-sim { background: linear-gradient(135deg, #238636, #1f6feb); color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; margin-top: 20px; box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3); transition: transform 0.15s; }
+  .show-sim:hover { transform: translateY(-2px); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0; }
+  .col { background: #0d1117; border-radius: 6px; padding: 14px; border-top: 3px solid; }
 </style>
 </head>
 <body>
+<div class="container">
 <div class="nav"><a href="index.html">← Volver al hub</a></div>
 <h1>DNS y DHCP</h1>
 <div class="subtitle">DORA del DHCP + resolución DNS recursiva paso a paso.</div>
 
-<div class="layout">
+<div class="docs-panel">
+  <h2>📖 Concepto</h2>
+
+  <div class="two-col">
+    <div class="col" style="border-top-color:#3fb950">
+      <h3 style="margin-top:0;color:#3fb950">DHCP — el hotel y la recepción</h3>
+      <p style="font-size:13px">Llegás a un hotel sin habitación asignada. La recepcionista te da la 304, te dice que podés usarla hasta el domingo, y te da el mapa (gateway) y guía telefónica (DNS).</p>
+      <p style="font-size:13px">Un servidor DHCP entrega: <b>IP</b>, <b>máscara</b>, <b>gateway</b>, <b>DNS</b>, <b>lease time</b>.</p>
+    </div>
+    <div class="col" style="border-top-color:#a371f7">
+      <h3 style="margin-top:0;color:#a371f7">DNS — la agenda telefónica</h3>
+      <p style="font-size:13px">Querés llamar a "pizzeria-de-la-esquina.com" pero no sabés su número. Le preguntás a tu contacto de confianza, que pregunta al directorio central, etc.</p>
+      <p style="font-size:13px">DNS traduce nombres a IPs: <code>www.google.com</code> → <code>142.250.80.4</code>.</p>
+    </div>
+  </div>
+
+  <h3>DHCP: proceso DORA</h3>
+  <ol style="list-style:decimal;margin-left:20px;color:#c9d1d9;font-size:14px;line-height:1.6">
+    <li><b>D</b>iscover (broadcast): "¿hay algún servidor DHCP?"</li>
+    <li><b>O</b>ffer: el servidor ofrece una IP</li>
+    <li><b>R</b>equest (broadcast): "acepto la oferta de X"</li>
+    <li><b>A</b>cknowledge: "confirmado, es tuya hasta las 12:00"</li>
+  </ol>
+  <p>Puertos: <b>UDP 67</b> servidor / <b>UDP 68</b> cliente. Renovación: T1 (50% del lease) unicast, T2 (87.5%) broadcast.</p>
+
+  <h3>Jerarquía DNS</h3>
+  <ul>
+    <li><b>Root servers (.):</b> conocen los TLDs</li>
+    <li><b>TLD servers (.com, .ar):</b> conocen los nameservers de cada dominio</li>
+    <li><b>Authoritative nameserver:</b> tiene la respuesta final para un dominio</li>
+    <li><b>Recursive resolver:</b> hace todo el trabajo (8.8.8.8, 1.1.1.1, DNS del ISP)</li>
+    <li><b>Stub resolver:</b> tu PC — solo pregunta</li>
+  </ul>
+
+  <h3>Tipos de registros</h3>
+  <ul>
+    <li><b>A / AAAA:</b> nombre → IPv4 / IPv6</li>
+    <li><b>CNAME:</b> alias de otro nombre</li>
+    <li><b>MX:</b> servidor de correo del dominio</li>
+    <li><b>NS:</b> servidores autoritativos del dominio</li>
+    <li><b>SOA:</b> registro de autoridad (uno por zona)</li>
+    <li><b>TXT:</b> texto libre (SPF, DKIM, DMARC)</li>
+  </ul>
+
+  <h3>TTL y caché</h3>
+  <p>Cada respuesta DNS tiene un TTL en segundos. El resolver guarda en caché hasta que vence — la siguiente consulta es instantánea. Por eso "un cambio DNS tarda hasta 24/48hs en propagarse".</p>
+
+  <button class="show-sim" id="show-sim">▶ Ver animación interactiva</button>
+</div>
+
+<div class="layout" id="sim" style="display:none">
   <div class="panel">
     <div class="tabs">
       <div class="tab active" data-view="dhcp">DHCP — DORA</div>
@@ -316,7 +380,13 @@ document.querySelectorAll('.tab').forEach(t => {
   };
 });
 
+document.getElementById('show-sim').onclick = () => {
+  document.getElementById('sim').style.display = '';
+  document.getElementById('sim').scrollIntoView({ behavior: 'smooth' });
+};
+
 renderDHCP();
 </script>
+</div>
 </body>
 </html>

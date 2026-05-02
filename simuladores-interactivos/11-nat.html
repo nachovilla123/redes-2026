@@ -34,14 +34,61 @@
   .controls-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; }
   .controls-row label { font-size: 13px; color: #8b949e; }
   .log { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 10px; max-height: 160px; overflow-y: auto; font-family: 'SF Mono', Menlo, monospace; font-size: 11px; line-height: 1.6; }
+  .container { max-width: 1400px; margin: 0 auto; }
+  .docs-panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+  .docs-panel h2 { font-size: 18px; margin-bottom: 12px; color: #58a6ff; }
+  .docs-panel h3 { font-size: 15px; margin: 16px 0 8px; color: #d29922; }
+  .docs-panel p { line-height: 1.7; color: #c9d1d9; margin-bottom: 10px; font-size: 14px; }
+  .docs-panel ul { list-style: none; padding-left: 0; margin: 8px 0; }
+  .docs-panel li { padding: 4px 0; padding-left: 16px; position: relative; line-height: 1.6; font-size: 14px; }
+  .docs-panel li::before { content: "›"; position: absolute; left: 0; color: #58a6ff; font-weight: bold; }
+  .docs-panel code { background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #d29922; font-size: 12px; }
+  .show-sim { background: linear-gradient(135deg, #238636, #1f6feb); color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; margin-top: 20px; box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3); transition: transform 0.15s; }
+  .show-sim:hover { transform: translateY(-2px); }
 </style>
 </head>
 <body>
+<div class="container">
 <div class="nav"><a href="index.html">← Volver al hub</a></div>
 <h1>NAT — el portero del edificio</h1>
 <div class="subtitle">Cómo varios dispositivos comparten una sola IP pública saliendo a internet.</div>
 
-<div class="layout">
+<div class="docs-panel">
+  <h2>📖 Concepto</h2>
+  <p>Hay ~8.000 millones de personas pero IPv4 solo permite ~4.300 millones de direcciones. Matemáticamente no alcanza. La solución: que muchos dispositivos <b>compartan una sola IP pública</b>, gracias a <b>NAT (Network Address Translation)</b>.</p>
+
+  <h3>Analogía: la empresa con una sola línea externa</h3>
+  <p>Una empresa tiene 200 empleados pero <b>una sola línea telefónica pública</b>. Cuando alguien de afuera llama, la recepcionista atiende y transfiere al interno correcto. Cuando un empleado llama hacia afuera, la recepcionista gestiona la llamada.</p>
+  <ul>
+    <li><b>Tu router:</b> tiene 1 IP pública (la que ve internet)</li>
+    <li><b>Tus dispositivos:</b> tienen IPs privadas (192.168.x.x)</li>
+    <li><b>El router:</b> es la recepcionista — gestiona conexiones entrantes y salientes</li>
+  </ul>
+
+  <h3>PAT (Port Address Translation)</h3>
+  <p>Variante de NAT donde múltiples dispositivos comparten <b>la misma IP pública</b> diferenciándose por <b>puerto</b>. Es lo que tenés en tu casa.</p>
+
+  <h3>Tipos de NAT</h3>
+  <ul>
+    <li><b>Estático:</b> 1 IP privada → siempre la misma IP pública. Usado para servidores accesibles desde internet.</li>
+    <li><b>Dinámico:</b> mapeo a un pool de IPs públicas según disponibilidad.</li>
+    <li><b>PAT / Sobrecarga:</b> muchas IPs privadas → 1 IP pública usando puertos. El más común.</li>
+  </ul>
+
+  <h3>Ventajas y desventajas</h3>
+  <ul>
+    <li>✓ <b>Ahorro de IPs públicas</b></li>
+    <li>✓ <b>Seguridad implícita:</b> internet no puede iniciar conexiones a tus dispositivos privados</li>
+    <li>✗ <b>Complica P2P:</b> videollamadas, torrents, juegos online — el otro lado a veces necesita iniciar la conexión</li>
+    <li>✗ <b>Más procesamiento</b> en el router: lee y modifica cada paquete</li>
+  </ul>
+
+  <p style="font-style:italic;color:#8b949e">NAT es la razón por la que IPv4 todavía funciona a pesar de que las IPs se "acabaron" hace años. IPv6 quiere hacer NAT innecesario, pero mientras tanto NAT sostiene la red.</p>
+
+  <button class="show-sim" id="show-sim">▶ Ver animación interactiva</button>
+</div>
+
+<div class="layout" id="sim" style="display:none">
   <div class="panel">
     <svg id="canvas" viewBox="0 0 800 480"></svg>
     <div style="margin-top:12px">
@@ -261,9 +308,15 @@ document.getElementById('reset').onclick = () => {
   logEl.innerHTML = '';
 };
 
+document.getElementById('show-sim').onclick = () => {
+  document.getElementById('sim').style.display = '';
+  document.getElementById('sim').scrollIntoView({ behavior: 'smooth' });
+};
+
 render();
 renderTable();
 addLog('Tabla NAT lista. Iniciá una conexión saliente para verla en acción.', '#58a6ff');
 </script>
+</div>
 </body>
 </html>

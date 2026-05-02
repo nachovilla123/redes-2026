@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Modelo de Comunicaciones</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, system-ui, sans-serif; background: #0d1117; color: #e6edf3; padding: 20px; min-height: 100vh; }
+  .nav { margin-bottom: 16px; }
+  .nav a { color: #58a6ff; text-decoration: none; font-size: 13px; }
+  h1 { font-size: 28px; margin-bottom: 4px; }
+  .subtitle { color: #8b949e; margin-bottom: 20px; }
+  .layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; max-width: 1400px; margin: 0 auto; }
+  .panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+  .panel h2 { font-size: 16px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+  button { background: #238636; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; margin-right: 6px; margin-bottom: 6px; }
+  button:hover { background: #2ea043; }
+  button.secondary { background: #30363d; }
+  button.danger { background: #da3633; }
+  svg { width: 100%; height: 480px; display: block; }
+  .step { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed #30363d; }
+  .step:last-child { border: none; }
+  .step-title { font-weight: 600; margin-bottom: 6px; color: #58a6ff; }
+  .info-box { background: #0d1117; border-left: 3px solid #58a6ff; padding: 10px 12px; border-radius: 4px; font-size: 12px; color: #c9d1d9; line-height: 1.6; margin-bottom: 8px; }
+  .info-box code { background: #161b22; padding: 1px 5px; border-radius: 3px; color: #d29922; font-size: 11px; }
+  .controls-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; }
+  .controls-row label { font-size: 13px; color: #8b949e; }
+  input[type="text"] { background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 6px; padding: 8px; font-size: 13px; flex: 1; min-width: 160px; }
+  input[type="checkbox"] { transform: scale(1.2); margin-right: 4px; }
+  .container { max-width: 1400px; margin: 0 auto; }
+  .docs-panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+  .docs-panel h2 { font-size: 18px; margin-bottom: 12px; color: #58a6ff; }
+  .docs-panel h3 { font-size: 15px; margin: 16px 0 8px; color: #d29922; }
+  .docs-panel p { line-height: 1.7; color: #c9d1d9; margin-bottom: 10px; font-size: 14px; }
+  .docs-panel ul { list-style: none; padding-left: 0; margin: 8px 0; }
+  .docs-panel li { padding: 4px 0; padding-left: 16px; position: relative; line-height: 1.6; font-size: 14px; }
+  .docs-panel li::before { content: "›"; position: absolute; left: 0; color: #58a6ff; font-weight: bold; }
+  .docs-panel code { background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #d29922; font-size: 12px; }
+  .show-sim { background: linear-gradient(135deg, #238636, #1f6feb); color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; margin-top: 20px; box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3); transition: transform 0.15s; }
+  .show-sim:hover { transform: translateY(-2px); }
+  .components-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 14px 0; }
+  .component-card { background: #0d1117; border-radius: 6px; padding: 12px; text-align: center; border-top: 3px solid; }
+  .component-card .ic { font-size: 24px; margin-bottom: 4px; }
+  .component-card .name { font-weight: bold; font-size: 13px; }
+  .component-card .desc { font-size: 11px; color: #8b949e; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="nav"><a href="index.html">← Volver al hub</a></div>
+<h1>Modelo de Comunicaciones</h1>
+<div class="subtitle">Los 5 componentes que aparecen en cualquier comunicación: fuente, transmisor, sistema, receptor, destino.</div>
+
+<div class="docs-panel">
+  <h2>📖 Concepto</h2>
+  <p>Imaginate que querés mandarle una carta a un amigo en Japón. Vos escribís la carta (<b>fuente</b>), Correo Argentino la mete en un sobre y le pone franqueo (<b>transmisor</b>), viaja en avión y camiones (<b>sistema</b>), Correo japonés la recibe y la lleva a su puerta (<b>receptor</b>), tu amigo la lee (<b>destino</b>).</p>
+  <p>Eso es exactamente el <b>Modelo de Comunicaciones</b>. Siempre hay estos 5 componentes — sin excepción.</p>
+
+  <h3>Los 5 componentes</h3>
+  <div class="components-grid">
+    <div class="component-card" style="border-top-color:#58a6ff"><div class="ic">👤</div><div class="name" style="color:#58a6ff">Fuente</div><div class="desc">genera datos</div></div>
+    <div class="component-card" style="border-top-color:#3fb950"><div class="ic">📡</div><div class="name" style="color:#3fb950">Transmisor</div><div class="desc">codifica</div></div>
+    <div class="component-card" style="border-top-color:#d29922"><div class="ic">🌐</div><div class="name" style="color:#d29922">Sistema</div><div class="desc">transporta</div></div>
+    <div class="component-card" style="border-top-color:#a371f7"><div class="ic">📥</div><div class="name" style="color:#a371f7">Receptor</div><div class="desc">decodifica</div></div>
+    <div class="component-card" style="border-top-color:#f85149"><div class="ic">👥</div><div class="name" style="color:#f85149">Destino</div><div class="desc">consume</div></div>
+  </div>
+
+  <h3>Aplicado a WhatsApp</h3>
+  <ul>
+    <li><b>Fuente:</b> vos escribiendo el texto</li>
+    <li><b>Transmisor:</b> tu celu convirtiendo texto a señales WiFi/datos móviles</li>
+    <li><b>Sistema:</b> cables, antenas, routers entre vos y el destinatario</li>
+    <li><b>Receptor:</b> el celu del otro convirtiendo señales de vuelta a texto</li>
+    <li><b>Destino:</b> tu amigo leyendo el mensaje</li>
+  </ul>
+
+  <h3>Tareas que pasan en el camino</h3>
+  <p>El sistema no solo "transporta" — hace varias cosas que ni notás:</p>
+  <ul>
+    <li><b>Direccionamiento:</b> ¿a dónde va exactamente?</li>
+    <li><b>Detección de errores:</b> ¿la dirección existe? ¿llegó completo?</li>
+    <li><b>Ruteo:</b> ¿qué camino conviene tomar?</li>
+    <li><b>Control de errores:</b> ¿llegó dañado? ¿hay que reenviar?</li>
+    <li><b>Gestión de la red:</b> ¿el destino está disponible?</li>
+  </ul>
+
+  <p style="margin-top:14px;font-style:italic;color:#8b949e">El modelo es universal: aplica a una llamada, un email, Netflix, WhatsApp o una señal de radio. Siempre hay fuente, transmisor, sistema, receptor y destino.</p>
+
+  <button class="show-sim" id="show-sim">▶ Ver animación interactiva</button>
+</div>
+
+<div class="layout" id="sim" style="display:none">
+  <div class="panel">
+    <svg id="canvas" viewBox="0 0 800 480"></svg>
+  </div>
+  <div class="panel">
+    <h2>Mandá un mensaje</h2>
+    <div class="step">
+      <div class="controls-row">
+        <input type="text" id="msg" value="Hola mundo" maxlength="20">
+      </div>
+      <div class="controls-row">
+        <label><input type="checkbox" id="noise"> Agregar ruido en el canal</label>
+      </div>
+      <button id="send">Enviar mensaje</button>
+      <button id="reset" class="danger">Reset</button>
+    </div>
+
+    <div class="step">
+      <div class="step-title">Paso actual</div>
+      <div class="info-box" id="explain">Cada vez que mandás un mensaje pasa por estos 5 componentes — siempre, sin excepción. Da igual si es un WhatsApp, un email, una llamada o una señal de radio.</div>
+    </div>
+
+    <div class="step">
+      <div class="step-title">Aplicado a WhatsApp</div>
+      <div class="info-box">
+        <b>Fuente:</b> vos escribiendo<br>
+        <b>Transmisor:</b> tu celu convirtiendo a señales WiFi<br>
+        <b>Sistema:</b> antenas, routers, cables submarinos<br>
+        <b>Receptor:</b> el celu del otro decodificando<br>
+        <b>Destino:</b> tu amigo leyendo
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title">Tareas que pasan en el camino</div>
+      <div class="info-box">
+        Direccionamiento, detección de errores, ruteo, control de errores, gestión de la red. El modelo no las muestra explícitamente — están dentro del transmisor/sistema/receptor.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function ns(t,a={},c=[]){const e=document.createElementNS('http://www.w3.org/2000/svg',t);for(const k in a)e.setAttribute(k,a[k]);c.forEach(x=>e.appendChild(x));return e;}
+const svg = document.getElementById('canvas');
+
+const components = [
+  { id: 'src',  name: 'Fuente',     desc: 'genera datos',          x: 100, color: '#58a6ff', icon: '👤' },
+  { id: 'tx',   name: 'Transmisor', desc: 'codifica',              x: 260, color: '#3fb950', icon: '📡' },
+  { id: 'sys',  name: 'Sistema',    desc: 'transporta',            x: 420, color: '#d29922', icon: '🌐' },
+  { id: 'rx',   name: 'Receptor',   desc: 'decodifica',            x: 580, color: '#a371f7', icon: '📥' },
+  { id: 'dst',  name: 'Destino',    desc: 'consume datos',         x: 740, color: '#f85149', icon: '👥' },
+];
+
+let activeIdx = -1;
+let currentMsg = '';
+
+function render() {
+  svg.innerHTML = '';
+  // links
+  for (let i = 0; i < components.length - 1; i++) {
+    const a = components[i], b = components[i + 1];
+    svg.appendChild(ns('line', { x1: a.x + 50, y1: 240, x2: b.x - 50, y2: 240, stroke: '#30363d', 'stroke-width': 2 }));
+  }
+  components.forEach((c, i) => {
+    const isActive = i === activeIdx;
+    const isPast = i < activeIdx;
+    const opacity = (isActive || isPast || activeIdx === -1) ? 1 : 0.5;
+    const stroke = isActive ? c.color : (isPast ? c.color : '#30363d');
+    const strokeWidth = isActive ? 3 : 2;
+    svg.appendChild(ns('rect', { x: c.x - 50, y: 195, width: 100, height: 90, rx: 10, fill: '#21262d', stroke, 'stroke-width': strokeWidth, opacity }));
+    const ic = ns('text', { x: c.x, y: 230, fill: 'white', 'font-size': 28, 'text-anchor': 'middle', opacity });
+    ic.textContent = c.icon; svg.appendChild(ic);
+    const t = ns('text', { x: c.x, y: 258, fill: 'white', 'font-size': 13, 'text-anchor': 'middle', 'font-weight': 'bold', opacity });
+    t.textContent = c.name; svg.appendChild(t);
+    const t2 = ns('text', { x: c.x, y: 274, fill: c.color, 'font-size': 10, 'text-anchor': 'middle', opacity });
+    t2.textContent = c.desc; svg.appendChild(t2);
+  });
+
+  // Show "channel" emphasis under sys
+  const ch = ns('text', { x: 420, y: 320, fill: '#8b949e', 'font-size': 11, 'text-anchor': 'middle' });
+  ch.textContent = '↑ canal de transmisión ↑'; svg.appendChild(ch);
+}
+
+const explanations = [
+  '<b>1. Fuente</b>: vos generás el dato (escribís un mensaje). Es información cruda en un formato que vos entendés.',
+  '<b>2. Transmisor</b>: convierte la información en algo que puede viajar por el medio. En tu celu, los caracteres se codifican como bits y modulan en señales WiFi.',
+  '<b>3. Sistema de transmisión</b>: el medio físico por donde viaja el mensaje. WiFi → router → cable de tu ISP → antenas → cables submarinos → el otro lado del mundo.',
+  '<b>4. Receptor</b>: decodifica las señales. El celu del destinatario demodula la señal WiFi y reconstruye los caracteres originales.',
+  '<b>5. Destino</b>: la persona o app que efectivamente consume la información. Tu amigo lee el mensaje en pantalla.',
+];
+
+async function send() {
+  const msg = document.getElementById('msg').value || 'Hola';
+  currentMsg = msg;
+  const noise = document.getElementById('noise').checked;
+
+  for (let i = 0; i < components.length; i++) {
+    activeIdx = i;
+    render();
+    document.getElementById('explain').innerHTML = explanations[i];
+
+    if (i < components.length - 1) {
+      await animateMsg(components[i], components[i + 1], i === 2 && noise);
+    }
+  }
+
+  // Final state
+  const finalMsg = noise ? scrambleMsg(msg) : msg;
+  const explainEl = document.getElementById('explain');
+  if (noise) {
+    explainEl.innerHTML = `<b>5. Destino</b>: el ruido en el canal corrompió el mensaje. Llegó <code style="color:#f85149">"${finalMsg}"</code> en vez de <code style="color:#3fb950">"${msg}"</code>. Por eso los protocolos reales tienen <b>detección de errores</b>.`;
+  }
+}
+
+function scrambleMsg(s) {
+  const chars = s.split('');
+  for (let i = 0; i < Math.max(1, Math.floor(chars.length * 0.3)); i++) {
+    const idx = Math.floor(Math.random() * chars.length);
+    chars[idx] = String.fromCharCode(33 + Math.floor(Math.random() * 90));
+  }
+  return chars.join('');
+}
+
+function animateMsg(from, to, addNoise) {
+  return new Promise(resolve => {
+    const startX = from.x + 50;
+    const endX = to.x - 50;
+    const y = 240;
+    const dot = ns('rect', { x: startX, y: y - 14, width: 80, height: 28, rx: 4, fill: from.color, stroke: 'white', 'stroke-width': 1.5 });
+    const lbl = ns('text', { x: startX + 40, y: y + 4, fill: 'white', 'font-size': 11, 'text-anchor': 'middle', 'font-family': 'monospace', 'font-weight': 'bold' });
+    lbl.textContent = currentMsg.slice(0, 9);
+    svg.appendChild(dot); svg.appendChild(lbl);
+
+    let noisePulses = [];
+    if (addNoise) {
+      // pulses going up/down
+      for (let i = 0; i < 5; i++) {
+        const px = startX + (endX - startX) * (0.2 + i * 0.15);
+        const pulse = ns('text', { x: px, y: y - 30 - Math.random() * 10, fill: '#f85149', 'font-size': 16, 'text-anchor': 'middle' });
+        pulse.textContent = '⚡'; svg.appendChild(pulse);
+        noisePulses.push(pulse);
+      }
+    }
+
+    const start = performance.now();
+    function frame(t) {
+      const p = Math.min((t - start) / 900, 1);
+      const x = startX + (endX - startX) * p;
+      dot.setAttribute('x', x);
+      lbl.setAttribute('x', x + 40);
+      if (addNoise && p > 0.3 && p < 0.7) {
+        // glitch text
+        lbl.textContent = scrambleMsg(currentMsg.slice(0, 9));
+      } else if (p > 0.7) {
+        lbl.textContent = currentMsg.slice(0, 9);
+      }
+      if (p < 1) requestAnimationFrame(frame);
+      else {
+        setTimeout(() => {
+          dot.remove(); lbl.remove();
+          noisePulses.forEach(n => n.remove());
+          resolve();
+        }, 300);
+      }
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+document.getElementById('send').onclick = send;
+document.getElementById('reset').onclick = () => { activeIdx = -1; render(); document.getElementById('explain').innerHTML = 'Cada vez que mandás un mensaje pasa por estos 5 componentes — siempre, sin excepción.'; };
+
+document.getElementById('show-sim').onclick = () => {
+  document.getElementById('sim').style.display = '';
+  document.getElementById('sim').scrollIntoView({ behavior: 'smooth' });
+};
+
+render();
+</script>
+</div>
+
+</body>
+</html>

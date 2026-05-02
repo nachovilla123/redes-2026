@@ -187,14 +187,57 @@
     font-size: 13px;
     margin-bottom: 8px;
   }
+  .container { max-width: 1400px; margin: 0 auto; }
+  .docs-panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+  .docs-panel h2 { font-size: 18px; margin-bottom: 12px; color: #58a6ff; }
+  .docs-panel h3 { font-size: 15px; margin: 16px 0 8px; color: #d29922; }
+  .docs-panel p { line-height: 1.7; color: #c9d1d9; margin-bottom: 10px; font-size: 14px; }
+  .docs-panel ul { list-style: none; padding-left: 0; margin: 8px 0; }
+  .docs-panel li { padding: 4px 0; padding-left: 16px; position: relative; line-height: 1.6; font-size: 14px; }
+  .docs-panel li::before { content: "›"; position: absolute; left: 0; color: #58a6ff; font-weight: bold; }
+  .docs-panel code { background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #d29922; font-size: 12px; }
+  .show-sim { background: linear-gradient(135deg, #238636, #1f6feb); color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; margin-top: 20px; box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3); transition: transform 0.15s; }
+  .show-sim:hover { transform: translateY(-2px); }
+  .layers7 { display: flex; flex-direction: column; gap: 4px; margin: 12px 0; }
+  .layer7 { background: #0d1117; border-radius: 6px; padding: 8px 12px; display: flex; gap: 12px; align-items: center; border-left: 3px solid; font-size: 13px; }
+  .layer7-num { font-weight: bold; min-width: 28px; }
 </style>
 </head>
 <body>
+<div class="container">
 <div class="nav"><a href="index.html">← Volver al hub</a></div>
 <h1>Modelo OSI — encapsulamiento</h1>
 <div class="subtitle">Mirá cómo cada capa procesa los datos. Por defecto se va de L1 a L7 (recibiendo) — los bits llegan al cable y suben hasta la aplicación.</div>
 
-<div class="layout">
+<div class="docs-panel">
+  <h2>📖 Concepto</h2>
+  <p>El <b>Modelo OSI</b> divide la comunicación de red en <b>7 capas</b> donde cada una hace una tarea específica. Es como mandar plata al exterior por un banco: hay 7 departamentos que intervienen, y si uno falla la cadena se rompe.</p>
+
+  <h3>Las 7 capas (de abajo hacia arriba)</h3>
+  <div class="layers7">
+    <div class="layer7" style="border-left-color:#fb8500"><span class="layer7-num" style="color:#fb8500">L1</span><b>Física</b> — bits crudos: voltajes, frecuencias, cables, fibra, ondas. Un repetidor trabaja solo acá.</div>
+    <div class="layer7" style="border-left-color:#d29922"><span class="layer7-num" style="color:#d29922">L2</span><b>Enlace</b> — entre dos dispositivos directamente conectados. Detecta y corrige errores. Acá viven las MAC. Switch.</div>
+    <div class="layer7" style="border-left-color:#3fb950"><span class="layer7-num" style="color:#3fb950">L3</span><b>Red</b> — lleva datos a través de múltiples saltos. Acá viven las IPs. Router.</div>
+    <div class="layer7" style="border-left-color:#58a6ff"><span class="layer7-num" style="color:#58a6ff">L4</span><b>Transporte</b> — datos completos, en orden, sin pérdidas. Acá viven los puertos. TCP/UDP.</div>
+    <div class="layer7" style="border-left-color:#ec4899"><span class="layer7-num" style="color:#ec4899">L5</span><b>Sesión</b> — controla el diálogo: apertura, cierre, recuperación.</div>
+    <div class="layer7" style="border-left-color:#a371f7"><span class="layer7-num" style="color:#a371f7">L6</span><b>Presentación</b> — formato, compresión, cifrado (TLS).</div>
+    <div class="layer7" style="border-left-color:#f85149"><span class="layer7-num" style="color:#f85149">L7</span><b>Aplicación</b> — lo que el usuario toca: HTTP, SMTP, FTP, DNS.</div>
+  </div>
+
+  <h3>Encapsulamiento — las muñecas rusas</h3>
+  <p>Al enviar, cada capa <b>agrega su header</b> a los datos (de L7 hacia L1). Al recibir, cada capa <b>quita su header</b> (de L1 hacia L7). El header solo lo lee la capa equivalente del otro lado.</p>
+
+  <h3>OSI vs TCP/IP</h3>
+  <p>OSI es el modelo <b>teórico</b> diseñado en los 80. TCP/IP es el modelo <b>real</b> que ya existía y ganó porque ya estaba implementado. OSI sirve hoy como modelo conceptual para enseñar; TCP/IP es lo que corre realmente.</p>
+
+  <h3>Mnemónico</h3>
+  <p style="font-size:14px"><b>"Fui En el Router, Tomé Sopa Por Ahí"</b><br>
+  <span style="color:#8b949e">Física → Enlace → Red → Transporte → Sesión → Presentación → Aplicación</span></p>
+
+  <button class="show-sim" id="show-sim">▶ Ver animación interactiva</button>
+</div>
+
+<div class="layout" id="sim" style="display:none">
   <div class="panel">
     <div class="mode-pills">
       <div class="mode-pill active" data-mode="recv">Recibiendo (L1 → L7) ↑</div>
@@ -486,9 +529,15 @@ document.getElementById('data').oninput = e => {
   renderPdu();
 };
 
+document.getElementById('show-sim').onclick = () => {
+  document.getElementById('sim').style.display = '';
+  document.getElementById('sim').scrollIntoView({ behavior: 'smooth' });
+};
+
 renderStack();
 renderPdu();
 updateExplanation();
 </script>
+</div>
 </body>
 </html>

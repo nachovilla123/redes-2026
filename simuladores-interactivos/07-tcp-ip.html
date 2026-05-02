@@ -38,14 +38,81 @@
   .port-svc { font-size: 11px; color: #8b949e; margin-top: 2px; }
   .controls-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
   select { background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 6px; padding: 6px 10px; font-size: 13px; }
+  .container { max-width: 1400px; margin: 0 auto; }
+  .docs-panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+  .docs-panel h2 { font-size: 18px; margin-bottom: 12px; color: #58a6ff; }
+  .docs-panel h3 { font-size: 15px; margin: 16px 0 8px; color: #d29922; }
+  .docs-panel p { line-height: 1.7; color: #c9d1d9; margin-bottom: 10px; font-size: 14px; }
+  .docs-panel ul { list-style: none; padding-left: 0; margin: 8px 0; }
+  .docs-panel li { padding: 4px 0; padding-left: 16px; position: relative; line-height: 1.6; font-size: 14px; }
+  .docs-panel li::before { content: "›"; position: absolute; left: 0; color: #58a6ff; font-weight: bold; }
+  .docs-panel code { background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #d29922; font-size: 12px; }
+  .show-sim { background: linear-gradient(135deg, #238636, #1f6feb); color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; margin-top: 20px; box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3); transition: transform 0.15s; }
+  .show-sim:hover { transform: translateY(-2px); }
+  .compare2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+  .compare-side2 { background: #0d1117; border-radius: 6px; padding: 14px; border-left: 3px solid; }
+  .compare-side2 h4 { font-size: 14px; margin-bottom: 6px; }
 </style>
 </head>
 <body>
+<div class="container">
 <div class="nav"><a href="index.html">← Volver al hub</a></div>
 <h1>TCP/IP — handshake y puertos</h1>
 <div class="subtitle">El 3-way handshake, comparativa TCP vs UDP, y para qué sirven los puertos.</div>
 
-<div class="layout">
+<div class="docs-panel">
+  <h2>📖 Concepto</h2>
+  <p>TCP/IP es el modelo <b>real</b> que usa Internet. Tiene 4-5 capas (Aplicación, Transporte, Internet, Acceso a la red, Física). Lo más importante de este capítulo: la diferencia entre <b>TCP</b> y <b>UDP</b>, y qué son los <b>puertos</b>.</p>
+
+  <h3>TCP vs UDP</h3>
+  <div class="compare2">
+    <div class="compare-side2" style="border-left-color:#58a6ff">
+      <h4 style="color:#58a6ff">📬 TCP — Correo certificado</h4>
+      <p style="font-size:13px">Mandás la carta. El cartero te trae el acuse firmado. Si no llega en X tiempo, va de nuevo.</p>
+      <ul>
+        <li>Datos completos ✓</li>
+        <li>En orden ✓</li>
+        <li>Sin duplicados ✓</li>
+        <li>Más lento (espera ACKs)</li>
+      </ul>
+      <p style="font-size:12px;color:#8b949e;margin-top:6px"><b>Usar para:</b> web, descargas, email — todo donde no puede faltar nada.</p>
+    </div>
+    <div class="compare-side2" style="border-left-color:#a371f7">
+      <h4 style="color:#a371f7">📨 UDP — Folleto en el buzón</h4>
+      <p style="font-size:13px">Lo tirás y listo. No sabés si lo leyeron. Si se pierde, no te enterás.</p>
+      <ul>
+        <li>Sin garantías</li>
+        <li>Sin orden garantizado</li>
+        <li>Header mínimo</li>
+        <li>Muy rápido</li>
+      </ul>
+      <p style="font-size:12px;color:#8b949e;margin-top:6px"><b>Usar para:</b> videollamada, streaming, juegos, DNS — donde la velocidad importa más que la perfección.</p>
+    </div>
+  </div>
+
+  <h3>3-way handshake (solo TCP)</h3>
+  <p>Antes de mandar datos, TCP <b>negocia</b> la conexión con tres mensajes:</p>
+  <ul>
+    <li><b>SYN</b> — el cliente le dice al servidor "quiero conectarme, mi número de secuencia inicial es X"</li>
+    <li><b>SYN-ACK</b> — el servidor responde "OK, mi número es Y, confirmo el tuyo (X+1)"</li>
+    <li><b>ACK</b> — el cliente confirma "OK, recibí tu Y (Y+1)"</li>
+  </ul>
+  <p>Recién después se mandan los datos reales. UDP no tiene handshake — manda directo.</p>
+
+  <h3>Puertos: las puertas del edificio</h3>
+  <p>La <b>IP</b> identifica la máquina (el edificio). El <b>puerto</b> identifica la app (el departamento). Tu PC corre Chrome y Spotify a la vez con la misma IP — los puertos los distinguen.</p>
+  <ul>
+    <li><b>Bien conocidos (0–1023):</b> 22 SSH · 25 SMTP · 53 DNS · 80 HTTP · 443 HTTPS</li>
+    <li><b>Dinámicos (1024–65535):</b> los asigna el SO a tus apps cuando inician una conexión</li>
+  </ul>
+
+  <h3>Encapsulación — las muñecas rusas</h3>
+  <p>Cada capa envuelve los datos: <code>[ETH | IP | TCP | datos | CRC]</code>. Al recibir, cada capa quita su envoltura y pasa el resto a la de arriba.</p>
+
+  <button class="show-sim" id="show-sim">▶ Ver animación interactiva</button>
+</div>
+
+<div class="layout" id="sim" style="display:none">
   <div class="panel">
     <div class="tabs">
       <div class="tab active" data-view="handshake">3-way handshake</div>
@@ -393,7 +460,13 @@ document.querySelectorAll('.tab').forEach(t => {
   };
 });
 
+document.getElementById('show-sim').onclick = () => {
+  document.getElementById('sim').style.display = '';
+  document.getElementById('sim').scrollIntoView({ behavior: 'smooth' });
+};
+
 renderHs();
 </script>
+</div>
 </body>
 </html>

@@ -27,6 +27,7 @@ export const flashcardsClase3: Flashcard[] = [
     front: "¿Cuál es la estructura de una trama Ethernet?",
     back: "Preámbulo (8B) | MAC Destino (6B) | MAC Origen (6B) | Tipo/Longitud (2B) | Datos (0-1500B) | Relleno (0-46B) | CRC (4B)\n\nMínimo: 64 bytes (para detección de colisiones)\nMáximo: 1518 bytes (sin contar preámbulo)\nEl relleno aparece solo cuando los datos son muy cortos para llegar al mínimo.",
     tag: "Ethernet",
+    simulator: { animationId: "ethernet-frame", label: "Trama Ethernet campo a campo" },
   },
   {
     id: 204,
@@ -40,6 +41,7 @@ export const flashcardsClase3: Flashcard[] = [
     front: "¿Cómo se estructura una dirección MAC?",
     back: "6 bytes = 48 bits, expresados en hexadecimal.\n\nPrimeros 3 bytes → OUI (Organizationally Unique Identifier): asignado al fabricante por IEEE.\nÚltimos 3 bytes → Número específico del dispositivo.\n\nBit 1 del primer byte:\n• 0 = unicast (Individual)\n• 1 = multicast/broadcast (Grupo)\n\nBit 2 del primer byte:\n• 0 = Global (administrada por IEEE)\n• 1 = Local (administrada localmente)",
     tag: "Ethernet",
+    simulator: { animationId: "mac-structure", label: "Estructura de la MAC" },
   },
   // Switch
   {
@@ -54,7 +56,7 @@ export const flashcardsClase3: Flashcard[] = [
     front: "¿Cuáles son los 3 modos de conmutación de un switch?",
     back: "Store and Forward:\n• Recibe la trama COMPLETA, verifica el CRC y luego reenvía.\n• Mayor latencia, pero no reenvía tramas con errores.\n\nCut-Through:\n• Lee solo la MAC de destino y reenvía de inmediato.\n• Muy baja latencia, pero puede reenviar tramas corruptas.\n\nFragment Free (Cut-Through modificado):\n• Espera los primeros 64 bytes (mínimo que dura una colisión) antes de reenviar.\n• Balance entre latencia y filtrado de errores.",
     tag: "Switch",
-    simulator: { url: "/simuladores/09-vlan.html", label: "Switch y VLANs" },
+    simulator: { animationId: "switch-modes", label: "Modos de conmutación" },
   },
   {
     id: 208,
@@ -68,7 +70,7 @@ export const flashcardsClase3: Flashcard[] = [
     front: "¿Qué es half duplex vs full duplex?",
     back: "Half duplex: la interfaz puede transmitir O recibir, pero no ambas cosas al mismo tiempo. (Como una radio walkie-talkie)\n→ Puede haber colisiones.\n\nFull duplex: transmite Y recibe simultáneamente en canales separados.\n→ Sin colisiones, doble ancho de banda efectivo.\n\nLos switches modernos operan en full duplex en cada puerto.",
     tag: "Switch",
-    simulator: { url: "/simuladores/09-vlan.html", label: "Switch y VLANs" },
+    simulator: { animationId: "half-full-duplex", label: "Half vs Full duplex" },
   },
   // VLAN
   {
@@ -90,14 +92,14 @@ export const flashcardsClase3: Flashcard[] = [
     front: "¿Qué es un enlace troncal (trunk) y por qué se usa?",
     back: "Un trunk es un enlace entre switches que transporta tráfico de MÚLTIPLES VLANs simultáneamente, usando un único cable físico.\n\nSin trunk: necesitarías un cable físico separado por VLAN entre cada par de switches.\n\nCon trunk: un solo cable lleva todas las VLANs. Cada trama se etiqueta con el ID de su VLAN (IEEE 802.1Q) para que el switch receptor sepa a qué VLAN pertenece.",
     tag: "VLAN",
-    simulator: { url: "/simuladores/09-vlan.html", label: "Switch y VLANs · 802.1Q" },
+    simulator: { animationId: "dot1q", label: "Trunk + tag 802.1Q" },
   },
   {
     id: 213,
     front: "¿Qué es el protocolo IEEE 802.1Q?",
     back: "Estándar que define cómo etiquetar tramas Ethernet con información de VLAN para transportarlas por enlaces trunk.\n\nAgrega 4 bytes a la trama Ethernet original con:\n• TPID (2B): valor 0x8100 → indica que es una trama etiquetada\n• Prioridad (3 bits): QoS, prioridad del tráfico\n• CFI (1 bit): formato canónico (0) o no canónico (1)\n• VLAN ID (12 bits): identifica la VLAN (0-4095 VLANs posibles)",
     tag: "VLAN",
-    simulator: { url: "/simuladores/09-vlan.html", label: "Switch y VLANs · 802.1Q" },
+    simulator: { animationId: "dot1q", label: "Tag 802.1Q en el trunk" },
   },
   {
     id: 214,

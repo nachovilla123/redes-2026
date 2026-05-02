@@ -16,6 +16,18 @@ import { TcpVsUdp } from "./TcpVsUdp";
 import { SpanningTree } from "./SpanningTree";
 import { NodalDelays } from "./NodalDelays";
 import { Crc } from "./Crc";
+import { CsmaCa } from "./CsmaCa";
+import { HalfFullDuplex } from "./HalfFullDuplex";
+import { EthernetFrame } from "./EthernetFrame";
+import { Dot1Q } from "./Dot1Q";
+import { RoutingTable } from "./RoutingTable";
+import { Vlsm } from "./Vlsm";
+import { DhcpRelay } from "./DhcpRelay";
+import { HttpRequest } from "./HttpRequest";
+import { TlsHandshake } from "./TlsHandshake";
+import { SwitchModes } from "./SwitchModes";
+import { MacStructure } from "./MacStructure";
+import { Ports } from "./Ports";
 
 export const animations: Record<string, ComponentType> = {
   "cam-table": CamTableAnimation,
@@ -33,6 +45,18 @@ export const animations: Record<string, ComponentType> = {
   "spanning-tree": SpanningTree,
   "nodal-delays": NodalDelays,
   crc: Crc,
+  "csma-ca": CsmaCa,
+  "half-full-duplex": HalfFullDuplex,
+  "ethernet-frame": EthernetFrame,
+  "dot1q": Dot1Q,
+  "routing-table": RoutingTable,
+  vlsm: Vlsm,
+  "dhcp-relay": DhcpRelay,
+  "http-request": HttpRequest,
+  "tls-handshake": TlsHandshake,
+  "switch-modes": SwitchModes,
+  "mac-structure": MacStructure,
+  ports: Ports,
 };
 
 export function getAnimation(id: string): ComponentType | null {

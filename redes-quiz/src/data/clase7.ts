@@ -13,6 +13,7 @@ export const flashcardsClase7: Flashcard[] = [
     front: "¿Cuál es la estructura de una HTTP Request?",
     back: "Tiene tres partes:\n\n1. Request line:\n   GET /api/usuarios/42 HTTP/1.1\n   [método] [path] [versión]\n\n2. Headers: pares clave:valor, terminan con línea en blanco (\\r\\n\\r\\n)\n   Host: api.ejemplo.com (obligatorio en HTTP/1.1)\n   Content-Type: application/json\n   Authorization: Bearer <token>\n\n3. Body (opcional): solo en POST, PUT, PATCH\n   {\"nombre\": \"Nacho\"}\n\nLa línea en blanco entre headers y body es obligatoria.",
     tag: "HTTP",
+    simulator: { animationId: "http-request", label: "HTTP Request/Response" },
   },
   {
     id: 602,
@@ -44,6 +45,7 @@ export const flashcardsClase7: Flashcard[] = [
     front: "¿Qué agrega HTTPS sobre HTTP y cómo funciona el TLS Handshake?",
     back: "HTTPS = HTTP + TLS. Agrega:\n• Confidencialidad: contenido encriptado\n• Integridad: nadie puede modificar datos en tránsito sin que se detecte\n• Autenticación: el cliente verifica que habla con el servidor real\n\nTLS Handshake (simplificado):\n1. ClientHello: versiones TLS soportadas, cipher suites, clave DH efímera, random_C\n2. ServerHello + Certificado: versión/cipher elegidos, clave DH efímera, certificado, random_S\n3. Intercambio Diffie-Hellman → ambos derivan el mismo secreto compartido sin que viaje por la red\n4. Derivación de session keys: KDF(secreto_DH, random_C, random_S)\n5. Finished cifrado: confirma que ambos tienen las mismas claves\n\nDesde aquí: todo el HTTP viaja cifrado con AES (simétrico, rápido).",
     tag: "TLS",
+    simulator: { animationId: "tls-handshake", label: "TLS Handshake paso a paso" },
   },
   {
     id: 607,

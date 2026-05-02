@@ -105,7 +105,7 @@ export const flashcardsClase2: Flashcard[] = [
     front: "¿Qué es un puerto y para qué sirve?",
     back: "Número de 16 bits (0-65535) que identifica un proceso/aplicación específica en un host.\n\nPermite que un mismo equipo tenga múltiples conexiones simultáneas. La IP identifica el equipo, el puerto identifica la aplicación.\n\nPuertos bien conocidos:\n• 80 → HTTP\n• 443 → HTTPS\n• 22 → SSH\n• 25 → SMTP\n• 53 → DNS\n• 21 → FTP",
     tag: "TCP/IP",
-    simulator: { url: "/simuladores/07-tcp-ip.html", label: "TCP/IP · handshake y puertos" },
+    simulator: { animationId: "ports", label: "Puertos como puertas" },
   },
   {
     id: 115,

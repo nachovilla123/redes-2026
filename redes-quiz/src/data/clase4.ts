@@ -13,12 +13,14 @@ export const flashcardsClase4: Flashcard[] = [
     front: "¿Por qué WiFi usa CSMA/CA y no CSMA/CD como Ethernet?",
     back: "En Ethernet con cable, si dos dispositivos transmiten a la vez, detectan la colisión mientras ocurre (CD = Collision Detection).\n\nEn WiFi, un dispositivo que transmite no puede escuchar al mismo tiempo — su propia señal ahoga cualquier señal entrante. Por eso no puede detectar colisiones.\n\nSolución: CSMA/CA (Collision Avoidance) — evita colisiones antes de que ocurran, en lugar de detectarlas.",
     tag: "WiFi",
+    simulator: { animationId: "csma-ca", label: "CSMA/CA paso a paso" },
   },
   {
     id: 302,
     front: "¿Cómo funciona CSMA/CA paso a paso?",
     back: "1. Escuchá el canal (Carrier Sense): ¿hay alguien transmitiendo?\n2. Si está ocupado → esperá a que se libere + tiempo aleatorio extra\n3. Si está libre → esperá DIFS (tiempo fijo) + backoff (tiempo aleatorio)\n4. Transmitís\n5. El receptor manda ACK confirmando recepción\n6. Si no llega el ACK → asumir colisión → esperar más tiempo aleatorio → reintentar\n\nEl backoff aleatorio es clave: si todos esperan distintos tiempos, es difícil que dos transmitan exactamente al mismo tiempo.",
     tag: "WiFi",
+    simulator: { animationId: "csma-ca", label: "CSMA/CA paso a paso" },
   },
   {
     id: 303,

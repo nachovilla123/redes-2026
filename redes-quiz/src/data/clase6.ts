@@ -42,7 +42,7 @@ export const flashcardsClase6: Flashcard[] = [
     front: "¿Qué es VLSM y cuál es la regla de oro para aplicarlo?",
     back: "VLSM (Variable Length Subnet Mask): técnica de subnetting donde cada subred puede tener una máscara diferente, optimizando el uso de direcciones.\n\nRegla de oro: ordenar los requerimientos de MAYOR a MENOR cantidad de hosts y asignarlos en ese orden, empezando desde la primera dirección disponible.\n\nSi empezás con las subredes chicas, las grandes pueden no entrar en el espacio restante.",
     tag: "VLSM",
-    simulator: { url: "/simuladores/10-subredes.html", label: "Subredes y CIDR (VLSM)" },
+    simulator: { animationId: "vlsm", label: "VLSM Top-Down paso a paso" },
   },
   {
     id: 502,
@@ -92,7 +92,7 @@ export const flashcardsClase6: Flashcard[] = [
     front: "¿Qué es el DHCP Relay Agent y por qué es necesario?",
     back: "Problema: DHCPDISCOVER es broadcast. Los broadcasts NO atraviesan routers. Si el servidor DHCP está en otra red, el cliente nunca lo alcanza.\n\nSolución: el DHCP Relay Agent (o DHCP Helper) es una función del router.\n\nFuncionamiento:\n1. El relay recibe el broadcast de la subred local\n2. Le agrega el campo giaddr (su propia IP en esa subred)\n3. Lo reenvía como unicast al servidor DHCP remoto\n4. El servidor sabe en qué subred está el cliente por el giaddr y ofrece una IP del pool correcto\n\nConfigura en Cisco: ip helper-address <IP del servidor DHCP>",
     tag: "DHCP",
-    simulator: { url: "/simuladores/dns-dhcp.html", label: "DNS y DHCP" },
+    simulator: { animationId: "dhcp-relay", label: "DHCP Relay con giaddr" },
   },
   // DNS
   {

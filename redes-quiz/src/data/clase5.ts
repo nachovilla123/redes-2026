@@ -13,7 +13,7 @@ export const flashcardsClase5: Flashcard[] = [
     front: "¿Qué es la tabla de rutas y qué tipos de rutas contiene?",
     back: "Es la lista que tiene cada router con las redes que conoce y cómo llegar a ellas.\n\nTipos (indicados por letra al inicio):\n• C → Connected: red directamente conectada a una interfaz\n• S → Static: configurada a mano por el administrador\n• O → OSPF: aprendida por el protocolo OSPF\n• R → RIP: aprendida por el protocolo RIP\n• D → EIGRP, B → BGP, etc.\n\nLos números [AD/métrica] entre corchetes indican:\n• AD (distancia administrativa): qué tan confiable es la fuente (menos = más confiable)\n• Métrica: costo para llegar al destino (menos = mejor)",
     tag: "Routing",
-    simulator: { url: "/simuladores/16-routing.html", label: "Routing · tablas y next-hop" },
+    simulator: { animationId: "routing-table", label: "Paquete saltando por routers" },
   },
   {
     id: 402,

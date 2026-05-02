@@ -227,6 +227,6 @@ function Wave({ from, to, y, color, label }: { from: number; to: number; y: numb
   );
 }
 
-function sleep(ms: number) {
+function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }

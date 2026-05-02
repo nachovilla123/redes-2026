@@ -177,6 +177,6 @@ export function NodalDelays() {
   );
 }
 
-function sleep(ms: number) {
+function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }

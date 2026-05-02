@@ -254,6 +254,6 @@ function Lane({ y, color, tcp = false, lossIndex }: { y: number; color: string; 
   );
 }
 
-function sleep(ms: number) {
+function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }

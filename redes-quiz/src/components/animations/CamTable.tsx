@@ -219,7 +219,7 @@ function portLabelPos(id: number) {
   return { x: (pos.x + switchX) / 2, y: (pos.y + switchY) / 2 - 4 };
 }
 
-function sleep(ms: number) {
+function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 

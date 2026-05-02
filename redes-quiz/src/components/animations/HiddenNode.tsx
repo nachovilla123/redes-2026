@@ -1,107 +1,89 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { AnimationFrame, PlayButton , sleep} from "./AnimationFrame";
+import { useEffect, useState } from "react";
+import { AnimationFrame, StepControls } from "./AnimationFrame";
 
-type Phase =
-  | "idle"
-  | "no-rts-attempt-a"
-  | "no-rts-attempt-b"
-  | "no-rts-collision"
-  | "rts-from-a"
-  | "rts-cts-from-ap"
-  | "rts-data-from-a"
-  | "rts-b-blocked"
-  | "rts-ack";
+type Mode = "no-rts" | "rts";
+
+const NO_RTS_PHASES = [
+  { id: "no-rts-attempt-a", caption: "PC-A escucha el medio (vacío para ella) y empieza a transmitir hacia el AP." },
+  { id: "no-rts-attempt-b", caption: "PC-B también escucha y como NO ve la señal de A (está oculta), también empieza a transmitir." },
+  { id: "no-rts-collision", caption: "💥 Las señales de A y B chocan en el AP. Ambas tramas se pierden." },
+] as const;
+
+const RTS_PHASES = [
+  { id: "rts-from-a", caption: "Con RTS/CTS: PC-A primero envía RTS (Request To Send) al AP." },
+  { id: "rts-cts-from-ap", caption: "El AP responde CTS (Clear To Send) a TODOS — incluyendo a PC-B, que aunque no ve a A, sí ve al AP." },
+  { id: "rts-data-from-a", caption: "PC-A ya puede transmitir datos sin riesgo de colisión." },
+  { id: "rts-b-blocked", caption: "PC-B recibió el CTS y sabe que el medio está reservado. Espera (NAV) sin transmitir." },
+  { id: "rts-ack", caption: "El AP confirma con ACK. Recién ahora PC-B puede intentar enviar." },
+] as const;
 
 export function HiddenNode() {
-  const [mode, setMode] = useState<"no-rts" | "rts">("no-rts");
-  const [phase, setPhase] = useState<Phase>("idle");
+  const [mode, setMode] = useState<Mode>("no-rts");
+  const [step, setStep] = useState(-1);
   const [running, setRunning] = useState(false);
-  const cancelRef = useRef(false);
+
+  const phases = mode === "no-rts" ? NO_RTS_PHASES : RTS_PHASES;
+  const phaseId = step >= 0 && step < phases.length ? phases[step].id : "idle";
+  const total = phases.length;
 
   function reset() {
-    cancelRef.current = true;
-    setPhase("idle");
+    setStep(-1);
     setRunning(false);
-    setTimeout(() => (cancelRef.current = false), 100);
   }
-
-  async function play() {
-    if (running) return;
-    cancelRef.current = false;
-    setRunning(true);
-    setPhase("idle");
-    await sleep(400);
-    if (cancelRef.current) return;
-
-    if (mode === "no-rts") {
-      setPhase("no-rts-attempt-a");
-      await sleep(1300);
-      if (cancelRef.current) return;
-      setPhase("no-rts-attempt-b");
-      await sleep(1300);
-      if (cancelRef.current) return;
-      setPhase("no-rts-collision");
-      await sleep(2000);
-    } else {
-      setPhase("rts-from-a");
-      await sleep(1500);
-      if (cancelRef.current) return;
-      setPhase("rts-cts-from-ap");
-      await sleep(1700);
-      if (cancelRef.current) return;
-      setPhase("rts-data-from-a");
-      await sleep(1700);
-      if (cancelRef.current) return;
-      setPhase("rts-b-blocked");
-      await sleep(1500);
-      if (cancelRef.current) return;
-      setPhase("rts-ack");
-      await sleep(1500);
-    }
-
-    if (!cancelRef.current) setRunning(false);
+  function next() {
+    setStep((s) => Math.min(s + 1, total - 1));
+  }
+  function prev() {
+    setStep((s) => Math.max(s - 1, 0));
+  }
+  function pause() {
+    setRunning(false);
   }
 
   useEffect(() => {
-    return () => {
-      cancelRef.current = true;
-    };
-  }, []);
+    if (!running) return;
+    if (step >= total - 1) {
+      setRunning(false);
+      return;
+    }
+    const t = setTimeout(() => setStep((s) => s + 1), 1700);
+    return () => clearTimeout(t);
+  }, [running, step, total]);
 
-  const captions: Record<Phase, string> = {
-    idle:
-      "PC-A y PC-B están fuera del alcance de radio entre sí pero ambas ven al AP. Sin RTS/CTS, hay colisiones invisibles.",
-    "no-rts-attempt-a": "PC-A escucha el medio (vacío para ella) y empieza a transmitir hacia el AP.",
-    "no-rts-attempt-b":
-      "PC-B también escucha y como NO ve la señal de A (está oculta), también empieza a transmitir.",
-    "no-rts-collision": "💥 Las señales de A y B chocan en el AP. Ambas tramas se pierden.",
-    "rts-from-a": "Con RTS/CTS: PC-A primero envía RTS (Request To Send) al AP.",
-    "rts-cts-from-ap":
-      "El AP responde CTS (Clear To Send) a TODOS — incluyendo a PC-B, que aunque no ve a A, sí ve al AP.",
-    "rts-data-from-a": "PC-A ya puede transmitir datos sin riesgo de colisión.",
-    "rts-b-blocked":
-      "PC-B recibió el CTS y sabe que el medio está reservado. Espera (NAV) sin transmitir.",
-    "rts-ack": "El AP confirma con ACK. Recién ahora PC-B puede intentar enviar.",
-  };
+  function auto() {
+    if (running) return;
+    if (step >= total - 1) setStep(-1);
+    setRunning(true);
+    setStep((s) => (s < 0 ? 0 : s + 1));
+  }
+
+  function switchMode(m: Mode) {
+    setMode(m);
+    setStep(-1);
+    setRunning(false);
+  }
+
+  const idleCaption =
+    mode === "no-rts"
+      ? "PC-A y PC-B están fuera del alcance de radio entre sí pero ambas ven al AP. Sin RTS/CTS, hay colisiones invisibles."
+      : "Con RTS/CTS, las estaciones reservan el medio antes de transmitir. PC-B se entera vía el CTS del AP.";
+
+  const caption = step >= 0 && step < phases.length ? phases[step].caption : idleCaption;
 
   return (
     <AnimationFrame
       caption={
         <div>
-          <p className="text-slate-300 font-medium">{captions[phase]}</p>
+          <p className="text-slate-300 font-medium">{caption}</p>
         </div>
       }
       controls={
         <>
           <button
             type="button"
-            onClick={() => {
-              setMode("no-rts");
-              reset();
-              setTimeout(play, 200);
-            }}
+            onClick={() => switchMode("no-rts")}
             className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
               mode === "no-rts" ? "bg-red-600 text-white" : "bg-slate-800 hover:bg-slate-700 text-slate-300"
             }`}
@@ -110,18 +92,23 @@ export function HiddenNode() {
           </button>
           <button
             type="button"
-            onClick={() => {
-              setMode("rts");
-              reset();
-              setTimeout(play, 200);
-            }}
+            onClick={() => switchMode("rts")}
             className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
               mode === "rts" ? "bg-green-600 text-white" : "bg-slate-800 hover:bg-slate-700 text-slate-300"
             }`}
           >
             Con RTS/CTS
           </button>
-          <PlayButton running={running} onPlay={play} onReset={reset} />
+          <StepControls
+            step={step < 0 ? 0 : step}
+            total={total}
+            onNext={next}
+            onPrev={prev}
+            onAuto={auto}
+            onPause={pause}
+            onReset={reset}
+            running={running}
+          />
         </>
       }
     >
@@ -151,17 +138,15 @@ export function HiddenNode() {
           <text y={5} fill="#fff" fontSize={14} fontWeight="bold" textAnchor="middle">PC-B</text>
         </g>
 
-        {/* No-RTS animations */}
-        {phase === "no-rts-attempt-a" && (
-          <Wave from={150} to={400} y={200} color="#58a6ff" label="DATA" />
-        )}
-        {phase === "no-rts-attempt-b" && (
+        {/* Phase visuals */}
+        {phaseId === "no-rts-attempt-a" && <Wave from={150} to={400} y={200} color="#58a6ff" label="DATA" />}
+        {phaseId === "no-rts-attempt-b" && (
           <>
             <Wave from={150} to={400} y={200} color="#58a6ff" label="DATA" />
             <Wave from={650} to={400} y={200} color="#3fb950" label="DATA" />
           </>
         )}
-        {phase === "no-rts-collision" && (
+        {phaseId === "no-rts-collision" && (
           <g>
             <Wave from={150} to={400} y={200} color="#58a6ff" label="DATA" />
             <Wave from={650} to={400} y={200} color="#3fb950" label="DATA" />
@@ -172,17 +157,14 @@ export function HiddenNode() {
           </g>
         )}
 
-        {/* RTS animations */}
-        {phase === "rts-from-a" && (
-          <Wave from={150} to={400} y={200} color="#fbbf24" label="RTS" />
-        )}
-        {phase === "rts-cts-from-ap" && (
+        {phaseId === "rts-from-a" && <Wave from={150} to={400} y={200} color="#fbbf24" label="RTS" />}
+        {phaseId === "rts-cts-from-ap" && (
           <>
             <Wave from={400} to={150} y={200} color="#3fb950" label="CTS" />
             <Wave from={400} to={650} y={200} color="#3fb950" label="CTS" />
           </>
         )}
-        {phase === "rts-data-from-a" && (
+        {phaseId === "rts-data-from-a" && (
           <>
             <Wave from={150} to={400} y={200} color="#58a6ff" label="DATA" />
             <text x={650} y={250} fill="#f59e0b" fontSize={11} textAnchor="middle">
@@ -190,7 +172,7 @@ export function HiddenNode() {
             </text>
           </>
         )}
-        {phase === "rts-b-blocked" && (
+        {phaseId === "rts-b-blocked" && (
           <>
             <text x={650} y={250} fill="#f59e0b" fontSize={11} textAnchor="middle" fontWeight="bold">
               ⏸ NAV: medio reservado
@@ -200,7 +182,7 @@ export function HiddenNode() {
             </text>
           </>
         )}
-        {phase === "rts-ack" && (
+        {phaseId === "rts-ack" && (
           <>
             <Wave from={400} to={150} y={200} color="#3fb950" label="ACK" />
             <text x={650} y={250} fill="#3fb950" fontSize={11} textAnchor="middle">

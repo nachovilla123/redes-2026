@@ -143,19 +143,14 @@
     border: 1px solid #1e293b;
     border-radius: 16px;
     padding: 20px;
-    text-decoration: none;
-    color: inherit;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
     transition: border-color 0.15s;
     position: relative;
   }
   .card:hover { border-color: #334155; }
-  .card.disabled {
-    opacity: 0.5;
-    pointer-events: none;
-  }
+  .card.disabled { opacity: 0.55; }
   .card-top {
     display: flex;
     align-items: flex-start;
@@ -183,29 +178,35 @@
     color: #64748b;
     font-size: 12px;
     margin-top: 2px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
-  .card-bottom {
-    margin-top: auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .card-tag {
-    font-size: 12px;
-    background: #1e293b;
-    border-radius: 6px;
-    padding: 4px 8px;
+  .card-desc {
     color: #94a3b8;
+    font-size: 13px;
+    line-height: 1.5;
+    flex: 1;
   }
-  .card-arrow {
-    color: #475569;
-    font-size: 16px;
-    transition: color 0.15s;
+  .card-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: #4f46e5;
+    color: white !important;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 10px 16px;
+    text-decoration: none;
+    font-size: 13px;
+    transition: background 0.15s;
+    margin-top: auto;
   }
-  .card:hover .card-arrow { color: #94a3b8; }
+  .card-btn:hover { background: #6366f1; }
+  .card-btn.disabled {
+    background: #1e293b;
+    color: #64748b !important;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
 
   footer {
     margin-top: 40px;
@@ -258,7 +259,7 @@
 
     <p class="section-tag">Fundamentos</p>
     <div class="grid">
-      <a class="card" href="01-modelo-comunicaciones.html">
+      <div class="card">
         <div class="card-top">
           <div class="card-icon">📡</div>
           <div class="card-text">
@@ -266,12 +267,10 @@
             <p class="card-sub">Cap. 01 · 5 componentes</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">📖 Doc + animación</span>
-          <span class="card-arrow">→</span>
-        </div>
-      </a>
-      <a class="card" href="02-tipos-redes.html">
+        <p class="card-desc">Fuente, transmisor, sistema, receptor y destino — siempre los 5 en cualquier comunicación.</p>
+        <a href="01-modelo-comunicaciones.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card">
         <div class="card-top">
           <div class="card-icon">🌐</div>
           <div class="card-text">
@@ -279,25 +278,21 @@
             <p class="card-sub">Cap. 02 · LAN/MAN/WAN/GAN</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">📖 Doc + animación</span>
-          <span class="card-arrow">→</span>
-        </div>
-      </a>
-      <a class="card" href="03-conmutacion.html">
+        <p class="card-desc">Cómo se clasifican las redes según el alcance: tu casa, la ciudad, el país, el planeta.</p>
+        <a href="02-tipos-redes.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card">
         <div class="card-top">
           <div class="card-icon">🔀</div>
           <div class="card-text">
-            <h2 class="card-title">Conmutación de circuitos vs paquetes</h2>
-            <p class="card-sub">Cap. 03 · Comparativa lado a lado</p>
+            <h2 class="card-title">Conmutación: circuitos vs paquetes</h2>
+            <p class="card-sub">Cap. 03 · Telefonía vs internet</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">📖 Doc + animación</span>
-          <span class="card-arrow">→</span>
-        </div>
-      </a>
-      <a class="card" href="04-protocolos.html">
+        <p class="card-desc">Reservar mesa vs delivery por Rappi — animación lado a lado de los dos modelos.</p>
+        <a href="03-conmutacion.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card">
         <div class="card-top">
           <div class="card-icon">🤝</div>
           <div class="card-text">
@@ -305,12 +300,10 @@
             <p class="card-sub">Cap. 04 · Sintaxis, semántica, tiempo</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">📖 Doc + animación</span>
-          <span class="card-arrow">→</span>
-        </div>
-      </a>
-      <a class="card" href="05-arquitectura-capas.html">
+        <p class="card-desc">Las reglas que dos máquinas acuerdan para comunicarse — y qué pasa cuando alguna se rompe.</p>
+        <a href="04-protocolos.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card">
         <div class="card-top">
           <div class="card-icon">📚</div>
           <div class="card-text">
@@ -318,16 +311,14 @@
             <p class="card-sub">Cap. 05 · PDUs · 3 niveles</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">📖 Doc + animación</span>
-          <span class="card-arrow">→</span>
-        </div>
-      </a>
+        <p class="card-desc">Por qué las redes se organizan en capas — encapsulamiento como las muñecas rusas.</p>
+        <a href="05-arquitectura-capas.html" class="card-btn">Ver en acción →</a>
+      </div>
     </div>
 
     <p class="section-tag">Modelos OSI y TCP/IP</p>
     <div class="grid">
-      <a class="card" href="06-osi.html">
+      <div class="card">
         <div class="card-top">
           <div class="card-icon">🧱</div>
           <div class="card-text">
@@ -335,12 +326,10 @@
             <p class="card-sub">Cap. 06 · Encapsulamiento</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">📖 Doc + animación</span>
-          <span class="card-arrow">→</span>
-        </div>
-      </a>
-      <a class="card" href="07-tcp-ip.html">
+        <p class="card-desc">Mirá cómo cada capa agrega su header al enviar y lo quita al recibir, capa por capa.</p>
+        <a href="06-osi.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card">
         <div class="card-top">
           <div class="card-icon">🔌</div>
           <div class="card-text">
@@ -348,11 +337,9 @@
             <p class="card-sub">Cap. 07 · TCP vs UDP</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">📖 Doc + animación</span>
-          <span class="card-arrow">→</span>
-        </div>
-      </a>
+        <p class="card-desc">3-way handshake animado, comparativa con pérdida configurable, y para qué sirven los puertos.</p>
+        <a href="07-tcp-ip.html" class="card-btn">Ver en acción →</a>
+      </div>
       <div class="card disabled">
         <div class="card-top">
           <div class="card-icon">⚙️</div>
@@ -361,16 +348,14 @@
             <p class="card-sub">Cap. 08 · Próximamente</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">Pendiente</span>
-          <span class="card-arrow">→</span>
-        </div>
+        <p class="card-desc">CRC, paridad, ARQ básico — los mecanismos que detectan y corrigen errores.</p>
+        <span class="card-btn disabled">Pendiente</span>
       </div>
     </div>
 
     <p class="section-tag">Direccionamiento y switching</p>
     <div class="grid">
-      <a class="card" href="09-vlan.html">
+      <div class="card">
         <div class="card-top">
           <div class="card-icon">🏷️</div>
           <div class="card-text">
@@ -378,12 +363,10 @@
             <p class="card-sub">Cap. 09 · Tag en el trunk</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">📖 Doc + animación</span>
-          <span class="card-arrow">→</span>
-        </div>
-      </a>
-      <a class="card" href="10-subredes.html">
+        <p class="card-desc">Asigná VLANs, mandá broadcasts y mirá cómo el tag 802.1Q viaja por el trunk.</p>
+        <a href="09-vlan.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card">
         <div class="card-top">
           <div class="card-icon">🔢</div>
           <div class="card-text">
@@ -391,12 +374,10 @@
             <p class="card-sub">Cap. 10 · Calculadora visual</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">📖 Doc + animación</span>
-          <span class="card-arrow">→</span>
-        </div>
-      </a>
-      <a class="card" href="11-nat.html">
+        <p class="card-desc">Mové la máscara y mirá cómo cambian los bits, los rangos de hosts, broadcast y red.</p>
+        <a href="10-subredes.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card">
         <div class="card-top">
           <div class="card-icon">🚪</div>
           <div class="card-text">
@@ -404,11 +385,9 @@
             <p class="card-sub">Cap. 11 · Tabla de traducción</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">📖 Doc + animación</span>
-          <span class="card-arrow">→</span>
-        </div>
-      </a>
+        <p class="card-desc">Mirá la tabla NAT del router traduciendo IPs privadas a públicas en tiempo real.</p>
+        <a href="11-nat.html" class="card-btn">Ver en acción →</a>
+      </div>
       <div class="card disabled">
         <div class="card-top">
           <div class="card-icon">🔒</div>
@@ -417,10 +396,8 @@
             <p class="card-sub">Cap. 12 · Próximamente</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">Pendiente</span>
-          <span class="card-arrow">→</span>
-        </div>
+        <p class="card-desc">El túnel virtual sobre internet pública — cómo se cifra el tráfico extremo a extremo.</p>
+        <span class="card-btn disabled">Pendiente</span>
       </div>
       <div class="card disabled">
         <div class="card-top">
@@ -430,10 +407,8 @@
             <p class="card-sub">Cap. 13 · Próximamente</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">Pendiente</span>
-          <span class="card-arrow">→</span>
-        </div>
+        <p class="card-desc">El portero con lista — qué tráfico se permite y cuál se descarta en un router.</p>
+        <span class="card-btn disabled">Pendiente</span>
       </div>
     </div>
 
@@ -447,12 +422,10 @@
             <p class="card-sub">Cap. 14 · Próximamente</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">Pendiente</span>
-          <span class="card-arrow">→</span>
-        </div>
+        <p class="card-desc">Nodo oculto, RTS/CTS, evitando colisiones en el aire — cómo el WiFi maneja el medio compartido.</p>
+        <span class="card-btn disabled">Pendiente</span>
       </div>
-      <a class="card" href="15-arq.html">
+      <div class="card">
         <div class="card-top">
           <div class="card-icon">🔁</div>
           <div class="card-text">
@@ -460,16 +433,14 @@
             <p class="card-sub">Cap. 15 · 3 protocolos</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">📖 Doc + animación</span>
-          <span class="card-arrow">→</span>
-        </div>
-      </a>
+        <p class="card-desc">Stop-and-Wait vs Go-Back-N vs Selective Repeat con pérdidas configurables y stats.</p>
+        <a href="15-arq.html" class="card-btn">Ver en acción →</a>
+      </div>
     </div>
 
     <p class="section-tag">Routing y fragmentación</p>
     <div class="grid">
-      <a class="card" href="16-routing.html">
+      <div class="card">
         <div class="card-top">
           <div class="card-icon">🛤️</div>
           <div class="card-text">
@@ -477,12 +448,10 @@
             <p class="card-sub">Cap. 16 · RIP/OSPF/BGP</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">📖 Doc + animación</span>
-          <span class="card-arrow">→</span>
-        </div>
-      </a>
-      <a class="card" href="17-fragmentacion.html">
+        <p class="card-desc">Hacé clic en cada router para ver su tabla y trazar rutas entre redes.</p>
+        <a href="16-routing.html" class="card-btn">Ver en acción →</a>
+      </div>
+      <div class="card">
         <div class="card-top">
           <div class="card-icon">🧩</div>
           <div class="card-text">
@@ -490,11 +459,9 @@
             <p class="card-sub">Cap. 17 · MTU · MF · Offset</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">📖 Doc + animación</span>
-          <span class="card-arrow">→</span>
-        </div>
-      </a>
+        <p class="card-desc">Cambiá MTUs y mirá los fragmentos generados con su ID, MF y Fragment Offset.</p>
+        <a href="17-fragmentacion.html" class="card-btn">Ver en acción →</a>
+      </div>
       <div class="card disabled">
         <div class="card-top">
           <div class="card-icon">📐</div>
@@ -503,16 +470,14 @@
             <p class="card-sub">Cap. 18 · Próximamente</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">Pendiente</span>
-          <span class="card-arrow">→</span>
-        </div>
+        <p class="card-desc">Subnetting de longitud variable resuelto paso a paso con casos del final de Cicerchia.</p>
+        <span class="card-btn disabled">Pendiente</span>
       </div>
     </div>
 
     <p class="section-tag">Servicios de red</p>
     <div class="grid">
-      <a class="card" href="dns-dhcp.html">
+      <div class="card">
         <div class="card-top">
           <div class="card-icon">🏷️</div>
           <div class="card-text">
@@ -520,49 +485,41 @@
             <p class="card-sub">DORA + resolución recursiva</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">📖 Doc + animación</span>
-          <span class="card-arrow">→</span>
-        </div>
-      </a>
+        <p class="card-desc">El proceso DORA del DHCP y la resolución DNS recursiva paso a paso por la jerarquía.</p>
+        <a href="dns-dhcp.html" class="card-btn">Ver en acción →</a>
+      </div>
       <div class="card disabled">
         <div class="card-top">
           <div class="card-icon">🌍</div>
           <div class="card-text">
             <h2 class="card-title">HTTP / HTTPS</h2>
-            <p class="card-sub">Métodos · status · headers</p>
+            <p class="card-sub">Próximamente</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">Pendiente</span>
-          <span class="card-arrow">→</span>
-        </div>
+        <p class="card-desc">Request/response, métodos, status codes y headers — el protocolo de la web.</p>
+        <span class="card-btn disabled">Pendiente</span>
       </div>
       <div class="card disabled">
         <div class="card-top">
           <div class="card-icon">🔐</div>
           <div class="card-text">
             <h2 class="card-title">TLS / JWT</h2>
-            <p class="card-sub">Handshake · certificados</p>
+            <p class="card-sub">Próximamente</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">Pendiente</span>
-          <span class="card-arrow">→</span>
-        </div>
+        <p class="card-desc">Handshake TLS, cadena de certificados y tokens JWT para autenticación.</p>
+        <span class="card-btn disabled">Pendiente</span>
       </div>
       <div class="card disabled">
         <div class="card-top">
           <div class="card-icon">⚡</div>
           <div class="card-text">
             <h2 class="card-title">HTTP/3 y QUIC</h2>
-            <p class="card-sub">El sucesor sobre UDP</p>
+            <p class="card-sub">Próximamente</p>
           </div>
         </div>
-        <div class="card-bottom">
-          <span class="card-tag">Pendiente</span>
-          <span class="card-arrow">→</span>
-        </div>
+        <p class="card-desc">El sucesor de HTTP/2 sobre UDP — cómo QUIC reduce la latencia de las conexiones.</p>
+        <span class="card-btn disabled">Pendiente</span>
       </div>
     </div>
 

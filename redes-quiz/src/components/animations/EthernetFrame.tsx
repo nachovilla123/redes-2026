@@ -23,6 +23,7 @@ export function EthernetFrame() {
   function next() {
     setHighlight((h) => Math.min(h + 1, FIELDS.length - 1));
   }
+  function pause() { setRunning(false); }
   function prev() {
     setHighlight((h) => Math.max(h - 1, 0));
   }
@@ -72,6 +73,7 @@ export function EthernetFrame() {
           onNext={next}
           onPrev={prev}
           onAuto={auto}
+          onPause={pause}
           onReset={reset}
           running={running}
         />

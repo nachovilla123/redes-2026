@@ -116,7 +116,7 @@ export function PlayButton({
 }
 
 /**
- * Controles step-by-step: Anterior · Siguiente · Auto · Reset.
+ * Controles step-by-step: Anterior · Siguiente · Auto/Pausa · Reset.
  * Para animaciones que tienen pasos discretos (1..n).
  */
 export function StepControls({
@@ -125,6 +125,7 @@ export function StepControls({
   onNext,
   onPrev,
   onAuto,
+  onPause,
   onReset,
   running,
 }: {
@@ -133,6 +134,7 @@ export function StepControls({
   onNext: () => void;
   onPrev?: () => void;
   onAuto: () => void;
+  onPause?: () => void;
   onReset: () => void;
   running: boolean;
 }) {
@@ -160,15 +162,26 @@ export function StepControls({
       >
         Siguiente paso →
       </button>
-      <button
-        type="button"
-        onClick={onAuto}
-        disabled={running}
-        className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors"
-        title="Reproducir todos los pasos automáticamente"
-      >
-        {running ? "▶ Auto..." : "▶ Auto"}
-      </button>
+      {running && onPause ? (
+        <button
+          type="button"
+          onClick={onPause}
+          className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold rounded-lg transition-colors"
+          title="Pausar reproducción automática"
+        >
+          ⏸ Pausa
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={onAuto}
+          disabled={running}
+          className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors"
+          title="Reproducir automáticamente"
+        >
+          ▶ Auto
+        </button>
+      )}
       <button
         type="button"
         onClick={onReset}

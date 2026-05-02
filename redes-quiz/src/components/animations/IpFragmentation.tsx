@@ -22,6 +22,7 @@ export function IpFragmentation() {
   function next() {
     setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
   }
+  function pause() { setRunning(false); }
   function prev() {
     setStep((s) => Math.max(s - 1, 0));
   }
@@ -66,6 +67,7 @@ export function IpFragmentation() {
           onNext={next}
           onPrev={prev}
           onAuto={auto}
+          onPause={pause}
           onReset={reset}
           running={running}
         />

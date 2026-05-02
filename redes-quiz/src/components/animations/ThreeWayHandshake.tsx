@@ -50,6 +50,7 @@ export function ThreeWayHandshake() {
   function next() {
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
   }
+  function pause() { setRunning(false); }
   function prev() {
     setStep((s) => Math.max(s - 1, 0));
   }
@@ -88,6 +89,7 @@ export function ThreeWayHandshake() {
           onNext={next}
           onPrev={prev}
           onAuto={auto}
+          onPause={pause}
           onReset={reset}
           running={running}
         />

@@ -25,12 +25,14 @@ export const flashcardsClase4: Flashcard[] = [
     front: "¿Qué es el Problema del Nodo Oculto en WiFi?",
     back: "Ocurre cuando dos dispositivos (A y B) no se 'ven' entre sí pero ambos pueden llegar al mismo Access Point.\n\nA escucha el canal → libre → empieza a transmitir.\nB también escucha → libre (no escucha a A) → también empieza.\nEl AP recibe las dos señales al mismo tiempo → colisión.\n\nNi A ni B saben que colisionaron porque no se detectan mutuamente.\n\nAnalogía: dos personas en salas separadas que no se escuchan entre sí, pero ambas hablan con el mismo recepcionista al mismo tiempo.",
     tag: "WiFi",
+    simulator: { animationId: "hidden-node", label: "Nodo oculto + RTS/CTS" },
   },
   {
     id: 304,
     front: "¿Cómo resuelve RTS/CTS el problema del nodo oculto?",
     back: "RTS = Request To Send | CTS = Clear To Send\n\n1. A quiere transmitir → envía RTS al AP: 'quiero el canal por X tiempo'\n2. El AP responde con CTS que TODOS en el área escuchan: 'A tiene el canal'\n3. B escucha el CTS → sabe que el canal está ocupado → espera\n4. A transmite sin interferencia\n5. AP manda ACK final\n\nLa clave: el AP anuncia la reserva (y sí llega a todos), no el cliente que nadie más escucha.\n\nCosto: overhead de tramas extra → solo se usa para tramas más grandes que un umbral configurable.",
     tag: "WiFi",
+    simulator: { animationId: "hidden-node", label: "Nodo oculto + RTS/CTS" },
   },
   {
     id: 305,

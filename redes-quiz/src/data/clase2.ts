@@ -91,7 +91,7 @@ export const flashcardsClase2: Flashcard[] = [
     front: "¿Cuál es la diferencia fundamental entre TCP y UDP?",
     back: "TCP (Transmission Control Protocol):\n• Orientado a conexión (handshake de 3 vías)\n• Entrega garantizada y en orden\n• Control de flujo y congestión\n• Más lento\n• Uso: web, email, descarga de archivos\n\nUDP (User Datagram Protocol):\n• Sin conexión, sin garantías\n• Más rápido, menos overhead\n• Puede perder paquetes\n• Uso: streaming, videollamadas, DNS, juegos online",
     tag: "TCP/IP",
-    simulator: { url: "/simuladores/07-tcp-ip.html", label: "TCP/IP · handshake y puertos" },
+    simulator: { animationId: "tcp-vs-udp", label: "TCP vs UDP con pérdida" },
   },
   {
     id: 113,

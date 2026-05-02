@@ -13,12 +13,14 @@ export const flashcardsClase3: Flashcard[] = [
     front: "¿Cuál es la diferencia entre un Hub y un Switch?",
     back: "Hub (Ethernet compartida, 1990-1995):\n• Todos los dispositivos comparten el mismo ancho de banda\n• Si dos hablan a la vez, colisionan\n• Todos forman UN solo dominio de colisión\n\nSwitch (Ethernet conmutada, 1995-):\n• Cada puerto tiene su propio canal dedicado\n• No hay colisiones entre puertos distintos\n• Cada puerto es un dominio de colisión separado\n• Cada dispositivo usa todo el ancho de banda de su puerto",
     tag: "Ethernet",
+    simulator: { animationId: "hub-vs-switch", label: "Hub vs Switch (colisiones)" },
   },
   {
     id: 202,
     front: "¿Qué es un dominio de colisión?",
     back: "Conjunto de dispositivos que comparten el mismo medio físico y pueden interferir entre sí al transmitir simultáneamente.\n\nHub: todos los conectados forman un único dominio de colisión.\n\nSwitch: cada puerto es un dominio de colisión independiente → los dispositivos conectados a puertos distintos nunca colisionan entre sí.\n\nRouter: separa dominios de colisión Y dominios de broadcast.",
     tag: "Ethernet",
+    simulator: { animationId: "hub-vs-switch", label: "Hub vs Switch (colisiones)" },
   },
   {
     id: 203,
@@ -102,7 +104,7 @@ export const flashcardsClase3: Flashcard[] = [
     front: "¿Qué es el STP (Spanning Tree Protocol) y por qué es necesario?",
     back: "Protocolo que evita bucles (loops) en redes con enlaces redundantes.\n\nProblema: si conectás dos switches con dos cables (para redundancia), se forman bucles → las tramas dan vueltas infinitas y colapsan la red.\n\nSolución STP:\n• Elige un switch raíz (root) con el ID más bajo\n• Calcula el árbol de spanning tree: camino único entre cada par de switches\n• Bloquea los puertos redundantes\n• Si un enlace falla, reactiva los bloqueados\n\nTramas de control: BPDU (Bridge Protocol Data Units)",
     tag: "VLAN",
-    simulator: { url: "/simuladores/09-vlan.html", label: "Switch y VLANs · 802.1Q" },
+    simulator: { animationId: "spanning-tree", label: "STP bloqueando loops" },
   },
   {
     id: 215,

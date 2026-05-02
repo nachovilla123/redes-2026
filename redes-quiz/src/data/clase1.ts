@@ -105,6 +105,7 @@ export const flashcards: Flashcard[] = [
     front: "¿Qué es el CRC?",
     back: "Cyclic Redundancy Check: técnica de detección de errores.\n\n1. Para cada bloque de k bits genera una secuencia de n bits\n2. Transmite k+n bits exactamente divisibles por un número determinado\n3. El receptor divide la trama por ese número:\n   • Resto = 0 → sin error\n   • Resto ≠ 0 → error detectado",
     tag: "Errores",
+    simulator: { animationId: "crc", label: "CRC división binaria" },
   },
   {
     id: 12,

@@ -92,6 +92,7 @@ export const flashcardsClase5: Flashcard[] = [
     front: "¿Cuáles son los 4 tipos de retardo nodal en una red de conmutación de paquetes?",
     back: "Cuando un paquete pasa por un router (nodo), sufre 4 tipos de retardo:\n\n1. Retardo de PROCESAMIENTO NODAL: tiempo que tarda el router en examinar el encabezado y decidir a dónde enviar el paquete. Generalmente microsegundos — despreciable en routers modernos.\n\n2. Retardo de COLA: tiempo esperando en la cola antes de poder transmitir. Depende del tráfico — puede ser 0 o muy alto si el enlace está congestionado.\n\n3. Retardo de TRANSMISIÓN: tiempo en poner todos los bits del paquete en el enlace. = Longitud del paquete (bits) / Velocidad del enlace (bps). Determinístico y predecible.\n\n4. Retardo de PROPAGACIÓN: tiempo que tarda la señal en viajar físicamente por el cable. = Distancia / Velocidad de propagación. Para fibra ≈ 2/3 de la velocidad de la luz.\n\nRetardo nodal total = suma de los 4.\n\nHerramienta para medirlo: Traceroute (tracert en Windows).",
     tag: "Nivel Internet",
+    simulator: { animationId: "nodal-delays", label: "4 tipos de retardo en un router" },
   },
   {
     id: 413,

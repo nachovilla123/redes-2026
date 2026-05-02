@@ -13,7 +13,7 @@ export const flashcardsClase5: Flashcard[] = [
     front: "¿Qué es la tabla de rutas y qué tipos de rutas contiene?",
     back: "Es la lista que tiene cada router con las redes que conoce y cómo llegar a ellas.\n\nTipos (indicados por letra al inicio):\n• C → Connected: red directamente conectada a una interfaz\n• S → Static: configurada a mano por el administrador\n• O → OSPF: aprendida por el protocolo OSPF\n• R → RIP: aprendida por el protocolo RIP\n• D → EIGRP, B → BGP, etc.\n\nLos números [AD/métrica] entre corchetes indican:\n• AD (distancia administrativa): qué tan confiable es la fuente (menos = más confiable)\n• Métrica: costo para llegar al destino (menos = mejor)",
     tag: "Routing",
-    simulator: { url: "/simuladores/16-routing.html", label: "Routing · tablas y next-hop" },
+    simulator: { animationId: "routing-table", label: "Paquete saltando por routers" },
   },
   {
     id: 402,
@@ -63,14 +63,14 @@ export const flashcardsClase5: Flashcard[] = [
     front: "¿Cuáles son los tres campos clave del header IPv4 para la fragmentación?",
     back: "Identification (ID) — 16 bits:\nIdentifica a qué datagrama original pertenece el fragmento. Todos los fragmentos del mismo datagrama tienen el MISMO ID.\n\nFlags — 3 bits (solo 2 se usan):\n• Bit DF (Don't Fragment): 1 = no fragmentar, 0 = se puede fragmentar\n• Bit MF (More Fragments): 1 = hay más fragmentos después, 0 = este es el último\n\nFragment Offset — 13 bits:\nPosición de este fragmento dentro del datagrama original, en unidades de 8 bytes.\nEjemplo: offset=75 → el fragmento empieza en el byte 75 × 8 = 600.",
     tag: "Fragmentación",
-    simulator: { url: "/simuladores/17-fragmentacion.html", label: "Fragmentación IPv4" },
+    simulator: { animationId: "ip-fragmentation", label: "Fragmentación IP paso a paso" },
   },
   {
     id: 409,
     front: "¿Cómo se calcula la fragmentación? (fórmula y ejemplo)",
     back: "Fórmula:\n• Payload por fragmento = MTU − 20 (header IP), redondeado hacia abajo al múltiplo de 8\n• Offset de cada fragmento = posición inicial del payload ÷ 8\n• MF = 1 en todos excepto el último\n\nEjemplo: MTU destino = 620 bytes, datagrama = 1500 bytes (20 IP + 1480 datos)\n• Datos por fragmento: 620 − 20 = 600 bytes (ya es múltiplo de 8 ✓)\n• Fragmento 1: 600 bytes, MF=1, Offset=0\n• Fragmento 2: 600 bytes, MF=1, Offset=600/8=75\n• Fragmento 3: 280 bytes, MF=0, Offset=1200/8=150",
     tag: "Fragmentación",
-    simulator: { url: "/simuladores/17-fragmentacion.html", label: "Fragmentación IPv4" },
+    simulator: { animationId: "ip-fragmentation", label: "Fragmentación IP paso a paso" },
   },
   {
     id: 410,
@@ -92,6 +92,7 @@ export const flashcardsClase5: Flashcard[] = [
     front: "¿Cuáles son los 4 tipos de retardo nodal en una red de conmutación de paquetes?",
     back: "Cuando un paquete pasa por un router (nodo), sufre 4 tipos de retardo:\n\n1. Retardo de PROCESAMIENTO NODAL: tiempo que tarda el router en examinar el encabezado y decidir a dónde enviar el paquete. Generalmente microsegundos — despreciable en routers modernos.\n\n2. Retardo de COLA: tiempo esperando en la cola antes de poder transmitir. Depende del tráfico — puede ser 0 o muy alto si el enlace está congestionado.\n\n3. Retardo de TRANSMISIÓN: tiempo en poner todos los bits del paquete en el enlace. = Longitud del paquete (bits) / Velocidad del enlace (bps). Determinístico y predecible.\n\n4. Retardo de PROPAGACIÓN: tiempo que tarda la señal en viajar físicamente por el cable. = Distancia / Velocidad de propagación. Para fibra ≈ 2/3 de la velocidad de la luz.\n\nRetardo nodal total = suma de los 4.\n\nHerramienta para medirlo: Traceroute (tracert en Windows).",
     tag: "Nivel Internet",
+    simulator: { animationId: "nodal-delays", label: "4 tipos de retardo en un router" },
   },
   {
     id: 413,

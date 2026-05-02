@@ -6,6 +6,7 @@ import { use } from "react";
 import { getTopicBySlug, type Flashcard } from "@/data/index";
 import { notFound } from "next/navigation";
 import { downloadReviewPDF } from "@/lib/generatePDF";
+import { getAnimation } from "@/components/animations";
 
 export default function FlashcardsPage({
   params,
@@ -39,7 +40,7 @@ function FlashcardSession({
   const [isFlipped, setIsFlipped] = useState(false);
   const [roundDone, setRoundDone] = useState(false);
   const [generatingPDF, setGeneratingPDF] = useState(false);
-  const [simulatorOpen, setSimulatorOpen] = useState<{ url: string; label?: string } | null>(null);
+  const [simulatorOpen, setSimulatorOpen] = useState<{ url?: string; animationId?: string; label?: string } | null>(null);
 
   useEffect(() => {
     if (!simulatorOpen) return;
@@ -269,12 +270,16 @@ function FlashcardSession({
               <span className="text-xs text-blue-400 uppercase tracking-widest font-medium mb-4 block">Respuesta</span>
               <p className="text-slate-100 text-sm sm:text-base leading-relaxed whitespace-pre-line">{card.back}</p>
             </div>
-            {card.simulator && (
+            {card.simulator && (card.simulator.url || card.simulator.animationId) && (
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSimulatorOpen({ url: card.simulator!.url, label: card.simulator!.label });
+                  setSimulatorOpen({
+                    url: card.simulator!.url,
+                    animationId: card.simulator!.animationId,
+                    label: card.simulator!.label,
+                  });
                 }}
                 className="mt-5 inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold rounded-xl px-4 py-3 transition-colors text-sm self-start"
               >
@@ -335,20 +340,22 @@ function FlashcardSession({
               <div className="flex items-center gap-3 min-w-0">
                 <span className="text-xl">🎬</span>
                 <div className="min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Simulador</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Animación</p>
                   <p className="text-white font-semibold text-sm truncate">{simulatorOpen.label ?? "Animación"}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
-                <a
-                  href={simulatorOpen.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-slate-400 hover:text-white text-xs transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-800"
-                  title="Abrir en nueva pestaña"
-                >
-                  ↗ Pestaña nueva
-                </a>
+                {simulatorOpen.url && (
+                  <a
+                    href={simulatorOpen.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-slate-400 hover:text-white text-xs transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-800"
+                    title="Abrir en nueva pestaña"
+                  >
+                    ↗ Pestaña nueva
+                  </a>
+                )}
                 <button
                   type="button"
                   onClick={() => setSimulatorOpen(null)}
@@ -359,14 +366,38 @@ function FlashcardSession({
                 </button>
               </div>
             </div>
-            <iframe
-              src={simulatorOpen.url}
-              className="flex-1 w-full bg-slate-950"
-              title={simulatorOpen.label ?? "Simulador"}
-            />
+            <SimulatorBody open={simulatorOpen} />
           </div>
         </div>
       )}
     </main>
   );
+}
+
+function SimulatorBody({ open }: { open: { url?: string; animationId?: string; label?: string } }) {
+  if (open.animationId) {
+    const Animation = getAnimation(open.animationId);
+    if (Animation) {
+      return (
+        <div className="flex-1 w-full overflow-hidden bg-slate-950">
+          <Animation />
+        </div>
+      );
+    }
+    return (
+      <div className="flex-1 flex items-center justify-center text-slate-500 text-sm">
+        Animación no encontrada: {open.animationId}
+      </div>
+    );
+  }
+  if (open.url) {
+    return (
+      <iframe
+        src={open.url}
+        className="flex-1 w-full bg-slate-950"
+        title={open.label ?? "Simulador"}
+      />
+    );
+  }
+  return null;
 }

@@ -62,7 +62,7 @@ export const flashcardsClase2: Flashcard[] = [
     front: "¿Qué es la encapsulación y cómo funciona?",
     back: "Cada capa agrega su propia cabecera (header) al dato que recibe de la capa superior, 'envolviendo' el contenido.\n\nEmisor (hacia abajo):\nDato → Segmento (+ header capa 4) → Paquete (+ header capa 3) → Trama (+ header capa 2) → Bits\n\nReceptor (hacia arriba): cada capa saca su cabecera y pasa el contenido a la siguiente.\n\nAnalogía: como meter una carta en un sobre, ese sobre en una caja, esa caja en un contenedor.",
     tag: "OSI",
-    simulator: { url: "/simuladores/06-osi.html", label: "Modelo OSI" },
+    simulator: { animationId: "encapsulation", label: "Encapsulación capa por capa" },
   },
   {
     id: 109,
@@ -91,21 +91,21 @@ export const flashcardsClase2: Flashcard[] = [
     front: "¿Cuál es la diferencia fundamental entre TCP y UDP?",
     back: "TCP (Transmission Control Protocol):\n• Orientado a conexión (handshake de 3 vías)\n• Entrega garantizada y en orden\n• Control de flujo y congestión\n• Más lento\n• Uso: web, email, descarga de archivos\n\nUDP (User Datagram Protocol):\n• Sin conexión, sin garantías\n• Más rápido, menos overhead\n• Puede perder paquetes\n• Uso: streaming, videollamadas, DNS, juegos online",
     tag: "TCP/IP",
-    simulator: { url: "/simuladores/07-tcp-ip.html", label: "TCP/IP · handshake y puertos" },
+    simulator: { animationId: "tcp-vs-udp", label: "TCP vs UDP con pérdida" },
   },
   {
     id: 113,
     front: "¿Qué es el handshake de 3 vías de TCP?",
     back: "Proceso para establecer una conexión TCP antes de enviar datos:\n\n1. SYN: el cliente envía 'quiero conectarme'\n2. SYN-ACK: el servidor responde 'ok, yo también'\n3. ACK: el cliente confirma 'perfecto, empezamos'\n\nRecién después de esto se envían datos. Garantiza que ambos extremos están listos y sincronizados.",
     tag: "TCP/IP",
-    simulator: { url: "/simuladores/07-tcp-ip.html", label: "TCP/IP · handshake y puertos" },
+    simulator: { animationId: "tcp-handshake", label: "3-way handshake" },
   },
   {
     id: 114,
     front: "¿Qué es un puerto y para qué sirve?",
     back: "Número de 16 bits (0-65535) que identifica un proceso/aplicación específica en un host.\n\nPermite que un mismo equipo tenga múltiples conexiones simultáneas. La IP identifica el equipo, el puerto identifica la aplicación.\n\nPuertos bien conocidos:\n• 80 → HTTP\n• 443 → HTTPS\n• 22 → SSH\n• 25 → SMTP\n• 53 → DNS\n• 21 → FTP",
     tag: "TCP/IP",
-    simulator: { url: "/simuladores/07-tcp-ip.html", label: "TCP/IP · handshake y puertos" },
+    simulator: { animationId: "ports", label: "Puertos como puertas" },
   },
   {
     id: 115,

@@ -36,10 +36,20 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-slate-400 hover:text-blue-400 text-xs font-medium transition-colors"
-              title="LinkedIn"
+              title="LinkedIn — Ignacio Villarruel"
             >
               <LinkedinIcon />
               <span className="hidden sm:inline">Ignacio Villarruel</span>
+            </a>
+            <a
+              href="https://www.linkedin.com/in/alanfried/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-slate-400 hover:text-blue-400 text-xs font-medium transition-colors"
+              title="LinkedIn — Alan Fried"
+            >
+              <LinkedinIcon />
+              <span className="hidden sm:inline">Alan Fried</span>
             </a>
             <a
               href="https://github.com/nachovilla123/redes-2026"

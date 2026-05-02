@@ -13,30 +13,35 @@ export const flashcardsClase3: Flashcard[] = [
     front: "¿Cuál es la diferencia entre un Hub y un Switch?",
     back: "Hub (Ethernet compartida, 1990-1995):\n• Todos los dispositivos comparten el mismo ancho de banda\n• Si dos hablan a la vez, colisionan\n• Todos forman UN solo dominio de colisión\n\nSwitch (Ethernet conmutada, 1995-):\n• Cada puerto tiene su propio canal dedicado\n• No hay colisiones entre puertos distintos\n• Cada puerto es un dominio de colisión separado\n• Cada dispositivo usa todo el ancho de banda de su puerto",
     tag: "Ethernet",
+    simulator: { animationId: "hub-vs-switch", label: "Hub vs Switch (colisiones)" },
   },
   {
     id: 202,
     front: "¿Qué es un dominio de colisión?",
     back: "Conjunto de dispositivos que comparten el mismo medio físico y pueden interferir entre sí al transmitir simultáneamente.\n\nHub: todos los conectados forman un único dominio de colisión.\n\nSwitch: cada puerto es un dominio de colisión independiente → los dispositivos conectados a puertos distintos nunca colisionan entre sí.\n\nRouter: separa dominios de colisión Y dominios de broadcast.",
     tag: "Ethernet",
+    simulator: { animationId: "hub-vs-switch", label: "Hub vs Switch (colisiones)" },
   },
   {
     id: 203,
     front: "¿Cuál es la estructura de una trama Ethernet?",
     back: "Preámbulo (8B) | MAC Destino (6B) | MAC Origen (6B) | Tipo/Longitud (2B) | Datos (0-1500B) | Relleno (0-46B) | CRC (4B)\n\nMínimo: 64 bytes (para detección de colisiones)\nMáximo: 1518 bytes (sin contar preámbulo)\nEl relleno aparece solo cuando los datos son muy cortos para llegar al mínimo.",
     tag: "Ethernet",
+    simulator: { animationId: "ethernet-frame", label: "Trama Ethernet campo a campo" },
   },
   {
     id: 204,
     front: "¿Cuáles son los 3 tipos de emisión en una LAN?",
     back: "Unicast: dirigida a un único host (una sola interfaz). El más común.\n\nMulticast: dirigida a un grupo de hosts que se suscribieron. El grupo puede cambiar dinámicamente.\n\nBroadcast: dirigida a TODOS los hosts de la LAN. Dirección: FF:FF:FF:FF:FF:FF.\n\nRegla: las direcciones multicast y broadcast NUNCA aparecen como dirección de origen, solo como destino.",
     tag: "Ethernet",
+    simulator: { animationId: "cast-types", label: "Unicast vs Multicast vs Broadcast" },
   },
   {
     id: 205,
     front: "¿Cómo se estructura una dirección MAC?",
     back: "6 bytes = 48 bits, expresados en hexadecimal.\n\nPrimeros 3 bytes → OUI (Organizationally Unique Identifier): asignado al fabricante por IEEE.\nÚltimos 3 bytes → Número específico del dispositivo.\n\nBit 1 del primer byte:\n• 0 = unicast (Individual)\n• 1 = multicast/broadcast (Grupo)\n\nBit 2 del primer byte:\n• 0 = Global (administrada por IEEE)\n• 1 = Local (administrada localmente)",
     tag: "Ethernet",
+    simulator: { animationId: "mac-structure", label: "Estructura de la MAC" },
   },
   // Switch
   {
@@ -44,14 +49,14 @@ export const flashcardsClase3: Flashcard[] = [
     front: "¿Qué es la tabla CAM de un switch?",
     back: "Content Addressable Memory: tabla que mapea direcciones MAC → puerto del switch.\n\nCómo se llena:\n• El switch aprende la MAC de origen de cada trama que llega y la asocia al puerto por donde llegó.\n• Las entradas tienen un tiempo de vida (típicamente 5 min): si no hay actividad, se borran para contemplar la movilidad.\n\nCómo se usa:\n• Llega trama con destino X → busca X en la tabla → envía por ese puerto.\n• Si no está → envía por TODOS los puertos activos (flooding).",
     tag: "Switch",
-    simulator: { url: "/simuladores/09-vlan.html", label: "Switch y VLANs" },
+    simulator: { animationId: "cam-table", label: "Tabla CAM aprendiendo" },
   },
   {
     id: 207,
     front: "¿Cuáles son los 3 modos de conmutación de un switch?",
     back: "Store and Forward:\n• Recibe la trama COMPLETA, verifica el CRC y luego reenvía.\n• Mayor latencia, pero no reenvía tramas con errores.\n\nCut-Through:\n• Lee solo la MAC de destino y reenvía de inmediato.\n• Muy baja latencia, pero puede reenviar tramas corruptas.\n\nFragment Free (Cut-Through modificado):\n• Espera los primeros 64 bytes (mínimo que dura una colisión) antes de reenviar.\n• Balance entre latencia y filtrado de errores.",
     tag: "Switch",
-    simulator: { url: "/simuladores/09-vlan.html", label: "Switch y VLANs" },
+    simulator: { animationId: "switch-modes", label: "Modos de conmutación" },
   },
   {
     id: 208,
@@ -65,7 +70,7 @@ export const flashcardsClase3: Flashcard[] = [
     front: "¿Qué es half duplex vs full duplex?",
     back: "Half duplex: la interfaz puede transmitir O recibir, pero no ambas cosas al mismo tiempo. (Como una radio walkie-talkie)\n→ Puede haber colisiones.\n\nFull duplex: transmite Y recibe simultáneamente en canales separados.\n→ Sin colisiones, doble ancho de banda efectivo.\n\nLos switches modernos operan en full duplex en cada puerto.",
     tag: "Switch",
-    simulator: { url: "/simuladores/09-vlan.html", label: "Switch y VLANs" },
+    simulator: { animationId: "half-full-duplex", label: "Half vs Full duplex" },
   },
   // VLAN
   {
@@ -87,21 +92,21 @@ export const flashcardsClase3: Flashcard[] = [
     front: "¿Qué es un enlace troncal (trunk) y por qué se usa?",
     back: "Un trunk es un enlace entre switches que transporta tráfico de MÚLTIPLES VLANs simultáneamente, usando un único cable físico.\n\nSin trunk: necesitarías un cable físico separado por VLAN entre cada par de switches.\n\nCon trunk: un solo cable lleva todas las VLANs. Cada trama se etiqueta con el ID de su VLAN (IEEE 802.1Q) para que el switch receptor sepa a qué VLAN pertenece.",
     tag: "VLAN",
-    simulator: { url: "/simuladores/09-vlan.html", label: "Switch y VLANs · 802.1Q" },
+    simulator: { animationId: "dot1q", label: "Trunk + tag 802.1Q" },
   },
   {
     id: 213,
     front: "¿Qué es el protocolo IEEE 802.1Q?",
     back: "Estándar que define cómo etiquetar tramas Ethernet con información de VLAN para transportarlas por enlaces trunk.\n\nAgrega 4 bytes a la trama Ethernet original con:\n• TPID (2B): valor 0x8100 → indica que es una trama etiquetada\n• Prioridad (3 bits): QoS, prioridad del tráfico\n• CFI (1 bit): formato canónico (0) o no canónico (1)\n• VLAN ID (12 bits): identifica la VLAN (0-4095 VLANs posibles)",
     tag: "VLAN",
-    simulator: { url: "/simuladores/09-vlan.html", label: "Switch y VLANs · 802.1Q" },
+    simulator: { animationId: "dot1q", label: "Tag 802.1Q en el trunk" },
   },
   {
     id: 214,
     front: "¿Qué es el STP (Spanning Tree Protocol) y por qué es necesario?",
     back: "Protocolo que evita bucles (loops) en redes con enlaces redundantes.\n\nProblema: si conectás dos switches con dos cables (para redundancia), se forman bucles → las tramas dan vueltas infinitas y colapsan la red.\n\nSolución STP:\n• Elige un switch raíz (root) con el ID más bajo\n• Calcula el árbol de spanning tree: camino único entre cada par de switches\n• Bloquea los puertos redundantes\n• Si un enlace falla, reactiva los bloqueados\n\nTramas de control: BPDU (Bridge Protocol Data Units)",
     tag: "VLAN",
-    simulator: { url: "/simuladores/09-vlan.html", label: "Switch y VLANs · 802.1Q" },
+    simulator: { animationId: "spanning-tree", label: "STP bloqueando loops" },
   },
   {
     id: 215,
@@ -116,14 +121,14 @@ export const flashcardsClase3: Flashcard[] = [
     front: "¿Qué es el Storm Control en un switch?",
     back: "Mecanismo para controlar tormentas de broadcast: situaciones donde una cantidad anormal de tramas broadcast inunda la red y la satura.\n\nFuncionamiento:\n• El switch mide la velocidad de entrada de tramas broadcast en cada puerto\n• Si supera el umbral configurado (en kbps), descarta el exceso\n• Se configura puerto por puerto\n• También puede aplicarse a multicast y unicast desconocido",
     tag: "Switch",
-    simulator: { url: "/simuladores/09-vlan.html", label: "Switch y VLANs" },
+    simulator: { animationId: "storm-control", label: "Storm Control vs sin protección" },
   },
   {
     id: 217,
     front: "¿Qué es Port Security (seguridad de puertos)?",
     back: "Mecanismo que controla qué dispositivos pueden conectarse a un puerto del switch, basándose en la dirección MAC.\n\nSi llega una trama cuya MAC origen no está en la tabla de ese puerto, el switch puede:\n• Forward: dejarla pasar sin aprender la MAC\n• Discard: descartarla silenciosamente\n• Discard + deshabilitar el puerto\n• Enviar un trap SNMP al sistema de gestión\n\nÚtil para evitar que alguien enchufe un dispositivo no autorizado.",
     tag: "Switch",
-    simulator: { url: "/simuladores/09-vlan.html", label: "Switch y VLANs" },
+    simulator: { animationId: "port-security", label: "Port Security: protect/restrict/shutdown" },
   },
   {
     id: 218,

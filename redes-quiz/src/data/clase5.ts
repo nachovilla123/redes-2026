@@ -20,35 +20,35 @@ export const flashcardsClase5: Flashcard[] = [
     front: "¿Qué es un Sistema Autónomo (AS) y cómo divide los protocolos de routing?",
     back: "Un Sistema Autónomo es una red bajo un mismo control administrativo (tu ISP, Google, Amazon, Telecom Argentina, etc.), identificado por un número (ASN).\n\nPor eso existen dos tipos de protocolos:\n\nIGP (Interior Gateway Protocol): para rutear DENTRO de un AS\n→ RIP, OSPF, EIGRP\n\nEGP (Exterior Gateway Protocol): para rutear ENTRE sistemas autónomos\n→ BGP (el único EGP vigente, es el protocolo de ruteo de Internet)",
     tag: "Routing",
-    simulator: { url: "/simuladores/16-routing.html", label: "Routing · tablas y next-hop" },
+    simulator: { animationId: "routing-protocols", label: "RIP / OSPF / BGP comparados" },
   },
   {
     id: 403,
     front: "¿Cómo funciona RIP y cuáles son sus limitaciones?",
     back: "RIP (Routing Information Protocol):\n• Tipo: IGP, algoritmo de vector de distancia\n• Métrica: cantidad de saltos (hops) — cada router atravesado = 1\n• Límite: máximo 15 saltos. Si está a 16 hops → inalcanzable\n• Actualización: cada 30 segundos envía su tabla completa a los vecinos\n• Distancia administrativa: 120\n\nAnalogía: preguntarle al vecino '¿cuántas cuadras al centro?' — él te dice lo que sabe y vos sumás 1.\n\nProblemas: converge lento (puede tardar minutos si una ruta falla), no escala a redes grandes.",
     tag: "Routing",
-    simulator: { url: "/simuladores/16-routing.html", label: "Routing · tablas y next-hop" },
+    simulator: { animationId: "routing-protocols", label: "RIP / OSPF / BGP comparados" },
   },
   {
     id: 404,
     front: "¿Cómo funciona OSPF y por qué es preferido sobre RIP?",
     back: "OSPF (Open Shortest Path First):\n• Tipo: IGP, algoritmo de estado de enlace (link-state)\n• Métrica: costo basado en el ancho de banda del enlace\n• Sin límite de saltos\n• Funcionamiento: cada router conoce la topología completa del AS y calcula el camino más corto con el algoritmo de Dijkstra\n• Distancia administrativa: 110 (más confiable que RIP=120)\n\nAnalogía: tener el mapa completo de la ciudad y calcular el mejor camino vos mismo.\n\nVentajas sobre RIP: converge mucho más rápido, escala a redes grandes, sin límite de saltos.",
     tag: "Routing",
-    simulator: { url: "/simuladores/16-routing.html", label: "Routing · tablas y next-hop" },
+    simulator: { animationId: "routing-protocols", label: "RIP / OSPF / BGP comparados" },
   },
   {
     id: 405,
     front: "¿Qué es BGP y para qué se usa?",
     back: "BGP (Border Gateway Protocol):\n• Tipo: EGP — el protocolo de ruteo de Internet\n• Usado entre: sistemas autónomos (entre ISPs, entre empresas y sus ISPs)\n• Métrica: no usa métrica simple — considera políticas, relaciones comerciales y AS-PATH (cantidad de AS que cruza)\n• No busca el camino más rápido sino el más 'conveniente' según políticas\n\nAnalogía: si RIP/OSPF son el GPS interno de una empresa, BGP es el sistema de acuerdos entre países sobre qué aviones pueden cruzar qué espacio aéreo y por dónde.",
     tag: "Routing",
-    simulator: { url: "/simuladores/16-routing.html", label: "Routing · tablas y next-hop" },
+    simulator: { animationId: "routing-protocols", label: "RIP / OSPF / BGP comparados" },
   },
   {
     id: 406,
     front: "Tabla comparativa: RIP, OSPF y BGP",
     back: "| | RIP | OSPF | BGP |\n|---|---|---|---|\n| Tipo | IGP | IGP | EGP |\n| Algoritmo | Vector de distancia | Link-state (Dijkstra) | Path vector |\n| Métrica | Hops (máx 15) | Costo (ancho de banda) | AS-PATH + políticas |\n| Convergencia | Lenta | Rápida | Lenta pero estable |\n| Escala | Redes pequeñas | Medianas/grandes | Internet |\n| Distancia adm. | 120 | 110 | 20 (eBGP) / 200 (iBGP) |",
     tag: "Routing",
-    simulator: { url: "/simuladores/16-routing.html", label: "Routing · tablas y next-hop" },
+    simulator: { animationId: "routing-protocols", label: "RIP / OSPF / BGP comparados" },
   },
   // Fragmentación IPv4
   {
@@ -84,7 +84,7 @@ export const flashcardsClase5: Flashcard[] = [
     front: "¿Qué es la ruta por defecto (default route) y cómo se representa?",
     back: "Es la ruta que usa un router cuando el destino de un paquete no coincide con ninguna entrada específica de su tabla de rutas.\n\nSe representa como: 0.0.0.0/0\nCoincide con CUALQUIER destino (por eso es el 'último recurso').\n\nSe configura típicamente para que el tráfico desconocido salga hacia el ISP.\n\nAplicación: en redes pequeñas y en PCs, la 'default gateway' es el router que conoce el camino al resto de Internet.",
     tag: "Routing",
-    simulator: { url: "/simuladores/16-routing.html", label: "Routing · tablas y next-hop" },
+    simulator: { animationId: "routing-table", label: "Paquete saltando por routers" },
   },
   // Retardo, pérdida y rendimiento (UD5 - Funcionamiento)
   {

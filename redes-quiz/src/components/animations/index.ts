@@ -30,6 +30,7 @@ import { MacStructure } from "./MacStructure";
 import { Ports } from "./Ports";
 import { StormControl } from "./StormControl";
 import { PortSecurity } from "./PortSecurity";
+import { RoutingProtocols } from "./RoutingProtocols";
 
 export const animations: Record<string, ComponentType> = {
   "cam-table": CamTableAnimation,
@@ -61,6 +62,7 @@ export const animations: Record<string, ComponentType> = {
   ports: Ports,
   "storm-control": StormControl,
   "port-security": PortSecurity,
+  "routing-protocols": RoutingProtocols,
 };
 
 export function getAnimation(id: string): ComponentType | null {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimationFrame, PlayButton } from "./AnimationFrame";
+import { AnimationFrame, PlayButton , sleep} from "./AnimationFrame";
 
 const PUBLIC_IP = "181.12.45.67";
 
@@ -168,10 +168,6 @@ export function NatTranslation() {
       </svg>
     </AnimationFrame>
   );
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms));
 }
 
 function animate(

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { AnimationFrame, PlayButton } from "./AnimationFrame";
+import { useEffect, useState } from "react";
+import { AnimationFrame, StepControls } from "./AnimationFrame";
 
 type Step = {
   from: "client" | "server";
@@ -42,44 +42,33 @@ const STEPS: Step[] = [
 export function ThreeWayHandshake() {
   const [step, setStep] = useState(-1);
   const [running, setRunning] = useState(false);
-  const [packetPos, setPacketPos] = useState<{ x: number; y: number; visible: boolean }>({ x: 0, y: 0, visible: false });
-  const animRef = useRef<number | null>(null);
 
   function reset() {
     setStep(-1);
     setRunning(false);
-    setPacketPos({ x: 0, y: 0, visible: false });
-    if (animRef.current) cancelAnimationFrame(animRef.current);
+  }
+  function next() {
+    setStep((s) => Math.min(s + 1, STEPS.length - 1));
+  }
+  function prev() {
+    setStep((s) => Math.max(s - 1, 0));
   }
 
   useEffect(() => {
-    return () => {
-      if (animRef.current) cancelAnimationFrame(animRef.current);
-    };
-  }, []);
-
-  async function play() {
-    if (running) return;
-    setRunning(true);
-    if (step >= STEPS.length - 1) setStep(-1);
-    let start = step + 1;
-    if (start < 0) start = 0;
-    for (let i = start; i < STEPS.length; i++) {
-      setStep(i);
-      const s = STEPS[i];
-      const fromX = s.from === "client" ? 130 : 600;
-      const toX = s.from === "client" ? 600 : 130;
-      const yLine = 130 + i * 80;
-      await animateAlong(
-        { x: fromX, y: yLine },
-        { x: toX, y: yLine },
-        900,
-        (p) => setPacketPos({ ...p, visible: true })
-      );
-      setPacketPos({ x: 0, y: 0, visible: false });
-      await sleep(400);
+    if (!running) return;
+    if (step >= STEPS.length - 1) {
+      setRunning(false);
+      return;
     }
-    setRunning(false);
+    const t = setTimeout(() => setStep((s) => s + 1), 1700);
+    return () => clearTimeout(t);
+  }, [running, step]);
+
+  function auto() {
+    if (running) return;
+    if (step >= STEPS.length - 1) setStep(-1);
+    setRunning(true);
+    setStep((s) => (s < 0 ? 0 : s + 1));
   }
 
   const current = step >= 0 && step < STEPS.length ? STEPS[step] : null;
@@ -88,11 +77,21 @@ export function ThreeWayHandshake() {
     <AnimationFrame
       caption={
         <div>
-          <p className="text-slate-300 font-medium mb-1">{current ? current.detail : "Antes de mandar datos, TCP negocia la conexión con tres mensajes."}</p>
+          <p className="text-slate-300 font-medium mb-1">{current ? current.detail : "Antes de mandar datos, TCP negocia la conexión con tres mensajes. Apretá Siguiente paso para avanzar a tu ritmo."}</p>
           <p className="text-slate-500">Paso {Math.max(0, step + 1)}/{STEPS.length}</p>
         </div>
       }
-      controls={<PlayButton running={running} onPlay={play} onReset={reset} />}
+      controls={
+        <StepControls
+          step={step < 0 ? 0 : step}
+          total={STEPS.length}
+          onNext={next}
+          onPrev={prev}
+          onAuto={auto}
+          onReset={reset}
+          running={running}
+        />
+      }
     >
       <svg viewBox="0 0 730 400" className="w-full h-auto bg-slate-900 rounded-xl border border-slate-800">
         {/* Endpoints */}
@@ -118,9 +117,8 @@ export function ThreeWayHandshake() {
           const yLine = 130 + i * 80;
           const fromX = s.from === "client" ? 130 : 600;
           const toX = s.from === "client" ? 600 : 130;
-          const isLast = i === step && running;
           return (
-            <g key={i} opacity={isLast ? 0.4 : 1}>
+            <g key={i}>
               <line x1={fromX} y1={yLine} x2={toX} y2={yLine} stroke={s.color} strokeWidth={2} />
               <polygon
                 points={
@@ -137,39 +135,7 @@ export function ThreeWayHandshake() {
             </g>
           );
         })}
-
-        {/* Animated packet */}
-        {packetPos.visible && current && (
-          <g>
-            <circle cx={packetPos.x} cy={packetPos.y} r={10} fill={current.color} stroke="#fff" strokeWidth={2} />
-            <text x={packetPos.x} y={packetPos.y - 16} fill={current.color} fontSize={11} textAnchor="middle" fontWeight="bold" fontFamily="monospace">
-              {current.label}
-            </text>
-          </g>
-        )}
       </svg>
     </AnimationFrame>
   );
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms));
-}
-
-function animateAlong(
-  from: { x: number; y: number },
-  to: { x: number; y: number },
-  duration: number,
-  setPos: (p: { x: number; y: number }) => void
-): Promise<void> {
-  return new Promise((resolve) => {
-    const start = performance.now();
-    function frame(now: number) {
-      const t = Math.min((now - start) / duration, 1);
-      setPos({ x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t });
-      if (t < 1) requestAnimationFrame(frame);
-      else resolve();
-    }
-    requestAnimationFrame(frame);
-  });
 }

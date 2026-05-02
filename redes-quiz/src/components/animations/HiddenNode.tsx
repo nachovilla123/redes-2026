@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimationFrame, PlayButton } from "./AnimationFrame";
+import { AnimationFrame, PlayButton , sleep} from "./AnimationFrame";
 
 type Phase =
   | "idle"
@@ -225,8 +225,4 @@ function Wave({ from, to, y, color, label }: { from: number; to: number; y: numb
       </text>
     </g>
   );
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms));
 }

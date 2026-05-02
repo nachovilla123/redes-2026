@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimationFrame, PlayButton } from "./AnimationFrame";
+import { AnimationFrame, PlayButton , sleep} from "./AnimationFrame";
 
 const SWITCHES = [
   { id: "S1", x: 400, y: 80, root: true },
@@ -179,8 +179,4 @@ export function SpanningTree() {
       </svg>
     </AnimationFrame>
   );
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms));
 }

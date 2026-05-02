@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimationFrame, PlayButton } from "./AnimationFrame";
+import { AnimationFrame, StepControls } from "./AnimationFrame";
 
 const FIELDS = [
   { name: "Preámbulo", bytes: 8, color: "#a371f7", detail: "10101010 × 7 + SFD: sincroniza al receptor a nivel bit." },
@@ -20,6 +20,12 @@ export function EthernetFrame() {
     setHighlight(-1);
     setRunning(false);
   }
+  function next() {
+    setHighlight((h) => Math.min(h + 1, FIELDS.length - 1));
+  }
+  function prev() {
+    setHighlight((h) => Math.max(h - 1, 0));
+  }
 
   useEffect(() => {
     if (!running) return;
@@ -27,11 +33,11 @@ export function EthernetFrame() {
       setRunning(false);
       return;
     }
-    const t = setTimeout(() => setHighlight((h) => h + 1), 1300);
+    const t = setTimeout(() => setHighlight((h) => h + 1), 1500);
     return () => clearTimeout(t);
   }, [running, highlight]);
 
-  function play() {
+  function auto() {
     if (running) return;
     if (highlight >= FIELDS.length - 1) setHighlight(-1);
     setRunning(true);
@@ -59,7 +65,17 @@ export function EthernetFrame() {
           </p>
         </div>
       }
-      controls={<PlayButton running={running} onPlay={play} onReset={reset} />}
+      controls={
+        <StepControls
+          step={highlight < 0 ? 0 : highlight}
+          total={FIELDS.length}
+          onNext={next}
+          onPrev={prev}
+          onAuto={auto}
+          onReset={reset}
+          running={running}
+        />
+      }
     >
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
         {/* Frame visualization */}

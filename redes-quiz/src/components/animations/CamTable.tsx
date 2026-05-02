@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimationFrame, PlayButton } from "./AnimationFrame";
+import { AnimationFrame, PlayButton , sleep} from "./AnimationFrame";
 
 type Step = {
   description: string;
@@ -217,10 +217,6 @@ function portLabelPos(id: number) {
   const switchX = 400;
   const switchY = 220;
   return { x: (pos.x + switchX) / 2, y: (pos.y + switchY) / 2 - 4 };
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms));
 }
 
 function animatePoint(

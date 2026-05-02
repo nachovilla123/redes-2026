@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimationFrame, PlayButton } from "./AnimationFrame";
+import { AnimationFrame, PlayButton , sleep} from "./AnimationFrame";
 
 const ROUTERS = [
   { id: "R1", x: 150, y: 200 },
@@ -195,8 +195,4 @@ export function RoutingTable() {
       </div>
     </AnimationFrame>
   );
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms));
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimationFrame, PlayButton } from "./AnimationFrame";
+import { AnimationFrame, PlayButton , sleep} from "./AnimationFrame";
 
 const NUM_PACKETS = 6;
 const LOSS_INDEX = 2; // packet #3 will be lost
@@ -252,8 +252,4 @@ function Lane({ y, color, tcp = false, lossIndex }: { y: number; color: string; 
       )}
     </g>
   );
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms));
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimationFrame, PlayButton } from "./AnimationFrame";
+import { AnimationFrame, PlayButton , sleep} from "./AnimationFrame";
 
 type Phase = "idle" | "sense" | "difs" | "backoff" | "tx" | "ack" | "done";
 
@@ -192,8 +192,4 @@ export function CsmaCa() {
       </svg>
     </AnimationFrame>
   );
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms));
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimationFrame, PlayButton } from "./AnimationFrame";
+import { AnimationFrame, PlayButton , sleep} from "./AnimationFrame";
 
 // Datos: 1101011011  (10 bits)
 // Polinomio generador G: 10011 (5 bits → grado 4 → CRC de 4 bits)
@@ -180,8 +180,4 @@ export function Crc() {
       </div>
     </AnimationFrame>
   );
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms));
 }

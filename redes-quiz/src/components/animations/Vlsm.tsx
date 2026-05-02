@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimationFrame, PlayButton } from "./AnimationFrame";
+import { AnimationFrame, StepControls } from "./AnimationFrame";
 
 // Red base: 192.168.1.0/24 (256 direcciones)
 // Necesidades:
@@ -28,6 +28,8 @@ const BLOCKS: Block[] = [
   { name: "Admin (10 hosts)", hosts: 10, prefix: 28, size: 16, start: 224, end: 239, color: "#a371f7" },
 ];
 
+const VLSM_TOTAL = BLOCKS.length + 1; // 4 blocks + 1 final summary
+
 export function Vlsm() {
   const [step, setStep] = useState(-1); // -1: empty, 0..3: assign block i, 4: done
   const [running, setRunning] = useState(false);
@@ -36,10 +38,16 @@ export function Vlsm() {
     setStep(-1);
     setRunning(false);
   }
+  function next() {
+    setStep((s) => Math.min(s + 1, VLSM_TOTAL - 1));
+  }
+  function prev() {
+    setStep((s) => Math.max(s - 1, 0));
+  }
 
   useEffect(() => {
     if (!running) return;
-    if (step >= BLOCKS.length) {
+    if (step >= VLSM_TOTAL - 1) {
       setRunning(false);
       return;
     }
@@ -47,9 +55,9 @@ export function Vlsm() {
     return () => clearTimeout(t);
   }, [running, step]);
 
-  function play() {
+  function auto() {
     if (running) return;
-    if (step >= BLOCKS.length) setStep(-1);
+    if (step >= VLSM_TOTAL - 1) setStep(-1);
     setRunning(true);
     setStep((s) => (s < 0 ? 0 : s + 1));
   }
@@ -70,7 +78,17 @@ export function Vlsm() {
           <p className="text-slate-500 text-xs">Regla de oro: <b>ordenar por hosts requeridos de MAYOR a MENOR</b> antes de asignar.</p>
         </div>
       }
-      controls={<PlayButton running={running} onPlay={play} onReset={reset} />}
+      controls={
+        <StepControls
+          step={step < 0 ? 0 : step}
+          total={VLSM_TOTAL}
+          onNext={next}
+          onPrev={prev}
+          onAuto={auto}
+          onReset={reset}
+          running={running}
+        />
+      }
     >
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
         {/* Address bar */}

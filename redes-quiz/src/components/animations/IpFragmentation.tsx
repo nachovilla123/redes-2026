@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimationFrame, PlayButton } from "./AnimationFrame";
+import { AnimationFrame, StepControls } from "./AnimationFrame";
 
 const FRAGMENTS = [
   { id: 1, total: 620, payload: 600, mf: 1, offset: 0 },
   { id: 2, total: 620, payload: 600, mf: 1, offset: 75 },
   { id: 3, total: 300, payload: 280, mf: 0, offset: 150 },
 ];
+
+const TOTAL_STEPS = 5;
 
 export function IpFragmentation() {
   const [step, setStep] = useState(0);
@@ -17,20 +19,26 @@ export function IpFragmentation() {
     setStep(0);
     setRunning(false);
   }
+  function next() {
+    setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
+  }
+  function prev() {
+    setStep((s) => Math.max(s - 1, 0));
+  }
 
   useEffect(() => {
     if (!running) return;
-    if (step >= 4) {
+    if (step >= TOTAL_STEPS - 1) {
       setRunning(false);
       return;
     }
-    const t = setTimeout(() => setStep((s) => s + 1), 1400);
+    const t = setTimeout(() => setStep((s) => s + 1), 1500);
     return () => clearTimeout(t);
   }, [running, step]);
 
-  function play() {
+  function auto() {
     if (running) return;
-    if (step >= 4) setStep(0);
+    if (step >= TOTAL_STEPS - 1) setStep(0);
     setRunning(true);
     setStep((s) => (s === 0 ? 1 : s + 1));
   }
@@ -51,7 +59,17 @@ export function IpFragmentation() {
           <p className="text-slate-500">Paso {step + 1}/{captions.length}</p>
         </div>
       }
-      controls={<PlayButton running={running} onPlay={play} onReset={reset} />}
+      controls={
+        <StepControls
+          step={step}
+          total={TOTAL_STEPS}
+          onNext={next}
+          onPrev={prev}
+          onAuto={auto}
+          onReset={reset}
+          running={running}
+        />
+      }
     >
       <div className="flex flex-col gap-3">
         <svg viewBox="0 0 800 280" className="w-full h-auto bg-slate-900 rounded-xl border border-slate-800">

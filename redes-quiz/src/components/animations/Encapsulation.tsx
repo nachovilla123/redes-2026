@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimationFrame, PlayButton } from "./AnimationFrame";
+import { AnimationFrame, StepControls } from "./AnimationFrame";
 
 const LAYERS = [
   { name: "Aplicación (L7)", header: "HTTP", color: "#f85149", pdu: "Datos" },
@@ -19,6 +19,12 @@ export function Encapsulation() {
     setStep(-1);
     setRunning(false);
   }
+  function next() {
+    setStep((s) => Math.min(s + 1, LAYERS.length - 1));
+  }
+  function prev() {
+    setStep((s) => Math.max(s - 1, 0));
+  }
 
   useEffect(() => {
     if (!running) return;
@@ -26,11 +32,11 @@ export function Encapsulation() {
       setRunning(false);
       return;
     }
-    const t = setTimeout(() => setStep((s) => s + 1), 1100);
+    const t = setTimeout(() => setStep((s) => s + 1), 1300);
     return () => clearTimeout(t);
   }, [running, step]);
 
-  function play() {
+  function auto() {
     if (running) return;
     if (step >= LAYERS.length - 1) setStep(-1);
     setRunning(true);
@@ -55,7 +61,17 @@ export function Encapsulation() {
           <p className="text-slate-500">Paso {Math.max(0, step + 1)}/{LAYERS.length}</p>
         </div>
       }
-      controls={<PlayButton running={running} onPlay={play} onReset={reset} />}
+      controls={
+        <StepControls
+          step={step < 0 ? 0 : step}
+          total={LAYERS.length}
+          onNext={next}
+          onPrev={prev}
+          onAuto={auto}
+          onReset={reset}
+          running={running}
+        />
+      }
     >
       <div className="flex flex-col gap-3">
         {/* Layer stack */}

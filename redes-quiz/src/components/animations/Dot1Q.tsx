@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimationFrame, PlayButton } from "./AnimationFrame";
+import { AnimationFrame, PlayButton , sleep} from "./AnimationFrame";
 
 type Phase = "idle" | "before" | "tagged" | "in-trunk" | "untagged" | "delivered";
 
@@ -170,8 +170,4 @@ function FramePill({ x, y, tagged }: { x: number; y: number; tagged: boolean }) 
       <text x={185} y={28} fill="#3fb950" fontSize={9} textAnchor="middle">payload</text>
     </g>
   );
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms));
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimationFrame, PlayButton } from "./AnimationFrame";
+import { AnimationFrame, StepControls } from "./AnimationFrame";
 
 const ACTORS = {
   pc: { x: 80, y: 200, label: "TU PC", sub: "stub", color: "#58a6ff" },
@@ -33,47 +33,57 @@ const STEPS: Array<{
 export function DnsResolution() {
   const [step, setStep] = useState(-1);
   const [running, setRunning] = useState(false);
-  const [pos, setPos] = useState<{ x: number; y: number; visible: boolean }>({ x: 0, y: 0, visible: false });
 
   function reset() {
     setStep(-1);
     setRunning(false);
-    setPos({ x: 0, y: 0, visible: false });
   }
-
-  async function play() {
-    if (running) return;
-    setRunning(true);
-    if (step >= STEPS.length - 1) setStep(-1);
-    let start = step + 1;
-    if (start < 0) start = 0;
-    for (let i = start; i < STEPS.length; i++) {
-      setStep(i);
-      const s = STEPS[i];
-      const from = ACTORS[s.from];
-      const to = ACTORS[s.to];
-      await animate(from, to, 1100, (p) => setPos({ ...p, visible: true }));
-      setPos({ x: 0, y: 0, visible: false });
-      await sleep(450);
-    }
-    setRunning(false);
+  function next() {
+    setStep((s) => Math.min(s + 1, STEPS.length - 1));
+  }
+  function prev() {
+    setStep((s) => Math.max(s - 1, 0));
   }
 
   useEffect(() => {
-    return () => {};
-  }, []);
+    if (!running) return;
+    if (step >= STEPS.length - 1) {
+      setRunning(false);
+      return;
+    }
+    const t = setTimeout(() => setStep((s) => s + 1), 1500);
+    return () => clearTimeout(t);
+  }, [running, step]);
+
+  function auto() {
+    if (running) return;
+    if (step >= STEPS.length - 1) setStep(-1);
+    setRunning(true);
+    setStep((s) => (s < 0 ? 0 : s + 1));
+  }
 
   const current = step >= 0 && step < STEPS.length ? STEPS[step] : null;
+  const currentEdge = current ? { from: ACTORS[current.from], to: ACTORS[current.to] } : null;
 
   return (
     <AnimationFrame
       caption={
         <div>
-          <p className="text-slate-300 font-medium">{current ? current.detail : "Resolución DNS recursiva: tu PC quiere la IP de www.google.com."}</p>
+          <p className="text-slate-300 font-medium">{current ? current.detail : "Resolución DNS recursiva: tu PC quiere la IP de www.google.com. Apretá Siguiente paso para avanzar a tu ritmo."}</p>
           <p className="text-slate-500">Paso {Math.max(0, step + 1)}/{STEPS.length}</p>
         </div>
       }
-      controls={<PlayButton running={running} onPlay={play} onReset={reset} />}
+      controls={
+        <StepControls
+          step={step < 0 ? 0 : step}
+          total={STEPS.length}
+          onNext={next}
+          onPrev={prev}
+          onAuto={auto}
+          onReset={reset}
+          running={running}
+        />
+      }
     >
       <svg viewBox="0 0 780 420" className="w-full h-auto bg-slate-900 rounded-xl border border-slate-800">
         {/* Edges from history */}
@@ -81,7 +91,7 @@ export function DnsResolution() {
           if (i > step) return null;
           const from = ACTORS[s.from];
           const to = ACTORS[s.to];
-          const isAnimating = i === step && running;
+          const isCurrent = i === step;
           return (
             <line
               key={i}
@@ -90,8 +100,8 @@ export function DnsResolution() {
               x2={to.x}
               y2={to.y}
               stroke={s.color}
-              strokeWidth={1.5}
-              opacity={isAnimating ? 0.2 : 0.4}
+              strokeWidth={isCurrent ? 2.5 : 1.5}
+              opacity={isCurrent ? 0.9 : 0.35}
             />
           );
         })}
@@ -112,11 +122,28 @@ export function DnsResolution() {
           );
         })}
 
-        {/* Animated packet */}
-        {pos.visible && current && (
+        {/* Current message label */}
+        {currentEdge && current && (
           <g>
-            <rect x={pos.x - 90} y={pos.y - 13} width={180} height={26} rx={5} fill={current.color} stroke="#fff" strokeWidth={1} />
-            <text x={pos.x} y={pos.y + 4} fill="#0f172a" fontSize={10} textAnchor="middle" fontWeight="bold" fontFamily="monospace">
+            <rect
+              x={(currentEdge.from.x + currentEdge.to.x) / 2 - 90}
+              y={(currentEdge.from.y + currentEdge.to.y) / 2 - 13}
+              width={180}
+              height={26}
+              rx={5}
+              fill={current.color}
+              stroke="#fff"
+              strokeWidth={1}
+            />
+            <text
+              x={(currentEdge.from.x + currentEdge.to.x) / 2}
+              y={(currentEdge.from.y + currentEdge.to.y) / 2 + 4}
+              fill="#0f172a"
+              fontSize={10}
+              textAnchor="middle"
+              fontWeight="bold"
+              fontFamily="monospace"
+            >
               {current.label}
             </text>
           </g>
@@ -124,26 +151,4 @@ export function DnsResolution() {
       </svg>
     </AnimationFrame>
   );
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms));
-}
-
-function animate(
-  from: { x: number; y: number },
-  to: { x: number; y: number },
-  duration: number,
-  setPos: (p: { x: number; y: number }) => void
-): Promise<void> {
-  return new Promise((resolve) => {
-    const start = performance.now();
-    function frame(now: number) {
-      const t = Math.min((now - start) / duration, 1);
-      setPos({ x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t });
-      if (t < 1) requestAnimationFrame(frame);
-      else resolve();
-    }
-    requestAnimationFrame(frame);
-  });
 }

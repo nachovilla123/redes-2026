@@ -121,7 +121,7 @@ export const flashcardsClase3: Flashcard[] = [
     front: "¿Qué es el Storm Control en un switch?",
     back: "Mecanismo para controlar tormentas de broadcast: situaciones donde una cantidad anormal de tramas broadcast inunda la red y la satura.\n\nFuncionamiento:\n• El switch mide la velocidad de entrada de tramas broadcast en cada puerto\n• Si supera el umbral configurado (en kbps), descarta el exceso\n• Se configura puerto por puerto\n• También puede aplicarse a multicast y unicast desconocido",
     tag: "Switch",
-    simulator: { url: "/simuladores/09-vlan.html", label: "Switch y VLANs" },
+    simulator: { animationId: "storm-control", label: "Storm Control vs sin protección" },
   },
   {
     id: 217,

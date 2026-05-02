@@ -28,6 +28,7 @@ import { TlsHandshake } from "./TlsHandshake";
 import { SwitchModes } from "./SwitchModes";
 import { MacStructure } from "./MacStructure";
 import { Ports } from "./Ports";
+import { StormControl } from "./StormControl";
 
 export const animations: Record<string, ComponentType> = {
   "cam-table": CamTableAnimation,
@@ -57,6 +58,7 @@ export const animations: Record<string, ComponentType> = {
   "switch-modes": SwitchModes,
   "mac-structure": MacStructure,
   ports: Ports,
+  "storm-control": StormControl,
 };
 
 export function getAnimation(id: string): ComponentType | null {

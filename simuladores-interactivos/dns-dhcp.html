@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>DNS y DHCP</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, system-ui, sans-serif; background: #0d1117; color: #e6edf3; padding: 20px; min-height: 100vh; }
+  .nav { margin-bottom: 16px; }
+  .nav a { color: #58a6ff; text-decoration: none; font-size: 13px; }
+  h1 { font-size: 28px; margin-bottom: 4px; }
+  .subtitle { color: #8b949e; margin-bottom: 20px; }
+  .layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; max-width: 1400px; margin: 0 auto; }
+  .panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+  .panel h2 { font-size: 16px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+  button { background: #238636; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; margin-right: 6px; margin-bottom: 6px; }
+  button:hover { background: #2ea043; }
+  button.secondary { background: #30363d; }
+  button.danger { background: #da3633; }
+  svg { width: 100%; height: 540px; display: block; }
+  .step { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed #30363d; }
+  .step:last-child { border: none; }
+  .step-title { font-weight: 600; margin-bottom: 6px; color: #58a6ff; }
+  .info-box { background: #0d1117; border-left: 3px solid #58a6ff; padding: 10px 12px; border-radius: 4px; font-size: 12px; color: #c9d1d9; line-height: 1.6; margin-bottom: 8px; }
+  .info-box code { background: #161b22; padding: 1px 5px; border-radius: 3px; color: #d29922; font-size: 11px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+  .tab { padding: 8px 14px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; cursor: pointer; font-size: 13px; color: #8b949e; }
+  .tab.active { background: #1f6feb; color: white; border-color: #1f6feb; }
+  .log { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 10px; font-family: 'SF Mono', Menlo, monospace; font-size: 11px; line-height: 1.6; max-height: 280px; overflow-y: auto; }
+</style>
+</head>
+<body>
+<div class="nav"><a href="index.html">← Volver al hub</a></div>
+<h1>DNS y DHCP</h1>
+<div class="subtitle">DORA del DHCP + resolución DNS recursiva paso a paso.</div>
+
+<div class="layout">
+  <div class="panel">
+    <div class="tabs">
+      <div class="tab active" data-view="dhcp">DHCP — DORA</div>
+      <div class="tab" data-view="dns">DNS — resolución</div>
+    </div>
+    <svg id="canvas" viewBox="0 0 800 540"></svg>
+  </div>
+
+  <div class="panel">
+    <h2 id="ctrl-title">Controles</h2>
+
+    <div id="ctrl-dhcp">
+      <div class="step">
+        <div class="step-title">Proceso DORA</div>
+        <div class="info-box">
+          Discover → Offer → Request → Ack. Tu PC recién conectada no tiene IP — pide una al servidor DHCP.
+        </div>
+        <button id="dhcp-step">Siguiente paso</button>
+        <button id="dhcp-auto" class="secondary">Reproducir todo</button>
+        <button id="dhcp-reset" class="danger">Reset</button>
+      </div>
+      <div class="step">
+        <div class="step-title">Estado actual</div>
+        <div class="info-box" id="dhcp-explain">PC se conectó a la red sin IP. Apretá "Siguiente paso".</div>
+      </div>
+      <div class="step">
+        <div class="step-title">Datos que entrega</div>
+        <div class="info-box">
+          <code>IP</code> · <code>Máscara</code> · <code>Gateway</code> · <code>DNS</code> · <code>Lease time</code><br>
+          Puertos: <b>UDP 67</b> servidor / <b>UDP 68</b> cliente.
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-title">¿Por qué broadcast?</div>
+        <div class="info-box">
+          El cliente no conoce la IP del servidor DHCP — y ni tiene IP propia. Broadcast es el único mecanismo. El paso REQUEST también es broadcast para que los demás servidores DHCP liberen su oferta.
+        </div>
+      </div>
+    </div>
+
+    <div id="ctrl-dns" style="display:none">
+      <div class="step">
+        <div class="step-title">Resolución iterativa</div>
+        <div class="info-box">
+          El resolver pregunta a cada servidor, que responde "yo no sé pero preguntale a tal". Va escalando hasta el autoritativo.
+        </div>
+        <button id="dns-step">Siguiente paso</button>
+        <button id="dns-auto" class="secondary">Reproducir todo</button>
+        <button id="dns-reset" class="danger">Reset</button>
+      </div>
+      <div class="step">
+        <div class="step-title">Paso actual</div>
+        <div class="info-box" id="dns-explain">Vas a resolver <code>www.google.com</code>. Apretá "Siguiente paso".</div>
+      </div>
+      <div class="step">
+        <div class="step-title">Tipos de servidores DNS</div>
+        <div class="info-box">
+          <b>Stub resolver:</b> tu SO. Solo pregunta.<br>
+          <b>Recursive resolver:</b> hace todo el trabajo (8.8.8.8, 1.1.1.1).<br>
+          <b>Root server:</b> sabe dónde está cada TLD.<br>
+          <b>TLD server:</b> sabe los NS de cada dominio bajo .com, .ar, etc.<br>
+          <b>Authoritative:</b> tiene la respuesta final.
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-title">Caché y TTL</div>
+        <div class="info-box">
+          Cada respuesta tiene un <code>TTL</code> en segundos. El resolver guarda en caché hasta que expira → la siguiente consulta es instantánea sin volver a recorrer toda la jerarquía.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title">Log</div>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const svg = document.getElementById('canvas');
+let view = 'dhcp';
+function ns(t,a={},c=[]){const e=document.createElementNS('http://www.w3.org/2000/svg',t);for(const k in a)e.setAttribute(k,a[k]);c.forEach(x=>e.appendChild(x));return e;}
+
+const log = document.getElementById('log');
+function addLog(msg, color='#c9d1d9') {
+  const e = document.createElement('div');
+  e.style.color = color;
+  e.innerHTML = msg;
+  log.insertBefore(e, log.firstChild);
+}
+
+// ================ DHCP DORA ================
+let dhcpStep = 0;
+const dhcpSteps = [
+  { txt: 'Estado inicial: PC sin IP, servidor DHCP esperando.', from: null, to: null, label: '', color: null },
+  { txt: '<b>1. DISCOVER</b> (broadcast): PC con IP origen <code>0.0.0.0</code> busca servidores DHCP. Llega a todos.', from: 'pc', to: 'all', label: 'DHCPDISCOVER', color: '#58a6ff' },
+  { txt: '<b>2. OFFER</b>: el servidor DHCP reserva una IP libre y se la ofrece. <code>192.168.1.10, máscara, gateway, DNS, lease=24h</code>.', from: 'dhcp', to: 'pc', label: 'DHCPOFFER (192.168.1.10)', color: '#3fb950' },
+  { txt: '<b>3. REQUEST</b> (broadcast): PC acepta formalmente la oferta. Es broadcast para que los demás servidores DHCP de la red liberen su reserva.', from: 'pc', to: 'all', label: 'DHCPREQUEST (acepto 192.168.1.10)', color: '#d29922' },
+  { txt: '<b>4. ACK</b>: el servidor confirma. Recién ahora la PC <b>configura su interfaz</b> con la IP, máscara, gateway, DNS.', from: 'dhcp', to: 'pc', label: 'DHCPACK', color: '#a371f7' },
+  { txt: '✓ <b>Listo.</b> La PC tiene IP. A los <b>50% del lease (T1)</b> intentará renovar al mismo servidor; al <b>87.5% (T2)</b> hará broadcast a cualquier servidor.', from: null, to: null, label: '', color: null },
+];
+
+function renderDHCP() {
+  svg.innerHTML = '';
+  // PC
+  svg.appendChild(ns('rect', { x: 60, y: 200, width: 140, height: 80, rx: 8, fill: '#21262d', stroke: '#58a6ff', 'stroke-width': 2 }));
+  const pcT = ns('text', { x: 130, y: 230, fill: 'white', 'font-size': 14, 'text-anchor': 'middle', 'font-weight': 'bold' }); pcT.textContent = 'TU PC'; svg.appendChild(pcT);
+  const pcIp = ns('text', { x: 130, y: 252, fill: dhcpStep < 5 ? '#8b949e' : '#3fb950', 'font-size': 11, 'text-anchor': 'middle', 'font-family': 'monospace' });
+  pcIp.textContent = dhcpStep < 5 ? 'IP: 0.0.0.0' : 'IP: 192.168.1.10'; svg.appendChild(pcIp);
+  const pcMac = ns('text', { x: 130, y: 270, fill: '#8b949e', 'font-size': 10, 'text-anchor': 'middle', 'font-family': 'monospace' }); pcMac.textContent = 'MAC: AA:BB:CC:DD:EE:FF'; svg.appendChild(pcMac);
+
+  // DHCP server
+  svg.appendChild(ns('rect', { x: 600, y: 80, width: 140, height: 80, rx: 8, fill: '#21262d', stroke: '#3fb950', 'stroke-width': 2 }));
+  const dT = ns('text', { x: 670, y: 110, fill: 'white', 'font-size': 14, 'text-anchor': 'middle', 'font-weight': 'bold' }); dT.textContent = 'SERVIDOR DHCP'; svg.appendChild(dT);
+  const dIp = ns('text', { x: 670, y: 132, fill: '#3fb950', 'font-size': 11, 'text-anchor': 'middle', 'font-family': 'monospace' }); dIp.textContent = '192.168.1.1:67'; svg.appendChild(dIp);
+
+  // Other devices (broadcast targets)
+  svg.appendChild(ns('rect', { x: 600, y: 380, width: 140, height: 60, rx: 8, fill: '#21262d', stroke: '#8b949e', 'stroke-width': 1.5 }));
+  const oT = ns('text', { x: 670, y: 410, fill: '#8b949e', 'font-size': 12, 'text-anchor': 'middle' }); oT.textContent = 'Otros dispositivos'; svg.appendChild(oT);
+  const oT2 = ns('text', { x: 670, y: 425, fill: '#8b949e', 'font-size': 10, 'text-anchor': 'middle' }); oT2.textContent = '(reciben broadcast)'; svg.appendChild(oT2);
+
+  // history of arrows
+  for (let i = 1; i <= dhcpStep; i++) {
+    const s = dhcpSteps[i];
+    if (!s.from) continue;
+    const y = 80 + (i - 1) * 70;
+    if (s.to === 'all') {
+      // broadcast
+      svg.appendChild(ns('line', { x1: 200, y1: 240, x2: 600, y2: 120, stroke: s.color, 'stroke-width': 2, 'stroke-dasharray': '5 3' }));
+      svg.appendChild(ns('line', { x1: 200, y1: 240, x2: 600, y2: 410, stroke: s.color, 'stroke-width': 2, 'stroke-dasharray': '5 3' }));
+      const lbl = ns('text', { x: 400, y: y + 40, fill: s.color, 'font-size': 12, 'text-anchor': 'middle', 'font-family': 'monospace', 'font-weight': 'bold' });
+      lbl.textContent = '📢 ' + s.label; svg.appendChild(lbl);
+    } else if (s.from === 'pc' && s.to === 'dhcp') {
+      svg.appendChild(ns('line', { x1: 200, y1: 240, x2: 600, y2: 120, stroke: s.color, 'stroke-width': 2 }));
+    } else if (s.from === 'dhcp' && s.to === 'pc') {
+      const lbl = ns('text', { x: 400, y: y + 40, fill: s.color, 'font-size': 12, 'text-anchor': 'middle', 'font-family': 'monospace', 'font-weight': 'bold' });
+      lbl.textContent = s.label; svg.appendChild(lbl);
+      svg.appendChild(ns('line', { x1: 600, y1: 120, x2: 200, y2: 240, stroke: s.color, 'stroke-width': 2 }));
+    }
+  }
+
+  // Animate latest
+  if (dhcpStep > 0 && dhcpStep < dhcpSteps.length) {
+    const s = dhcpSteps[dhcpStep];
+    if (s.from) {
+      animateDHCPPacket(s);
+    }
+  }
+
+  document.getElementById('dhcp-explain').innerHTML = dhcpSteps[dhcpStep].txt;
+}
+
+function animateDHCPPacket(s) {
+  const startX = s.from === 'pc' ? 200 : 600;
+  const startY = s.from === 'pc' ? 240 : 120;
+  const targets = s.to === 'all' ? [{ x: 600, y: 120 }, { x: 600, y: 410 }] : (s.to === 'pc' ? [{ x: 200, y: 240 }] : [{ x: 600, y: 120 }]);
+
+  targets.forEach(target => {
+    const dot = ns('circle', { cx: startX, cy: startY, r: 8, fill: s.color, stroke: 'white', 'stroke-width': 2 });
+    svg.appendChild(dot);
+    const start = performance.now();
+    function frame(t) {
+      const p = Math.min((t - start) / 900, 1);
+      dot.setAttribute('cx', startX + (target.x - startX) * p);
+      dot.setAttribute('cy', startY + (target.y - startY) * p);
+      if (p < 1) requestAnimationFrame(frame);
+      else setTimeout(() => dot.remove(), 200);
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+document.getElementById('dhcp-step').onclick = () => {
+  if (dhcpStep < dhcpSteps.length - 1) { dhcpStep++; renderDHCP(); addLog(stripHtml(dhcpSteps[dhcpStep].txt), dhcpSteps[dhcpStep].color || '#c9d1d9'); }
+};
+document.getElementById('dhcp-reset').onclick = () => { dhcpStep = 0; renderDHCP(); log.innerHTML = ''; };
+document.getElementById('dhcp-auto').onclick = async () => {
+  while (dhcpStep < dhcpSteps.length - 1) {
+    document.getElementById('dhcp-step').click();
+    await new Promise(r => setTimeout(r, 1500));
+  }
+};
+
+function stripHtml(s) { return s.replace(/<[^>]+>/g, ''); }
+
+// ================ DNS RESOLUTION ================
+let dnsStep = 0;
+const dnsActors = [
+  { id: 'pc', name: 'TU PC', sub: 'stub resolver', x: 60, y: 250, color: '#58a6ff' },
+  { id: 'res', name: 'RESOLVER', sub: '8.8.8.8 (recursivo)', x: 280, y: 250, color: '#3fb950' },
+  { id: 'root', name: 'ROOT', sub: '. (root server)', x: 500, y: 80, color: '#d29922' },
+  { id: 'tld', name: 'TLD', sub: '.com', x: 660, y: 250, color: '#a371f7' },
+  { id: 'auth', name: 'AUTORITATIVO', sub: 'ns1.google.com', x: 500, y: 460, color: '#f85149' },
+];
+const dnsSteps = [
+  { txt: 'Tu PC quiere abrir <code>www.google.com</code>. Pregunta al stub resolver del SO.', from: null, to: null, label: '', color: null },
+  { txt: '<b>1.</b> Stub resolver consulta al <b>resolver recursivo</b> (el que le dio DHCP, ej: 8.8.8.8).', from: 'pc', to: 'res', label: '¿www.google.com?', color: '#58a6ff' },
+  { txt: '<b>2.</b> El resolver no lo tiene en caché. Le pregunta al <b>root server</b>.', from: 'res', to: 'root', label: '¿www.google.com?', color: '#58a6ff' },
+  { txt: '<b>3.</b> Root responde: "yo no sé, pero preguntale al servidor de <b>.com</b>".', from: 'root', to: 'res', label: 'preguntale al TLD .com', color: '#d29922' },
+  { txt: '<b>4.</b> El resolver le pregunta al <b>servidor TLD .com</b>.', from: 'res', to: 'tld', label: '¿www.google.com?', color: '#58a6ff' },
+  { txt: '<b>5.</b> TLD responde: "preguntale al <b>autoritativo</b> ns1.google.com".', from: 'tld', to: 'res', label: 'preguntale al autoritativo', color: '#a371f7' },
+  { txt: '<b>6.</b> El resolver le pregunta al <b>servidor autoritativo</b>.', from: 'res', to: 'auth', label: '¿www.google.com?', color: '#58a6ff' },
+  { txt: '<b>7.</b> Autoritativo responde la <b>IP final</b>: <code>142.250.80.4</code> con TTL=300s.', from: 'auth', to: 'res', label: 'A 142.250.80.4 (TTL=300)', color: '#f85149' },
+  { txt: '<b>8.</b> El resolver guarda en <b>caché</b> y devuelve la respuesta a la PC. Próxima consulta = instantánea (mientras dure el TTL).', from: 'res', to: 'pc', label: '142.250.80.4', color: '#3fb950' },
+];
+
+function renderDNS() {
+  svg.innerHTML = '';
+  dnsActors.forEach(a => {
+    svg.appendChild(ns('rect', { x: a.x - 60, y: a.y - 30, width: 130, height: 60, rx: 6, fill: '#21262d', stroke: a.color, 'stroke-width': 2 }));
+    const t = ns('text', { x: a.x, y: a.y - 5, fill: 'white', 'font-size': 13, 'text-anchor': 'middle', 'font-weight': 'bold' });
+    t.textContent = a.name; svg.appendChild(t);
+    const t2 = ns('text', { x: a.x, y: a.y + 14, fill: a.color, 'font-size': 10, 'text-anchor': 'middle', 'font-family': 'monospace' });
+    t2.textContent = a.sub; svg.appendChild(t2);
+  });
+
+  // Show all completed arrows summarized as small labels
+  for (let i = 1; i <= dnsStep; i++) {
+    const s = dnsSteps[i];
+    if (!s.from) continue;
+    const a = dnsActors.find(x => x.id === s.from);
+    const b = dnsActors.find(x => x.id === s.to);
+    if (!a || !b) continue;
+    svg.appendChild(ns('line', { x1: a.x, y1: a.y, x2: b.x, y2: b.y, stroke: s.color, 'stroke-width': 1.5, opacity: i === dnsStep ? 1 : 0.3 }));
+  }
+
+  if (dnsStep > 0 && dnsStep < dnsSteps.length) {
+    const s = dnsSteps[dnsStep];
+    if (s.from) animateDNSPacket(s);
+  }
+
+  document.getElementById('dns-explain').innerHTML = dnsSteps[dnsStep].txt;
+}
+
+function animateDNSPacket(s) {
+  const a = dnsActors.find(x => x.id === s.from);
+  const b = dnsActors.find(x => x.id === s.to);
+  if (!a || !b) return;
+  const dot = ns('circle', { cx: a.x, cy: a.y, r: 9, fill: s.color, stroke: 'white', 'stroke-width': 2 });
+  svg.appendChild(dot);
+  const lbl = ns('text', { x: a.x, y: a.y - 14, fill: s.color, 'font-size': 11, 'text-anchor': 'middle', 'font-weight': 'bold' });
+  lbl.textContent = s.label; svg.appendChild(lbl);
+  const start = performance.now();
+  function frame(t) {
+    const p = Math.min((t - start) / 1100, 1);
+    dot.setAttribute('cx', a.x + (b.x - a.x) * p);
+    dot.setAttribute('cy', a.y + (b.y - a.y) * p);
+    lbl.setAttribute('x', a.x + (b.x - a.x) * p);
+    lbl.setAttribute('y', (a.y + (b.y - a.y) * p) - 14);
+    if (p < 1) requestAnimationFrame(frame);
+    else setTimeout(() => { dot.remove(); lbl.remove(); }, 600);
+  }
+  requestAnimationFrame(frame);
+}
+
+document.getElementById('dns-step').onclick = () => {
+  if (dnsStep < dnsSteps.length - 1) { dnsStep++; renderDNS(); addLog(stripHtml(dnsSteps[dnsStep].txt), dnsSteps[dnsStep].color || '#c9d1d9'); }
+};
+document.getElementById('dns-reset').onclick = () => { dnsStep = 0; renderDNS(); log.innerHTML = ''; };
+document.getElementById('dns-auto').onclick = async () => {
+  while (dnsStep < dnsSteps.length - 1) {
+    document.getElementById('dns-step').click();
+    await new Promise(r => setTimeout(r, 1700));
+  }
+};
+
+// Tab switching
+document.querySelectorAll('.tab').forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    view = t.dataset.view;
+    document.getElementById('ctrl-dhcp').style.display = view === 'dhcp' ? '' : 'none';
+    document.getElementById('ctrl-dns').style.display = view === 'dns' ? '' : 'none';
+    log.innerHTML = '';
+    if (view === 'dhcp') renderDHCP();
+    else renderDNS();
+  };
+});
+
+renderDHCP();
+</script>
+</body>
+</html>

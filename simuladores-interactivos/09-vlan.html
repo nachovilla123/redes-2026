@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>VLANs - Aprendé jugando</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, system-ui, sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    padding: 20px;
+    min-height: 100vh;
+  }
+  h1 { font-size: 28px; margin-bottom: 4px; }
+  .subtitle { color: #8b949e; margin-bottom: 20px; }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .canvas-wrap {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 16px;
+    position: relative;
+  }
+  svg { width: 100%; height: 520px; display: block; }
+  .panel {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .panel h2 {
+    font-size: 16px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #30363d;
+  }
+  .step {
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed #30363d;
+  }
+  .step:last-child { border-bottom: none; }
+  .step-title {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #58a6ff;
+  }
+  .step-desc {
+    font-size: 13px;
+    color: #8b949e;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  button {
+    background: #238636;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    margin-right: 6px;
+    margin-bottom: 6px;
+    transition: background 0.15s;
+  }
+  button:hover { background: #2ea043; }
+  button.secondary { background: #30363d; }
+  button.secondary:hover { background: #484f58; }
+  button.danger { background: #da3633; }
+  button.danger:hover { background: #f85149; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  select {
+    background: #0d1117;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    margin-right: 6px;
+  }
+  .log {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 10px;
+    max-height: 220px;
+    overflow-y: auto;
+    font-family: 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .log-entry { margin-bottom: 4px; }
+  .log-ok { color: #3fb950; }
+  .log-block { color: #f85149; }
+  .log-info { color: #58a6ff; }
+  .log-tag { color: #d29922; }
+  .legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    font-size: 12px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid;
+  }
+  .controls-row { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+  .controls-row label { font-size: 13px; color: #8b949e; margin-right: 4px; }
+  .device { cursor: pointer; }
+  .device:hover .device-bg { stroke-width: 3; }
+  .info-box {
+    background: #0d1117;
+    border-left: 3px solid #58a6ff;
+    padding: 10px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #c9d1d9;
+    line-height: 1.6;
+  }
+  .info-box code {
+    background: #161b22;
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: #d29922;
+  }
+  .vlan-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+  .tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+  .tab {
+    padding: 6px 12px;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #8b949e;
+  }
+  .tab.active { background: #1f6feb; color: white; border-color: #1f6feb; }
+</style>
+</head>
+<body>
+  <h1>VLANs — Simulador interactivo</h1>
+  <div class="subtitle">Hacé clic en una PC para cambiar su VLAN. Después enviá un paquete y mirá qué pasa.</div>
+
+  <div class="layout">
+    <div class="canvas-wrap">
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="border-color:#3fb950;background:#3fb95033"></div>VLAN 10 (Ventas)</div>
+        <div class="legend-item"><div class="legend-dot" style="border-color:#58a6ff;background:#58a6ff33"></div>VLAN 20 (Ingeniería)</div>
+        <div class="legend-item"><div class="legend-dot" style="border-color:#d29922;background:#d2992233"></div>VLAN 30 (Invitados)</div>
+        <div class="legend-item"><div class="legend-dot" style="border-color:#8b949e;background:#8b949e33"></div>Sin VLAN</div>
+      </div>
+      <svg id="canvas" viewBox="0 0 800 520"></svg>
+    </div>
+
+    <div class="panel">
+      <div class="tabs">
+        <div class="tab active" data-tab="play">Simular</div>
+        <div class="tab" data-tab="learn">Conceptos</div>
+      </div>
+
+      <div id="tab-play">
+        <div class="step">
+          <div class="step-title">1. Asigná VLANs</div>
+          <div class="step-desc">Hacé clic en una PC del diagrama y elegí su VLAN. Los puertos del switch heredan la VLAN del dispositivo conectado (puerto access).</div>
+        </div>
+
+        <div class="step">
+          <div class="step-title">2. Enviá un paquete</div>
+          <div class="step-desc">Elegí origen y destino. Si están en la misma VLAN llega; si no, el switch lo descarta.</div>
+          <div class="controls-row">
+            <label>De:</label>
+            <select id="src"></select>
+            <label>a:</label>
+            <select id="dst"></select>
+          </div>
+          <div class="controls-row">
+            <button id="send">Enviar unicast</button>
+            <button id="broadcast" class="secondary">Enviar broadcast</button>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-title">3. Trunk 802.1Q</div>
+          <div class="step-desc">El enlace entre los dos switches es un trunk: lleva todas las VLANs etiquetando cada frame con su VLAN ID.</div>
+          <button id="toggle-trunk" class="secondary">Mostrar/ocultar tag 802.1Q</button>
+        </div>
+
+        <div class="step">
+          <div class="step-title">Log de eventos</div>
+          <div class="log" id="log"></div>
+          <button id="clear-log" class="danger" style="margin-top:8px">Limpiar log</button>
+        </div>
+      </div>
+
+      <div id="tab-learn" style="display:none">
+        <div class="step">
+          <div class="step-title">¿Qué es una VLAN?</div>
+          <div class="info-box">
+            Una <b>VLAN</b> (Virtual LAN) divide un switch físico en varias redes lógicas independientes. Dispositivos en distintas VLANs <b>no se ven entre sí</b> a nivel L2 — aunque estén conectados al mismo switch.
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-title">Dominio de broadcast</div>
+          <div class="info-box">
+            Sin VLANs, un switch = un solo dominio de broadcast. Con VLANs, <b>cada VLAN es su propio dominio</b>. Un broadcast en VLAN 10 nunca llega a VLAN 20.
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-title">Access vs Trunk</div>
+          <div class="info-box">
+            <b>Access port:</b> pertenece a una sola VLAN, conecta dispositivos finales (PCs, impresoras). El frame viaja sin tag.<br><br>
+            <b>Trunk port:</b> transporta múltiples VLANs entre switches. Cada frame se etiqueta con <code>802.1Q</code> para saber a qué VLAN pertenece.
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-title">El tag 802.1Q</div>
+          <div class="info-box">
+            Son 4 bytes que se insertan en el frame Ethernet. Contienen el <b>VLAN ID</b> (12 bits → hasta 4094 VLANs). Cuando el frame sale por un puerto access, el switch <b>quita</b> el tag.
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-title">¿Cómo se comunican entre VLANs?</div>
+          <div class="info-box">
+            Necesitás un <b>router</b> o un <b>switch L3</b>. Esto se llama <i>inter-VLAN routing</i> o <i>router-on-a-stick</i>. Sin eso, las VLANs quedan completamente aisladas — que muchas veces es exactamente lo que querés (segmentación, seguridad, control de broadcast).
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const VLANS = {
+  0:  { name: 'Sin VLAN', color: '#8b949e' },
+  10: { name: 'Ventas',   color: '#3fb950' },
+  20: { name: 'Ingeniería', color: '#58a6ff' },
+  30: { name: 'Invitados', color: '#d29922' }
+};
+
+const devices = [
+  { id: 'PC1', x: 100, y: 80,  vlan: 10, switch: 'SW1' },
+  { id: 'PC2', x: 100, y: 180, vlan: 20, switch: 'SW1' },
+  { id: 'PC3', x: 100, y: 280, vlan: 10, switch: 'SW1' },
+  { id: 'PC4', x: 100, y: 380, vlan: 30, switch: 'SW1' },
+  { id: 'PC5', x: 700, y: 80,  vlan: 20, switch: 'SW2' },
+  { id: 'PC6', x: 700, y: 180, vlan: 10, switch: 'SW2' },
+  { id: 'PC7', x: 700, y: 280, vlan: 30, switch: 'SW2' },
+  { id: 'PC8', x: 700, y: 380, vlan: 20, switch: 'SW2' },
+];
+
+const switches = [
+  { id: 'SW1', x: 280, y: 230 },
+  { id: 'SW2', x: 520, y: 230 }
+];
+
+let showTag = true;
+const svg = document.getElementById('canvas');
+const log = document.getElementById('log');
+
+function ns(tag, attrs = {}, children = []) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const k in attrs) el.setAttribute(k, attrs[k]);
+  children.forEach(c => el.appendChild(c));
+  return el;
+}
+
+function getSwitch(id) { return switches.find(s => s.id === id); }
+function getDevice(id) { return devices.find(d => d.id === id); }
+
+function render() {
+  svg.innerHTML = '';
+
+  const trunk = ns('line', {
+    x1: switches[0].x + 60, y1: switches[0].y + 25,
+    x2: switches[1].x, y2: switches[1].y + 25,
+    stroke: '#d29922', 'stroke-width': 4, 'stroke-dasharray': '6,3'
+  });
+  svg.appendChild(trunk);
+
+  const trunkLabel = ns('text', {
+    x: 400, y: 245, fill: '#d29922', 'font-size': 12,
+    'text-anchor': 'middle', 'font-weight': 'bold'
+  });
+  trunkLabel.textContent = '◄── TRUNK 802.1Q ──►';
+  svg.appendChild(trunkLabel);
+
+  if (showTag) {
+    const tagBg = ns('rect', {
+      x: 360, y: 255, width: 80, height: 36, rx: 4,
+      fill: '#d2992222', stroke: '#d29922', 'stroke-width': 1
+    });
+    svg.appendChild(tagBg);
+    const tag1 = ns('text', { x: 400, y: 270, fill: '#d29922', 'font-size': 10, 'text-anchor': 'middle' });
+    tag1.textContent = 'VLAN 10,20,30';
+    svg.appendChild(tag1);
+    const tag2 = ns('text', { x: 400, y: 284, fill: '#8b949e', 'font-size': 9, 'text-anchor': 'middle' });
+    tag2.textContent = 'todas etiquetadas';
+    svg.appendChild(tag2);
+  }
+
+  devices.forEach(d => {
+    const sw = getSwitch(d.switch);
+    const color = VLANS[d.vlan].color;
+    const line = ns('line', {
+      x1: d.x + 30, y1: d.y + 20,
+      x2: d.switch === 'SW1' ? sw.x : sw.x + 60,
+      y2: sw.y + 25,
+      stroke: color, 'stroke-width': 2
+    });
+    svg.appendChild(line);
+  });
+
+  switches.forEach(s => {
+    const g = ns('g');
+    g.appendChild(ns('rect', {
+      x: s.x, y: s.y, width: 60, height: 50, rx: 6,
+      fill: '#21262d', stroke: '#58a6ff', 'stroke-width': 2
+    }));
+    const t = ns('text', {
+      x: s.x + 30, y: s.y + 30, fill: '#e6edf3',
+      'font-size': 14, 'text-anchor': 'middle', 'font-weight': 'bold'
+    });
+    t.textContent = s.id;
+    g.appendChild(t);
+    svg.appendChild(g);
+  });
+
+  devices.forEach(d => {
+    const color = VLANS[d.vlan].color;
+    const g = ns('g', { class: 'device', 'data-id': d.id });
+    g.style.cursor = 'pointer';
+
+    g.appendChild(ns('rect', {
+      class: 'device-bg',
+      x: d.x, y: d.y, width: 60, height: 40, rx: 6,
+      fill: color + '33', stroke: color, 'stroke-width': 2
+    }));
+
+    const id = ns('text', {
+      x: d.x + 30, y: d.y + 18, fill: '#e6edf3',
+      'font-size': 12, 'text-anchor': 'middle', 'font-weight': 'bold'
+    });
+    id.textContent = d.id;
+    g.appendChild(id);
+
+    const v = ns('text', {
+      x: d.x + 30, y: d.y + 32, fill: color,
+      'font-size': 10, 'text-anchor': 'middle'
+    });
+    v.textContent = d.vlan === 0 ? 'sin VLAN' : 'VLAN ' + d.vlan;
+    g.appendChild(v);
+
+    g.addEventListener('click', () => cycleVlan(d.id));
+    svg.appendChild(g);
+  });
+}
+
+function cycleVlan(id) {
+  const d = getDevice(id);
+  const order = [10, 20, 30, 0];
+  const idx = order.indexOf(d.vlan);
+  d.vlan = order[(idx + 1) % order.length];
+  addLog('info', `${id} ahora pertenece a ${d.vlan === 0 ? 'ninguna VLAN' : 'VLAN ' + d.vlan} (${VLANS[d.vlan].name})`);
+  render();
+  refreshSelects();
+}
+
+function refreshSelects() {
+  ['src', 'dst'].forEach(id => {
+    const sel = document.getElementById(id);
+    const prev = sel.value;
+    sel.innerHTML = '';
+    devices.forEach(d => {
+      const o = document.createElement('option');
+      o.value = d.id;
+      o.textContent = `${d.id} (VLAN ${d.vlan === 0 ? '—' : d.vlan})`;
+      sel.appendChild(o);
+    });
+    if (prev) sel.value = prev;
+  });
+}
+
+function addLog(type, msg) {
+  const e = document.createElement('div');
+  e.className = 'log-entry log-' + type;
+  const time = new Date().toLocaleTimeString();
+  e.innerHTML = `<span style="color:#6e7681">[${time}]</span> ${msg}`;
+  log.insertBefore(e, log.firstChild);
+}
+
+function animatePacket(srcId, dstId, vlan, willDeliver) {
+  const src = getDevice(srcId);
+  const dst = getDevice(dstId);
+  const sw1 = getSwitch(src.switch);
+  const sw2 = getSwitch(dst.switch);
+  const color = VLANS[vlan].color;
+
+  const path = [
+    { x: src.x + 30, y: src.y + 20 },
+    { x: src.switch === 'SW1' ? sw1.x + 30 : sw1.x + 30, y: sw1.y + 25 }
+  ];
+  if (src.switch !== dst.switch) {
+    path.push({ x: sw2.x + 30, y: sw2.y + 25 });
+  }
+  if (willDeliver) {
+    path.push({ x: dst.x + 30, y: dst.y + 20 });
+  }
+
+  const dot = ns('circle', { cx: path[0].x, cy: path[0].y, r: 8, fill: color, stroke: 'white', 'stroke-width': 2 });
+  svg.appendChild(dot);
+
+  let crossingTrunk = src.switch !== dst.switch;
+  let tagLabel = null;
+  if (crossingTrunk && showTag) {
+    tagLabel = ns('text', { x: path[0].x, y: path[0].y - 14, fill: '#d29922', 'font-size': 10, 'text-anchor': 'middle', 'font-weight': 'bold' });
+    tagLabel.textContent = `[VID:${vlan}]`;
+    svg.appendChild(tagLabel);
+  }
+
+  let step = 0;
+  const totalDuration = 1400;
+  const stepDuration = totalDuration / (path.length - 1);
+  const start = performance.now();
+
+  function frame(now) {
+    const elapsed = now - start;
+    const totalProgress = Math.min(elapsed / totalDuration, 1);
+    const segmentFloat = totalProgress * (path.length - 1);
+    const segIdx = Math.min(Math.floor(segmentFloat), path.length - 2);
+    const segProg = segmentFloat - segIdx;
+    const a = path[segIdx], b = path[segIdx + 1];
+    const cx = a.x + (b.x - a.x) * segProg;
+    const cy = a.y + (b.y - a.y) * segProg;
+    dot.setAttribute('cx', cx);
+    dot.setAttribute('cy', cy);
+    if (tagLabel) {
+      tagLabel.setAttribute('x', cx);
+      tagLabel.setAttribute('y', cy - 14);
+    }
+
+    if (totalProgress < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      if (!willDeliver) {
+        const x = ns('text', { x: dot.getAttribute('cx'), y: parseFloat(dot.getAttribute('cy')) - 12, fill: '#f85149', 'font-size': 16, 'text-anchor': 'middle', 'font-weight': 'bold' });
+        x.textContent = '✕ DROP';
+        svg.appendChild(x);
+        setTimeout(() => x.remove(), 1500);
+      }
+      setTimeout(() => {
+        dot.remove();
+        if (tagLabel) tagLabel.remove();
+      }, 600);
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+document.getElementById('send').onclick = () => {
+  const srcId = document.getElementById('src').value;
+  const dstId = document.getElementById('dst').value;
+  if (srcId === dstId) { addLog('block', 'Origen y destino son el mismo'); return; }
+  const src = getDevice(srcId);
+  const dst = getDevice(dstId);
+  if (src.vlan === 0 || dst.vlan === 0) {
+    addLog('block', `${srcId} o ${dstId} no tiene VLAN asignada — frame descartado`);
+    animatePacket(srcId, dstId, 0, false);
+    return;
+  }
+  if (src.vlan === dst.vlan) {
+    addLog('ok', `✓ ${srcId} → ${dstId} en VLAN ${src.vlan} — frame entregado`);
+    if (src.switch !== dst.switch) {
+      addLog('tag', `  ↳ El frame cruza el trunk con tag 802.1Q VID=${src.vlan}, SW2 lo quita antes de entregarlo`);
+    }
+    animatePacket(srcId, dstId, src.vlan, true);
+  } else {
+    addLog('block', `✗ ${srcId} (VLAN ${src.vlan}) → ${dstId} (VLAN ${dst.vlan}) — bloqueado: VLANs distintas`);
+    animatePacket(srcId, dstId, src.vlan, false);
+  }
+};
+
+document.getElementById('broadcast').onclick = () => {
+  const srcId = document.getElementById('src').value;
+  const src = getDevice(srcId);
+  if (src.vlan === 0) { addLog('block', `${srcId} no tiene VLAN — no puede broadcast`); return; }
+  addLog('info', `📡 ${srcId} envía broadcast en VLAN ${src.vlan}`);
+  const recipients = devices.filter(d => d.id !== srcId && d.vlan === src.vlan);
+  const blocked = devices.filter(d => d.id !== srcId && d.vlan !== src.vlan && d.vlan !== 0);
+  recipients.forEach((r, i) => {
+    setTimeout(() => {
+      addLog('ok', `  ✓ Recibe: ${r.id}`);
+      animatePacket(srcId, r.id, src.vlan, true);
+    }, i * 250);
+  });
+  if (blocked.length) {
+    setTimeout(() => {
+      addLog('block', `  ✗ NO reciben (otra VLAN): ${blocked.map(b => b.id).join(', ')}`);
+    }, recipients.length * 250 + 100);
+  }
+};
+
+document.getElementById('toggle-trunk').onclick = () => {
+  showTag = !showTag;
+  addLog('info', `Tags 802.1Q ${showTag ? 'visibles' : 'ocultos'}`);
+  render();
+};
+
+document.getElementById('clear-log').onclick = () => { log.innerHTML = ''; };
+
+document.querySelectorAll('.tab').forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('tab-play').style.display = t.dataset.tab === 'play' ? '' : 'none';
+    document.getElementById('tab-learn').style.display = t.dataset.tab === 'learn' ? '' : 'none';
+  };
+});
+
+render();
+refreshSelects();
+addLog('info', 'Listo. Hacé clic en una PC para cambiar su VLAN, o enviá un paquete para empezar.');
+</script>
+</body>
+</html>

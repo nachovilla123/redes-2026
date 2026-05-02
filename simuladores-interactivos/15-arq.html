@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>ARQ y ventanas deslizantes</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, system-ui, sans-serif; background: #0d1117; color: #e6edf3; padding: 20px; min-height: 100vh; }
+  .nav { margin-bottom: 16px; }
+  .nav a { color: #58a6ff; text-decoration: none; font-size: 13px; }
+  h1 { font-size: 28px; margin-bottom: 4px; }
+  .subtitle { color: #8b949e; margin-bottom: 20px; }
+  .layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; max-width: 1400px; margin: 0 auto; }
+  .panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+  .panel h2 { font-size: 16px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+  button { background: #238636; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; margin-right: 6px; margin-bottom: 6px; }
+  button:hover { background: #2ea043; }
+  button.secondary { background: #30363d; }
+  button.danger { background: #da3633; }
+  button:disabled { opacity: 0.5; }
+  svg { width: 100%; height: 540px; display: block; }
+  .step { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed #30363d; }
+  .step:last-child { border: none; }
+  .step-title { font-weight: 600; margin-bottom: 6px; color: #58a6ff; }
+  .info-box { background: #0d1117; border-left: 3px solid #58a6ff; padding: 10px 12px; border-radius: 4px; font-size: 12px; color: #c9d1d9; line-height: 1.6; margin-bottom: 8px; }
+  .info-box code { background: #161b22; padding: 1px 5px; border-radius: 3px; color: #d29922; font-size: 11px; }
+  .controls-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; }
+  .controls-row label { font-size: 13px; color: #8b949e; }
+  select, input[type=number] { background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 6px; padding: 6px 10px; font-size: 13px; }
+  input[type=number] { width: 70px; }
+  .pills { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+  .pill { padding: 6px 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 20px; cursor: pointer; font-size: 12px; color: #8b949e; }
+  .pill.active { background: #1f6feb; color: white; border-color: #1f6feb; }
+  .stat-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .stat { flex: 1; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 10px; text-align: center; }
+  .stat-label { font-size: 10px; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; }
+  .stat-value { font-size: 22px; font-weight: bold; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="nav"><a href="index.html">← Volver al hub</a></div>
+<h1>ARQ y ventanas deslizantes</h1>
+<div class="subtitle">Stop-and-Wait vs Go-Back-N vs Selective Repeat — comparalos con pérdidas reales.</div>
+
+<div class="layout">
+  <div class="panel">
+    <div class="pills" id="protocol-pills">
+      <div class="pill active" data-proto="saw">Stop-and-Wait</div>
+      <div class="pill" data-proto="gbn">Go-Back-N</div>
+      <div class="pill" data-proto="sr">Selective Repeat</div>
+    </div>
+    <svg id="canvas" viewBox="0 0 800 540"></svg>
+  </div>
+
+  <div class="panel">
+    <h2>Configuración</h2>
+    <div class="step">
+      <div class="controls-row">
+        <label>Tamaño ventana N:</label>
+        <input type="number" id="window" min="1" max="6" value="4">
+      </div>
+      <div class="controls-row">
+        <label>Total paquetes:</label>
+        <input type="number" id="total" min="3" max="10" value="8">
+      </div>
+      <div class="controls-row">
+        <label>Pérdida del paquete #:</label>
+        <input type="number" id="lossnum" min="0" max="10" value="3">
+        <span style="font-size:11px;color:#8b949e">(0 = sin pérdida)</span>
+      </div>
+      <div class="controls-row">
+        <button id="run">▶ Ejecutar simulación</button>
+        <button id="reset" class="danger">Reset</button>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title">Estadísticas</div>
+      <div class="stat-row">
+        <div class="stat"><div class="stat-label">Tx</div><div class="stat-value" id="s-sent">0</div></div>
+        <div class="stat"><div class="stat-label">Reenvíos</div><div class="stat-value" id="s-resent" style="color:#d29922">0</div></div>
+        <div class="stat"><div class="stat-label">Eficiencia</div><div class="stat-value" id="s-eff" style="color:#3fb950">—</div></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title" id="proto-title">Stop-and-Wait</div>
+      <div class="info-box" id="proto-info"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const svg = document.getElementById('canvas');
+let proto = 'saw';
+
+const PROTO_INFO = {
+  saw: {
+    title: 'Stop-and-Wait',
+    info: 'Mandás 1 paquete, esperás ACK. Si se pierde, reenviás ese mismo. <b>Eficiencia muy baja</b> porque el canal pasa la mayor parte del tiempo esperando. Equivale a ventana N=1.',
+  },
+  gbn: {
+    title: 'Go-Back-N',
+    info: 'Mandás hasta N paquetes sin esperar. Si uno se pierde, el receptor descarta todos los siguientes y vos reenviás <b>desde el perdido</b>. Receptor simple, costo: reenvíos innecesarios.',
+  },
+  sr: {
+    title: 'Selective Repeat',
+    info: 'Mandás hasta N paquetes. Si uno se pierde, el receptor <b>guarda los siguientes</b> y solo pide reenvío del específico. Mucho más eficiente, pero el receptor necesita buffer.',
+  },
+};
+
+function ns(t, a={}, c=[]) { const e=document.createElementNS('http://www.w3.org/2000/svg',t); for(const k in a)e.setAttribute(k,a[k]); c.forEach(x=>e.appendChild(x)); return e; }
+
+function drawSetup() {
+  svg.innerHTML = '';
+  // Endpoints
+  svg.appendChild(ns('rect', { x: 50, y: 30, width: 130, height: 36, rx: 6, fill: '#21262d', stroke: '#58a6ff', 'stroke-width': 2 }));
+  const cT = ns('text', { x: 115, y: 53, fill: 'white', 'font-size': 14, 'text-anchor': 'middle', 'font-weight': 'bold' }); cT.textContent = 'TRANSMISOR'; svg.appendChild(cT);
+  svg.appendChild(ns('rect', { x: 620, y: 30, width: 130, height: 36, rx: 6, fill: '#21262d', stroke: '#3fb950', 'stroke-width': 2 }));
+  const sT = ns('text', { x: 685, y: 53, fill: 'white', 'font-size': 14, 'text-anchor': 'middle', 'font-weight': 'bold' }); sT.textContent = 'RECEPTOR'; svg.appendChild(sT);
+  // timelines
+  svg.appendChild(ns('line', { x1: 115, y1: 66, x2: 115, y2: 530, stroke: '#30363d', 'stroke-width': 1, 'stroke-dasharray': '3 3' }));
+  svg.appendChild(ns('line', { x1: 685, y1: 66, x2: 685, y2: 530, stroke: '#30363d', 'stroke-width': 1, 'stroke-dasharray': '3 3' }));
+  // header arrow
+  const at = ns('text', { x: 400, y: 50, fill: '#8b949e', 'font-size': 11, 'text-anchor': 'middle' }); at.textContent = 'tiempo →'; svg.appendChild(at);
+  const tArr = ns('text', { x: 400, y: 540, fill: '#8b949e', 'font-size': 10, 'text-anchor': 'middle' }); tArr.textContent = '↓ tiempo'; svg.appendChild(tArr);
+}
+
+let running = false;
+
+async function runSAW(total, lossNum) {
+  let stats = { sent: 0, resent: 0 };
+  let y = 80;
+  for (let i = 1; i <= total; i++) {
+    let attempt = 0;
+    let delivered = false;
+    while (!delivered && attempt < 3) {
+      stats.sent++;
+      if (attempt > 0) stats.resent++;
+      updateStats(stats, total);
+      const lost = (i === lossNum && attempt === 0);
+      await drawPacket(y, i, true, lost, attempt > 0);
+      if (lost) {
+        y += 60;
+        await drawTimeout(y, i);
+        y += 30;
+        attempt++;
+        continue;
+      }
+      // ACK
+      y += 30;
+      await drawAck(y, i, false);
+      y += 30;
+      delivered = true;
+    }
+  }
+}
+
+async function runGBN(total, n, lossNum) {
+  let stats = { sent: 0, resent: 0 };
+  let base = 1;
+  let pass = 0;
+  let y = 80;
+  while (base <= total) {
+    // send window
+    const winEnd = Math.min(base + n - 1, total);
+    const sent = [];
+    for (let i = base; i <= winEnd; i++) {
+      stats.sent++;
+      if (pass > 0 && i >= lossNum) { /* part of retransmit */ }
+      const lost = pass === 0 && i === lossNum;
+      sent.push({ num: i, lost, y });
+      drawPacket(y, i, true, lost, pass > 0).then(() => {});
+      y += 24;
+      await new Promise(r => setTimeout(r, 200));
+    }
+    await new Promise(r => setTimeout(r, 800));
+    // ACKs only for those before loss
+    let ackedUpTo = base - 1;
+    for (let i = base; i <= winEnd; i++) {
+      if (pass === 0 && i === lossNum) {
+        // discard from here onward
+        await drawAck(y, ackedUpTo, true); // could indicate
+        y += 24;
+        break;
+      }
+      ackedUpTo = i;
+      await drawAck(y, i, false);
+      y += 24;
+    }
+    if (pass === 0 && lossNum > 0 && lossNum <= total) {
+      // timeout, go back to loss
+      y += 20;
+      await drawTimeout(y, lossNum);
+      y += 30;
+      stats.resent += (winEnd - lossNum + 1);
+      base = lossNum;
+      pass = 1;
+    } else {
+      base = winEnd + 1;
+    }
+    updateStats(stats, total);
+  }
+}
+
+async function runSR(total, n, lossNum) {
+  let stats = { sent: 0, resent: 0 };
+  let y = 80;
+  // Send all in window
+  for (let i = 1; i <= total; i++) {
+    stats.sent++;
+    const lost = i === lossNum;
+    drawPacket(y, i, true, lost, false);
+    y += 24;
+    await new Promise(r => setTimeout(r, 250));
+  }
+  await new Promise(r => setTimeout(r, 600));
+  // ACKs for everything except lost
+  for (let i = 1; i <= total; i++) {
+    if (i === lossNum) {
+      // NAK or just no ACK
+      await drawAck(y, i, true);
+    } else {
+      await drawAck(y, i, false);
+    }
+    y += 22;
+  }
+  // Retransmit only the lost one
+  if (lossNum > 0 && lossNum <= total) {
+    y += 20;
+    stats.sent++;
+    stats.resent++;
+    await drawPacket(y, lossNum, true, false, true);
+    y += 30;
+    await drawAck(y, lossNum, false);
+    y += 24;
+  }
+  updateStats(stats, total);
+}
+
+function updateStats(s, total) {
+  document.getElementById('s-sent').textContent = s.sent;
+  document.getElementById('s-resent').textContent = s.resent;
+  const eff = s.sent > 0 ? Math.round(total / s.sent * 100) : 0;
+  document.getElementById('s-eff').textContent = eff + '%';
+}
+
+function drawPacket(y, num, success, lost, isResend) {
+  return new Promise(resolve => {
+    const color = lost ? '#f85149' : (isResend ? '#d29922' : '#58a6ff');
+    const dot = ns('circle', { cx: 115, cy: y, r: 9, fill: color, stroke: 'white', 'stroke-width': 1.5 });
+    const lbl = ns('text', { x: 115, y: y + 4, fill: 'white', 'font-size': 10, 'text-anchor': 'middle', 'font-weight': 'bold' });
+    lbl.textContent = num;
+    svg.appendChild(dot); svg.appendChild(lbl);
+
+    const start = performance.now();
+    const targetX = lost ? 400 : 685;
+    const targetY = y + 18;
+    function frame(t) {
+      const p = Math.min((t - start) / 700, 1);
+      dot.setAttribute('cx', 115 + (targetX - 115) * p);
+      dot.setAttribute('cy', y + (targetY - y) * p);
+      lbl.setAttribute('x', 115 + (targetX - 115) * p);
+      lbl.setAttribute('y', (y + (targetY - y) * p) + 4);
+      if (lost && p > 0.7) {
+        dot.setAttribute('opacity', 1 - (p - 0.7) * 3);
+        lbl.setAttribute('opacity', 1 - (p - 0.7) * 3);
+      }
+      if (p < 1) requestAnimationFrame(frame);
+      else {
+        if (lost) {
+          const x = ns('text', { x: targetX, y: targetY - 8, fill: '#f85149', 'font-size': 14, 'text-anchor': 'middle', 'font-weight': 'bold' });
+          x.textContent = '✕ perdido';
+          svg.appendChild(x);
+          setTimeout(() => x.remove(), 1500);
+          dot.remove(); lbl.remove();
+        } else {
+          dot.setAttribute('cx', targetX); dot.setAttribute('cy', targetY);
+          lbl.setAttribute('x', targetX); lbl.setAttribute('y', targetY + 4);
+          // keep as marker
+          setTimeout(() => { dot.setAttribute('r', 5); lbl.setAttribute('font-size', 8); }, 100);
+        }
+        resolve();
+      }
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+function drawAck(y, num, isNak) {
+  return new Promise(resolve => {
+    const color = isNak ? '#f85149' : '#3fb950';
+    const lbl = ns('text', { x: 685, y: y + 4, fill: color, 'font-size': 10, 'text-anchor': 'middle', 'font-weight': 'bold' });
+    lbl.textContent = (isNak ? 'NAK' : 'ACK') + num;
+    svg.appendChild(lbl);
+    const start = performance.now();
+    function frame(t) {
+      const p = Math.min((t - start) / 600, 1);
+      lbl.setAttribute('x', 685 - (685 - 115) * p);
+      if (p < 1) requestAnimationFrame(frame);
+      else { lbl.setAttribute('font-size', 9); resolve(); }
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+function drawTimeout(y, num) {
+  return new Promise(resolve => {
+    const t = ns('text', { x: 115, y: y + 4, fill: '#d29922', 'font-size': 11, 'font-weight': 'bold' });
+    t.textContent = `⏱ Timeout — reenvío desde ${num}`;
+    svg.appendChild(t);
+    setTimeout(resolve, 800);
+  });
+}
+
+document.getElementById('run').onclick = async () => {
+  if (running) return;
+  running = true;
+  drawSetup();
+  document.getElementById('s-sent').textContent = '0';
+  document.getElementById('s-resent').textContent = '0';
+  document.getElementById('s-eff').textContent = '—';
+  const total = parseInt(document.getElementById('total').value);
+  const n = parseInt(document.getElementById('window').value);
+  const lossNum = parseInt(document.getElementById('lossnum').value);
+  if (proto === 'saw') await runSAW(total, lossNum);
+  else if (proto === 'gbn') await runGBN(total, n, lossNum);
+  else await runSR(total, n, lossNum);
+  running = false;
+};
+
+document.getElementById('reset').onclick = () => { drawSetup(); document.getElementById('s-sent').textContent = '0'; document.getElementById('s-resent').textContent = '0'; document.getElementById('s-eff').textContent = '—'; };
+
+document.querySelectorAll('.pill').forEach(p => {
+  p.onclick = () => {
+    document.querySelectorAll('.pill').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    proto = p.dataset.proto;
+    document.getElementById('proto-title').textContent = PROTO_INFO[proto].title;
+    document.getElementById('proto-info').innerHTML = PROTO_INFO[proto].info;
+    drawSetup();
+  };
+});
+
+drawSetup();
+document.getElementById('proto-info').innerHTML = PROTO_INFO.saw.info;
+</script>
+</body>
+</html>

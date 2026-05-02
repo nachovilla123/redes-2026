@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Redes 2026 — Hub interactivo</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, system-ui, sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+  header { margin-bottom: 40px; text-align: center; }
+  h1 {
+    font-size: 36px;
+    background: linear-gradient(135deg, #58a6ff, #3fb950);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  .subtitle { color: #8b949e; font-size: 16px; }
+  .section-title {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #8b949e;
+    margin: 30px 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #30363d;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 18px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    position: relative;
+    overflow: hidden;
+    display: block;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: #58a6ff;
+    box-shadow: 0 10px 30px -10px rgba(88,166,255,0.3);
+  }
+  .card.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  .card-num {
+    font-size: 11px;
+    color: #8b949e;
+    font-family: 'SF Mono', Menlo, monospace;
+    margin-bottom: 6px;
+  }
+  .card-title {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #e6edf3;
+  }
+  .card-desc {
+    font-size: 13px;
+    color: #8b949e;
+    line-height: 1.5;
+  }
+  .badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-ready { background: #238636; color: white; }
+  .badge-soon { background: #30363d; color: #8b949e; }
+  .accent-bar {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+  }
+  footer {
+    text-align: center;
+    margin-top: 60px;
+    color: #6e7681;
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Redes 2026</h1>
+    <div class="subtitle">Simuladores interactivos para entender redes paso a paso</div>
+  </header>
+
+  <div class="section-title">Fundamentos</div>
+  <div class="grid">
+    <a class="card disabled">
+      <div class="accent-bar" style="background:#8b949e"></div>
+      <span class="badge badge-soon">Próximamente</span>
+      <div class="card-num">CAP. 01</div>
+      <div class="card-title">Modelo de comunicaciones</div>
+      <div class="card-desc">Emisor, receptor, mensaje, canal y ruido — la base de toda comunicación.</div>
+    </a>
+    <a class="card disabled">
+      <div class="accent-bar" style="background:#8b949e"></div>
+      <span class="badge badge-soon">Próximamente</span>
+      <div class="card-num">CAP. 02</div>
+      <div class="card-title">Tipos de redes</div>
+      <div class="card-desc">LAN, MAN, WAN, GAN — clasificación por alcance geográfico.</div>
+    </a>
+    <a class="card disabled">
+      <div class="accent-bar" style="background:#8b949e"></div>
+      <span class="badge badge-soon">Próximamente</span>
+      <div class="card-num">CAP. 03</div>
+      <div class="card-title">Conmutación: circuitos vs paquetes</div>
+      <div class="card-desc">Diferencia entre la red telefónica clásica y la Internet moderna.</div>
+    </a>
+    <a class="card disabled">
+      <div class="accent-bar" style="background:#8b949e"></div>
+      <span class="badge badge-soon">Próximamente</span>
+      <div class="card-num">CAP. 04</div>
+      <div class="card-title">Protocolos</div>
+      <div class="card-desc">Las reglas que permiten que dos dispositivos se entiendan.</div>
+    </a>
+    <a class="card disabled">
+      <div class="accent-bar" style="background:#8b949e"></div>
+      <span class="badge badge-soon">Próximamente</span>
+      <div class="card-num">CAP. 05</div>
+      <div class="card-title">Arquitectura en capas</div>
+      <div class="card-desc">Por qué se separan las responsabilidades en niveles.</div>
+    </a>
+  </div>
+
+  <div class="section-title">Modelos OSI y TCP/IP</div>
+  <div class="grid">
+    <a class="card" href="06-osi.html">
+      <div class="accent-bar" style="background:#58a6ff"></div>
+      <span class="badge badge-ready">Listo</span>
+      <div class="card-num">CAP. 06</div>
+      <div class="card-title">Modelo OSI — 7 capas</div>
+      <div class="card-desc">Encapsulamiento de datos pasando por las 7 capas. Mirá cómo cada capa agrega su header.</div>
+    </a>
+    <a class="card" href="07-tcp-ip.html">
+      <div class="accent-bar" style="background:#58a6ff"></div>
+      <span class="badge badge-ready">Listo</span>
+      <div class="card-num">CAP. 07</div>
+      <div class="card-title">TCP/IP — handshake y puertos</div>
+      <div class="card-desc">3-way handshake TCP, comparativa TCP vs UDP, puertos como puertas del edificio.</div>
+    </a>
+    <a class="card disabled">
+      <div class="accent-bar" style="background:#8b949e"></div>
+      <span class="badge badge-soon">Próximamente</span>
+      <div class="card-num">CAP. 08</div>
+      <div class="card-title">Control de flujo y errores</div>
+      <div class="card-desc">CRC, paridad, ventana de control, ARQ básico.</div>
+    </a>
+  </div>
+
+  <div class="section-title">Direccionamiento y switching</div>
+  <div class="grid">
+    <a class="card" href="09-vlan.html">
+      <div class="accent-bar" style="background:#3fb950"></div>
+      <span class="badge badge-ready">Listo</span>
+      <div class="card-num">CAP. 09</div>
+      <div class="card-title">Switch y VLANs</div>
+      <div class="card-desc">Asigná VLANs a PCs, mandá broadcasts y mirá el tag 802.1Q en el trunk.</div>
+    </a>
+    <a class="card" href="10-subredes.html">
+      <div class="accent-bar" style="background:#3fb950"></div>
+      <span class="badge badge-ready">Listo</span>
+      <div class="card-num">CAP. 10</div>
+      <div class="card-title">IP, subredes y CIDR</div>
+      <div class="card-desc">Calculadora interactiva con visualización de bits, máscara y broadcast.</div>
+    </a>
+    <a class="card" href="11-nat.html">
+      <div class="accent-bar" style="background:#3fb950"></div>
+      <span class="badge badge-ready">Listo</span>
+      <div class="card-num">CAP. 11</div>
+      <div class="card-title">NAT / PAT</div>
+      <div class="card-desc">Mirá la tabla NAT del router traduciendo IPs privadas a públicas en tiempo real.</div>
+    </a>
+    <a class="card disabled">
+      <div class="accent-bar" style="background:#8b949e"></div>
+      <span class="badge badge-soon">Próximamente</span>
+      <div class="card-num">CAP. 12</div>
+      <div class="card-title">VPN — túnel cifrado</div>
+      <div class="card-desc">El túnel virtual sobre internet pública.</div>
+    </a>
+    <a class="card disabled">
+      <div class="accent-bar" style="background:#8b949e"></div>
+      <span class="badge badge-soon">Próximamente</span>
+      <div class="card-num">CAP. 13</div>
+      <div class="card-title">ACL — listas de control</div>
+      <div class="card-desc">El portero con lista negra/blanca.</div>
+    </a>
+  </div>
+
+  <div class="section-title">Wireless y transporte</div>
+  <div class="grid">
+    <a class="card disabled">
+      <div class="accent-bar" style="background:#8b949e"></div>
+      <span class="badge badge-soon">Próximamente</span>
+      <div class="card-num">CAP. 14</div>
+      <div class="card-title">WiFi 802.11 — CSMA/CA</div>
+      <div class="card-desc">Nodo oculto, RTS/CTS, evitando colisiones en el aire.</div>
+    </a>
+    <a class="card" href="15-arq.html">
+      <div class="accent-bar" style="background:#d29922"></div>
+      <span class="badge badge-ready">Listo</span>
+      <div class="card-num">CAP. 15</div>
+      <div class="card-title">ARQ — ventanas deslizantes</div>
+      <div class="card-desc">Stop-and-Wait vs Go-Back-N vs Selective Repeat con simulación de pérdidas.</div>
+    </a>
+  </div>
+
+  <div class="section-title">Routing y fragmentación</div>
+  <div class="grid">
+    <a class="card" href="16-routing.html">
+      <div class="accent-bar" style="background:#f85149"></div>
+      <span class="badge badge-ready">Listo</span>
+      <div class="card-num">CAP. 16</div>
+      <div class="card-title">Routing — tablas y next-hop</div>
+      <div class="card-desc">Routers con tablas, paquete eligiendo ruta, comparativa RIP vs OSPF vs BGP.</div>
+    </a>
+    <a class="card" href="17-fragmentacion.html">
+      <div class="accent-bar" style="background:#f85149"></div>
+      <span class="badge badge-ready">Listo</span>
+      <div class="card-num">CAP. 17</div>
+      <div class="card-title">Fragmentación IPv4</div>
+      <div class="card-desc">Calculá ID, MF y Fragment Offset cuando un paquete excede el MTU.</div>
+    </a>
+    <a class="card disabled">
+      <div class="accent-bar" style="background:#8b949e"></div>
+      <span class="badge badge-soon">Próximamente</span>
+      <div class="card-num">CAP. 18</div>
+      <div class="card-title">VLSM — ejercicios resueltos</div>
+      <div class="card-desc">Subnetting de longitud variable paso a paso.</div>
+    </a>
+  </div>
+
+  <div class="section-title">Servicios de red</div>
+  <div class="grid">
+    <a class="card" href="dns-dhcp.html">
+      <div class="accent-bar" style="background:#a371f7"></div>
+      <span class="badge badge-ready">Listo</span>
+      <div class="card-num">EXTRA</div>
+      <div class="card-title">DNS y DHCP</div>
+      <div class="card-desc">DORA del DHCP + resolución DNS recursiva paso a paso.</div>
+    </a>
+    <a class="card disabled">
+      <div class="accent-bar" style="background:#8b949e"></div>
+      <span class="badge badge-soon">Próximamente</span>
+      <div class="card-num">EXTRA</div>
+      <div class="card-title">HTTP / HTTPS</div>
+      <div class="card-desc">Request/response, métodos, status codes.</div>
+    </a>
+    <a class="card disabled">
+      <div class="accent-bar" style="background:#8b949e"></div>
+      <span class="badge badge-soon">Próximamente</span>
+      <div class="card-num">EXTRA</div>
+      <div class="card-title">TLS / JWT</div>
+      <div class="card-desc">Handshake TLS, certificados, tokens.</div>
+    </a>
+    <a class="card disabled">
+      <div class="accent-bar" style="background:#8b949e"></div>
+      <span class="badge badge-soon">Próximamente</span>
+      <div class="card-num">EXTRA</div>
+      <div class="card-title">HTTP/3 y QUIC</div>
+      <div class="card-desc">El sucesor sobre UDP.</div>
+    </a>
+  </div>
+
+  <footer>
+    Construido para aprender. Cada simulador es un solo archivo HTML — abrí el que quieras y experimentá.
+  </footer>
+</div>
+</body>
+</html>

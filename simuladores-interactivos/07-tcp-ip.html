@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>TCP/IP — handshake y puertos</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, system-ui, sans-serif; background: #0d1117; color: #e6edf3; padding: 20px; min-height: 100vh; }
+  .nav { margin-bottom: 16px; }
+  .nav a { color: #58a6ff; text-decoration: none; font-size: 13px; }
+  .nav a:hover { text-decoration: underline; }
+  h1 { font-size: 28px; margin-bottom: 4px; }
+  .subtitle { color: #8b949e; margin-bottom: 20px; }
+  .layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; max-width: 1400px; margin: 0 auto; }
+  .panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+  .panel h2 { font-size: 16px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+  button { background: #238636; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; margin-right: 6px; margin-bottom: 6px; }
+  button:hover { background: #2ea043; }
+  button.secondary { background: #30363d; }
+  button.danger { background: #da3633; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+  .tab { padding: 8px 14px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; cursor: pointer; font-size: 13px; color: #8b949e; }
+  .tab.active { background: #1f6feb; color: white; border-color: #1f6feb; }
+  svg { width: 100%; height: 540px; display: block; }
+  .step { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed #30363d; }
+  .step:last-child { border: none; }
+  .step-title { font-weight: 600; margin-bottom: 6px; color: #58a6ff; }
+  .info-box { background: #0d1117; border-left: 3px solid #58a6ff; padding: 10px 12px; border-radius: 4px; font-size: 12px; color: #c9d1d9; line-height: 1.6; margin-bottom: 8px; }
+  .info-box code { background: #161b22; padding: 1px 5px; border-radius: 3px; color: #d29922; font-size: 11px; }
+  .stat-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .stat { flex: 1; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 10px; text-align: center; }
+  .stat-label { font-size: 10px; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; }
+  .stat-value { font-size: 22px; font-weight: bold; margin-top: 4px; }
+  .ports-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; }
+  .port-card { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 10px; }
+  .port-num { font-family: 'SF Mono', Menlo, monospace; font-size: 18px; font-weight: bold; color: #58a6ff; }
+  .port-svc { font-size: 11px; color: #8b949e; margin-top: 2px; }
+  .controls-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  select { background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 6px; padding: 6px 10px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="nav"><a href="index.html">← Volver al hub</a></div>
+<h1>TCP/IP — handshake y puertos</h1>
+<div class="subtitle">El 3-way handshake, comparativa TCP vs UDP, y para qué sirven los puertos.</div>
+
+<div class="layout">
+  <div class="panel">
+    <div class="tabs">
+      <div class="tab active" data-view="handshake">3-way handshake</div>
+      <div class="tab" data-view="compare">TCP vs UDP</div>
+      <div class="tab" data-view="ports">Puertos</div>
+    </div>
+    <div id="view-handshake">
+      <svg id="canvas-hs" viewBox="0 0 800 540"></svg>
+    </div>
+    <div id="view-compare" style="display:none">
+      <svg id="canvas-cmp" viewBox="0 0 800 540"></svg>
+    </div>
+    <div id="view-ports" style="display:none">
+      <svg id="canvas-ports" viewBox="0 0 800 540"></svg>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Controles</h2>
+
+    <div id="ctrl-handshake">
+      <div class="step">
+        <div class="step-title">3-way handshake</div>
+        <div class="info-box">
+          Antes de mandar datos, TCP <b>negocia una conexión</b> con tres mensajes: <code>SYN</code>, <code>SYN-ACK</code>, <code>ACK</code>. Cada lado le dice al otro su número de secuencia inicial.
+        </div>
+        <div class="controls-row">
+          <button id="hs-step">Siguiente paso</button>
+          <button id="hs-auto" class="secondary">Reproducir</button>
+          <button id="hs-reset" class="danger">Reset</button>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-title">¿Qué pasa ahora?</div>
+        <div class="info-box" id="hs-explain">Cliente quiere conectarse al servidor. Apretá "Siguiente paso" para empezar.</div>
+      </div>
+    </div>
+
+    <div id="ctrl-compare" style="display:none">
+      <div class="step">
+        <div class="step-title">Simulá pérdida de paquetes</div>
+        <div class="info-box">
+          Pérdida del 0% al 50%. Mirá cómo TCP retransmite y UDP simplemente sigue.
+        </div>
+        <div class="controls-row">
+          <label style="font-size:13px;color:#8b949e">Pérdida:</label>
+          <select id="loss">
+            <option value="0">0%</option>
+            <option value="20" selected>20%</option>
+            <option value="50">50%</option>
+          </select>
+        </div>
+        <div class="controls-row">
+          <button id="cmp-tcp">Enviar con TCP</button>
+          <button id="cmp-udp" class="secondary">Enviar con UDP</button>
+          <button id="cmp-reset" class="danger">Reset</button>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-title">Resultado</div>
+        <div class="stat-row">
+          <div class="stat"><div class="stat-label">Enviados</div><div class="stat-value" id="cmp-sent">0</div></div>
+          <div class="stat"><div class="stat-label">Llegados</div><div class="stat-value" id="cmp-recv" style="color:#3fb950">0</div></div>
+          <div class="stat"><div class="stat-label">Reenviados</div><div class="stat-value" id="cmp-resent" style="color:#d29922">0</div></div>
+        </div>
+        <div class="info-box" id="cmp-explain">Elegí el protocolo y enviá 8 paquetes. Vas a ver la diferencia.</div>
+      </div>
+    </div>
+
+    <div id="ctrl-ports" style="display:none">
+      <div class="step">
+        <div class="step-title">Puertos: las puertas del edificio</div>
+        <div class="info-box">
+          La <b>IP</b> identifica la máquina. El <b>puerto</b> identifica la app dentro de la máquina. Tu PC corre Chrome y Spotify a la vez con la misma IP — los puertos los distinguen.
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-title">Bien conocidos (0–1023)</div>
+        <div class="ports-grid">
+          <div class="port-card"><div class="port-num">22</div><div class="port-svc">SSH</div></div>
+          <div class="port-card"><div class="port-num">25</div><div class="port-svc">SMTP</div></div>
+          <div class="port-card"><div class="port-num">53</div><div class="port-svc">DNS</div></div>
+          <div class="port-card"><div class="port-num">67/68</div><div class="port-svc">DHCP</div></div>
+          <div class="port-card"><div class="port-num">80</div><div class="port-svc">HTTP</div></div>
+          <div class="port-card"><div class="port-num">443</div><div class="port-svc">HTTPS</div></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-title">Dinámicos (1024–65535)</div>
+        <div class="info-box">
+          Los asigna el SO a tus apps cuando inician una conexión saliente. Por eso ves puertos altos como 52341, 49201, 58102 en tablas NAT.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function ns(tag, attrs = {}, children = []) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const k in attrs) el.setAttribute(k, attrs[k]);
+  children.forEach(c => el.appendChild(c));
+  return el;
+}
+
+// HANDSHAKE
+const hsSvg = document.getElementById('canvas-hs');
+let hsStep = 0;
+
+const hsSteps = [
+  { txt: 'Estado inicial. El cliente está LISTEN, el servidor también escuchando.', actions: [] },
+  { txt: '<b>Paso 1 — SYN:</b> el cliente manda un segmento con el flag SYN activado y un número de secuencia inicial (Seq=X). Pasa a estado SYN_SENT.', actions: [{ from: 'C', to: 'S', label: 'SYN, Seq=X', color: '#58a6ff' }] },
+  { txt: '<b>Paso 2 — SYN-ACK:</b> el servidor responde con SYN+ACK. Confirma el SYN del cliente (Ack=X+1) y envía su propio Seq=Y. Pasa a SYN_RECEIVED.', actions: [{ from: 'S', to: 'C', label: 'SYN, ACK, Seq=Y, Ack=X+1', color: '#3fb950' }] },
+  { txt: '<b>Paso 3 — ACK:</b> el cliente confirma el SYN del servidor (Ack=Y+1). Ambos pasan a ESTABLISHED. La conexión está abierta.', actions: [{ from: 'C', to: 'S', label: 'ACK, Seq=X+1, Ack=Y+1', color: '#d29922' }] },
+  { txt: '<b>Conexión ESTABLISHED.</b> Ahora pueden mandarse datos en ambos sentidos. ¡Recién ahora se mandan los datos reales!', actions: [{ from: 'C', to: 'S', label: 'Datos (HTTP GET /)', color: '#a371f7' }] },
+];
+
+function renderHs() {
+  hsSvg.innerHTML = '';
+  // two vertical timelines
+  hsSvg.appendChild(ns('rect', { x: 100, y: 30, width: 100, height: 30, rx: 6, fill: '#21262d', stroke: '#58a6ff', 'stroke-width': 2 }));
+  const cText = ns('text', { x: 150, y: 50, fill: 'white', 'font-size': 14, 'text-anchor': 'middle', 'font-weight': 'bold' });
+  cText.textContent = 'CLIENTE'; hsSvg.appendChild(cText);
+
+  hsSvg.appendChild(ns('rect', { x: 600, y: 30, width: 100, height: 30, rx: 6, fill: '#21262d', stroke: '#3fb950', 'stroke-width': 2 }));
+  const sText = ns('text', { x: 650, y: 50, fill: 'white', 'font-size': 14, 'text-anchor': 'middle', 'font-weight': 'bold' });
+  sText.textContent = 'SERVIDOR'; hsSvg.appendChild(sText);
+
+  // timelines
+  hsSvg.appendChild(ns('line', { x1: 150, y1: 60, x2: 150, y2: 510, stroke: '#30363d', 'stroke-width': 2 }));
+  hsSvg.appendChild(ns('line', { x1: 650, y1: 60, x2: 650, y2: 510, stroke: '#30363d', 'stroke-width': 2 }));
+
+  // states
+  const cStates = ['LISTEN', 'SYN_SENT', 'SYN_SENT', 'ESTABLISHED', 'ESTABLISHED'];
+  const sStates = ['LISTEN', 'LISTEN', 'SYN_RCVD', 'ESTABLISHED', 'ESTABLISHED'];
+  const cs = ns('text', { x: 150, y: 80, fill: '#58a6ff', 'font-size': 11, 'text-anchor': 'middle', 'font-family': 'monospace' });
+  cs.textContent = cStates[hsStep] || 'LISTEN'; hsSvg.appendChild(cs);
+  const ss = ns('text', { x: 650, y: 80, fill: '#3fb950', 'font-size': 11, 'text-anchor': 'middle', 'font-family': 'monospace' });
+  ss.textContent = sStates[hsStep] || 'LISTEN'; hsSvg.appendChild(ss);
+
+  // draw all completed steps
+  for (let i = 1; i <= hsStep; i++) {
+    const a = hsSteps[i].actions[0];
+    if (!a) continue;
+    const y = 110 + (i - 1) * 90;
+    const x1 = a.from === 'C' ? 150 : 650;
+    const x2 = a.from === 'C' ? 650 : 150;
+    const arrow = ns('line', { x1: x1, y1: y, x2: x2, y2: y + 30, stroke: a.color, 'stroke-width': 3, 'marker-end': `url(#arrow-${i})` });
+    const def = ns('defs');
+    const m = ns('marker', { id: `arrow-${i}`, viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 8, markerHeight: 8, orient: 'auto' });
+    const p = ns('path', { d: 'M 0 0 L 10 5 L 0 10 z', fill: a.color });
+    m.appendChild(p); def.appendChild(m); hsSvg.appendChild(def);
+    hsSvg.appendChild(arrow);
+
+    const lblBg = ns('rect', { x: 250, y: y + 4, width: 300, height: 22, rx: 4, fill: '#0d1117', stroke: a.color });
+    hsSvg.appendChild(lblBg);
+    const lbl = ns('text', { x: 400, y: y + 19, fill: a.color, 'font-size': 12, 'text-anchor': 'middle', 'font-family': 'monospace', 'font-weight': 'bold' });
+    lbl.textContent = a.label;
+    hsSvg.appendChild(lbl);
+  }
+
+  // animate latest packet
+  if (hsStep > 0 && hsStep < hsSteps.length) {
+    const a = hsSteps[hsStep].actions[0];
+    if (a) {
+      const y = 110 + (hsStep - 1) * 90;
+      const x1 = a.from === 'C' ? 150 : 650;
+      const x2 = a.from === 'C' ? 650 : 150;
+      const dot = ns('circle', { cx: x1, cy: y, r: 8, fill: a.color });
+      hsSvg.appendChild(dot);
+      const start = performance.now();
+      function frame(t) {
+        const p = Math.min((t - start) / 800, 1);
+        dot.setAttribute('cx', x1 + (x2 - x1) * p);
+        dot.setAttribute('cy', y + 30 * p);
+        if (p < 1) requestAnimationFrame(frame);
+        else setTimeout(() => dot.remove(), 200);
+      }
+      requestAnimationFrame(frame);
+    }
+  }
+
+  document.getElementById('hs-explain').innerHTML = hsSteps[hsStep].txt;
+}
+
+document.getElementById('hs-step').onclick = () => {
+  if (hsStep < hsSteps.length - 1) { hsStep++; renderHs(); }
+};
+document.getElementById('hs-reset').onclick = () => { hsStep = 0; renderHs(); };
+document.getElementById('hs-auto').onclick = async () => {
+  while (hsStep < hsSteps.length - 1) {
+    document.getElementById('hs-step').click();
+    await new Promise(r => setTimeout(r, 1400));
+  }
+};
+
+// COMPARE TCP vs UDP
+const cmpSvg = document.getElementById('canvas-cmp');
+function renderCmp() {
+  cmpSvg.innerHTML = '';
+  cmpSvg.appendChild(ns('rect', { x: 50, y: 30, width: 120, height: 40, rx: 6, fill: '#21262d', stroke: '#58a6ff', 'stroke-width': 2 }));
+  const ct = ns('text', { x: 110, y: 55, fill: 'white', 'font-size': 14, 'text-anchor': 'middle', 'font-weight': 'bold' }); ct.textContent = 'EMISOR'; cmpSvg.appendChild(ct);
+  cmpSvg.appendChild(ns('rect', { x: 630, y: 30, width: 120, height: 40, rx: 6, fill: '#21262d', stroke: '#3fb950', 'stroke-width': 2 }));
+  const st = ns('text', { x: 690, y: 55, fill: 'white', 'font-size': 14, 'text-anchor': 'middle', 'font-weight': 'bold' }); st.textContent = 'RECEPTOR'; cmpSvg.appendChild(st);
+
+  const tunnel = ns('rect', { x: 170, y: 100, width: 460, height: 360, rx: 8, fill: '#161b22', stroke: '#30363d', 'stroke-dasharray': '4 4' });
+  cmpSvg.appendChild(tunnel);
+  const tlbl = ns('text', { x: 400, y: 90, fill: '#8b949e', 'font-size': 11, 'text-anchor': 'middle' });
+  tlbl.textContent = 'Red (puede perder paquetes)'; cmpSvg.appendChild(tlbl);
+}
+renderCmp();
+
+let cmpRunning = false;
+async function runCmp(proto) {
+  if (cmpRunning) return;
+  cmpRunning = true;
+  document.getElementById('cmp-sent').textContent = '0';
+  document.getElementById('cmp-recv').textContent = '0';
+  document.getElementById('cmp-resent').textContent = '0';
+  renderCmp();
+
+  const loss = parseInt(document.getElementById('loss').value);
+  const numPackets = 8;
+  let sent = 0, received = 0, resent = 0;
+
+  for (let i = 1; i <= numPackets; i++) {
+    sent++;
+    document.getElementById('cmp-sent').textContent = sent;
+    const lost = Math.random() * 100 < loss;
+    await sendPacket(i, !lost, proto, false);
+
+    if (lost && proto === 'tcp') {
+      // retransmit
+      await new Promise(r => setTimeout(r, 600));
+      resent++;
+      document.getElementById('cmp-resent').textContent = resent;
+      // assume retransmission succeeds
+      await sendPacket(i, true, proto, true);
+      received++;
+      document.getElementById('cmp-recv').textContent = received;
+    } else if (!lost) {
+      received++;
+      document.getElementById('cmp-recv').textContent = received;
+    }
+  }
+
+  const expl = document.getElementById('cmp-explain');
+  if (proto === 'tcp') {
+    expl.innerHTML = `TCP entregó <b>${received}/${numPackets}</b> paquetes (todos). Reenvió <b>${resent}</b>. Es lento si hay pérdida pero garantiza entrega.`;
+  } else {
+    expl.innerHTML = `UDP entregó <b>${received}/${numPackets}</b> paquetes. Los perdidos no se reenvían — la app decide qué hacer. Es rápido pero sin garantías.`;
+  }
+  cmpRunning = false;
+}
+
+async function sendPacket(num, success, proto, isRetransmit) {
+  return new Promise(resolve => {
+    const color = isRetransmit ? '#d29922' : (proto === 'tcp' ? '#58a6ff' : '#a371f7');
+    const dot = ns('circle', { cx: 170, cy: 280, r: 10, fill: color, stroke: 'white', 'stroke-width': 1 });
+    const lbl = ns('text', { x: 170, y: 285, fill: 'white', 'font-size': 10, 'text-anchor': 'middle', 'font-weight': 'bold' });
+    lbl.textContent = num;
+    cmpSvg.appendChild(dot); cmpSvg.appendChild(lbl);
+
+    const start = performance.now();
+    const dur = 700;
+    function frame(t) {
+      const p = Math.min((t - start) / dur, 1);
+      const targetX = success ? 630 : (170 + Math.random() * 460 * 0.6 + 100);
+      const cx = 170 + (targetX - 170) * Math.min(p, 1);
+      dot.setAttribute('cx', cx);
+      lbl.setAttribute('x', cx);
+      if (!success && p > 0.5) {
+        dot.setAttribute('opacity', 1 - (p - 0.5) * 2);
+        lbl.setAttribute('opacity', 1 - (p - 0.5) * 2);
+        if (p > 0.7) {
+          const x = ns('text', { x: cx, y: 270, fill: '#f85149', 'font-size': 14, 'text-anchor': 'middle', 'font-weight': 'bold' });
+          x.textContent = '✕'; cmpSvg.appendChild(x);
+          setTimeout(() => x.remove(), 800);
+        }
+      }
+      if (p < 1) requestAnimationFrame(frame);
+      else { dot.remove(); lbl.remove(); resolve(); }
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+document.getElementById('cmp-tcp').onclick = () => runCmp('tcp');
+document.getElementById('cmp-udp').onclick = () => runCmp('udp');
+document.getElementById('cmp-reset').onclick = () => {
+  document.getElementById('cmp-sent').textContent = '0';
+  document.getElementById('cmp-recv').textContent = '0';
+  document.getElementById('cmp-resent').textContent = '0';
+  document.getElementById('cmp-explain').innerHTML = 'Elegí el protocolo y enviá 8 paquetes.';
+  renderCmp();
+};
+
+// PORTS visualization
+const portsSvg = document.getElementById('canvas-ports');
+function renderPorts() {
+  portsSvg.innerHTML = '';
+  // building
+  const bldg = ns('rect', { x: 250, y: 80, width: 300, height: 400, rx: 12, fill: '#161b22', stroke: '#58a6ff', 'stroke-width': 3 });
+  portsSvg.appendChild(bldg);
+  const ip = ns('text', { x: 400, y: 65, fill: '#58a6ff', 'font-size': 16, 'text-anchor': 'middle', 'font-weight': 'bold', 'font-family': 'monospace' });
+  ip.textContent = 'IP: 192.168.1.10'; portsSvg.appendChild(ip);
+  const sub = ns('text', { x: 400, y: 110, fill: 'white', 'font-size': 14, 'text-anchor': 'middle' });
+  sub.textContent = 'tu computadora'; portsSvg.appendChild(sub);
+
+  const apps = [
+    { port: 443, svc: 'Chrome (HTTPS)', y: 150, color: '#3fb950' },
+    { port: 4070, svc: 'Spotify', y: 220, color: '#a371f7' },
+    { port: 22, svc: 'SSH server', y: 290, color: '#d29922' },
+    { port: 53, svc: 'DNS resolver', y: 360, color: '#ec4899' },
+  ];
+  apps.forEach(a => {
+    portsSvg.appendChild(ns('rect', { x: 280, y: a.y, width: 240, height: 50, rx: 6, fill: '#0d1117', stroke: a.color, 'stroke-width': 2 }));
+    const portT = ns('text', { x: 310, y: a.y + 30, fill: a.color, 'font-size': 18, 'font-family': 'monospace', 'font-weight': 'bold' });
+    portT.textContent = ':' + a.port; portsSvg.appendChild(portT);
+    const svcT = ns('text', { x: 410, y: a.y + 30, fill: 'white', 'font-size': 13, 'text-anchor': 'middle' });
+    svcT.textContent = a.svc; portsSvg.appendChild(svcT);
+
+    // arrow from outside
+    portsSvg.appendChild(ns('line', { x1: 100, y1: a.y + 25, x2: 280, y2: a.y + 25, stroke: a.color, 'stroke-width': 2, 'stroke-dasharray': '4 4' }));
+    const arr = ns('polygon', { points: `${275},${a.y + 21} ${283},${a.y + 25} ${275},${a.y + 29}`, fill: a.color });
+    portsSvg.appendChild(arr);
+  });
+
+  const ext = ns('text', { x: 60, y: 285, fill: '#8b949e', 'font-size': 12, 'text-anchor': 'middle' });
+  ext.textContent = 'tráfico'; portsSvg.appendChild(ext);
+  const ext2 = ns('text', { x: 60, y: 300, fill: '#8b949e', 'font-size': 12, 'text-anchor': 'middle' });
+  ext2.textContent = 'entrante'; portsSvg.appendChild(ext2);
+}
+renderPorts();
+
+// Tab switching
+document.querySelectorAll('.tab').forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    ['handshake', 'compare', 'ports'].forEach(v => {
+      document.getElementById('view-' + v).style.display = v === t.dataset.view ? '' : 'none';
+      document.getElementById('ctrl-' + v).style.display = v === t.dataset.view ? '' : 'none';
+    });
+  };
+});
+
+renderHs();
+</script>
+</body>
+</html>

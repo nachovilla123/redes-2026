@@ -29,6 +29,7 @@ import { SwitchModes } from "./SwitchModes";
 import { MacStructure } from "./MacStructure";
 import { Ports } from "./Ports";
 import { StormControl } from "./StormControl";
+import { PortSecurity } from "./PortSecurity";
 
 export const animations: Record<string, ComponentType> = {
   "cam-table": CamTableAnimation,
@@ -59,6 +60,7 @@ export const animations: Record<string, ComponentType> = {
   "mac-structure": MacStructure,
   ports: Ports,
   "storm-control": StormControl,
+  "port-security": PortSecurity,
 };
 
 export function getAnimation(id: string): ComponentType | null {

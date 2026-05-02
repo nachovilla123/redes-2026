@@ -128,7 +128,7 @@ export const flashcardsClase3: Flashcard[] = [
     front: "¿Qué es Port Security (seguridad de puertos)?",
     back: "Mecanismo que controla qué dispositivos pueden conectarse a un puerto del switch, basándose en la dirección MAC.\n\nSi llega una trama cuya MAC origen no está en la tabla de ese puerto, el switch puede:\n• Forward: dejarla pasar sin aprender la MAC\n• Discard: descartarla silenciosamente\n• Discard + deshabilitar el puerto\n• Enviar un trap SNMP al sistema de gestión\n\nÚtil para evitar que alguien enchufe un dispositivo no autorizado.",
     tag: "Switch",
-    simulator: { url: "/simuladores/09-vlan.html", label: "Switch y VLANs" },
+    simulator: { animationId: "port-security", label: "Port Security: protect/restrict/shutdown" },
   },
   {
     id: 218,

@@ -69,7 +69,7 @@ export default function QuizPage() {
         : "Hay conceptos para reforzar";
 
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center px-4 py-16">
+      <main className="min-h-dvh flex flex-col items-center justify-center px-4 py-16">
         <div className="w-full max-w-lg text-center">
           <div className="text-7xl mb-6">{emoji}</div>
           <h2 className="text-3xl font-bold text-white mb-2">
@@ -115,7 +115,7 @@ export default function QuizPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center px-4 py-10">
+    <main className="min-h-dvh flex flex-col items-center px-4 py-10">
       {/* Top bar */}
       <div className="w-full max-w-2xl mb-8">
         <div className="flex items-center justify-between mb-3">

@@ -86,15 +86,18 @@ export default function OnboardingModal({
         <p className="text-slate-400 text-sm leading-relaxed mb-7">{current.body}</p>
 
         {/* Progress dots */}
-        <div className="flex justify-center gap-2 mb-6">
+        <div className="flex justify-center gap-1 mb-6">
           {STEPS.map((_, i) => (
             <button
               key={i}
               onClick={() => setStep(i)}
-              className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                i === step ? "bg-blue-400 w-4" : "bg-slate-700 hover:bg-slate-500"
-              }`}
-            />
+              aria-label={`Ir al paso ${i + 1}`}
+              className="p-3 flex items-center justify-center"
+            >
+              <span className={`block rounded-full transition-all duration-200 ${
+                i === step ? "bg-blue-400 w-4 h-2" : "bg-slate-700 hover:bg-slate-500 w-2 h-2"
+              }`} />
+            </button>
           ))}
         </div>
 

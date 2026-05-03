@@ -23,7 +23,7 @@ export default function Home() {
   return (
     <>
       <OnboardingModal />
-      <main className="min-h-screen flex flex-col items-center px-4 py-10 bg-slate-950">
+      <main className="min-h-dvh flex flex-col items-center px-4 py-10 bg-slate-950">
 
         {/* Header */}
         <header className="w-full max-w-4xl flex items-center justify-between mb-10">
@@ -66,8 +66,9 @@ export default function Home() {
             </a>
             <Link
               href="/tutorial"
-              className="w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-white text-xs font-bold transition-colors flex items-center justify-center"
+              className="w-11 h-11 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-white text-xs font-bold transition-colors flex items-center justify-center"
               title="Ver tutorial"
+              aria-label="Ver tutorial"
             >
               ?
             </Link>

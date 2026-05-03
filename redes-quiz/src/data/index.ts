@@ -7,6 +7,14 @@ import { TOPIC6, flashcardsClase6 } from "./clase6";
 import { TOPIC7, flashcardsClase7 } from "./clase7";
 import { TOPIC8, flashcardsClase8 } from "./clase8";
 import { TOPIC9, flashcardsClase9 } from "./clase9";
+import {
+  TOPIC_PARCIAL_LAN,
+  TOPIC_PARCIAL_IP,
+  TOPIC_PARCIAL_TRANSPORTE,
+  flashcardsParcialLAN,
+  flashcardsParcialIP,
+  flashcardsParcialTransporte,
+} from "./parciales";
 import type { Flashcard } from "./clase1";
 
 export type { Flashcard };
@@ -18,6 +26,7 @@ export interface Topic {
   source: string;
   emoji: string;
   flashcards: Flashcard[];
+  isParcial?: boolean;
 }
 
 export const topics: Topic[] = [
@@ -74,6 +83,27 @@ export const topics: Topic[] = [
     emoji: "📡",
     ...TOPIC9,
     flashcards: flashcardsClase9,
+  },
+  {
+    slug: "parcial-lan-stp-wireless",
+    emoji: "📋",
+    ...TOPIC_PARCIAL_LAN,
+    flashcards: flashcardsParcialLAN,
+    isParcial: true,
+  },
+  {
+    slug: "parcial-ip-direccionamiento",
+    emoji: "📋",
+    ...TOPIC_PARCIAL_IP,
+    flashcards: flashcardsParcialIP,
+    isParcial: true,
+  },
+  {
+    slug: "parcial-transporte-ipv6",
+    emoji: "📋",
+    ...TOPIC_PARCIAL_TRANSPORTE,
+    flashcards: flashcardsParcialTransporte,
+    isParcial: true,
   },
 ];
 

@@ -1,11 +1,30 @@
 "use client";
 
 import Link from "next/link";
+import {
+  Radio, Layers, Shuffle, Wifi, Map, Globe, Lock, Cable,
+  ClipboardList, PenLine, AlertTriangle, type LucideIcon,
+} from "lucide-react";
 import { topics } from "@/data/index";
 import OnboardingModal from "@/components/OnboardingModal";
 
 const parcialTopics = topics.filter((t) => t.isParcial);
 const regularTopics = topics.filter((t) => !t.isParcial);
+
+const TOPIC_ICONS: Record<string, LucideIcon> = {
+  "intro":                       Radio,
+  "arquitectura":                Layers,
+  "switches":                    Shuffle,
+  "wifi-arq":                    Wifi,
+  "routing-fragmentacion":       Map,
+  "vlsm-dhcp-dns":               Globe,
+  "http-tls-jwt":                Lock,
+  "cableado-estructurado":       Cable,
+  "wlan-avanzado":               Wifi,
+  "parcial-lan-stp-wireless":    ClipboardList,
+  "parcial-ip-direccionamiento": ClipboardList,
+  "parcial-transporte-ipv6":     ClipboardList,
+};
 
 const GithubIcon = () => (
   <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden="true">
@@ -80,8 +99,8 @@ export default function Home() {
           <div className="bg-slate-900 border border-indigo-800/60 rounded-2xl p-6 md:p-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-indigo-900/40 flex items-center justify-center text-2xl shrink-0">
-                  🖊️
+                <div className="w-12 h-12 rounded-xl bg-indigo-900/40 flex items-center justify-center shrink-0">
+                  <PenLine className="w-6 h-6 text-indigo-300" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
@@ -112,15 +131,17 @@ export default function Home() {
             Flashcards por tema
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {regularTopics.map((topic) => (
+            {regularTopics.map((topic) => {
+              const TopicIcon = TOPIC_ICONS[topic.slug] ?? Radio;
+              return (
               <Link
                 key={topic.slug}
                 href={`/flashcards/${topic.slug}`}
                 className="group bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-5 flex flex-col gap-4 transition-colors"
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-xl shrink-0">
-                    {topic.emoji}
+                  <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center shrink-0">
+                    <TopicIcon className="w-5 h-5 text-slate-300" />
                   </div>
                   <div className="min-w-0">
                     <h2 className="text-white font-semibold text-sm leading-snug">{topic.title}</h2>
@@ -130,12 +151,13 @@ export default function Home() {
 
                 <div className="mt-auto flex items-center justify-between">
                   <span className="text-xs bg-slate-800 rounded-md px-2 py-1 text-slate-400">
-                    🃏 {topic.flashcards.length} flashcards
+                    {topic.flashcards.length} flashcards
                   </span>
                   <span className="text-slate-600 group-hover:text-slate-400 text-sm transition-colors">→</span>
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -160,8 +182,8 @@ export default function Home() {
                 className="group bg-slate-900 border border-amber-800/40 hover:border-amber-700/60 rounded-2xl p-5 flex flex-col gap-4 transition-colors"
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-900/30 flex items-center justify-center text-xl shrink-0">
-                    📋
+                  <div className="w-10 h-10 rounded-xl bg-amber-900/30 flex items-center justify-center shrink-0">
+                    <ClipboardList className="w-5 h-5 text-amber-400" />
                   </div>
                   <div className="min-w-0">
                     <h2 className="text-white font-semibold text-sm leading-snug">{topic.title}</h2>
@@ -171,7 +193,7 @@ export default function Home() {
 
                 <div className="mt-auto flex items-center justify-between">
                   <span className="text-xs bg-amber-900/30 border border-amber-800/40 rounded-md px-2 py-1 text-amber-400">
-                    🃏 {topic.flashcards.length} preguntas
+                    {topic.flashcards.length} preguntas
                   </span>
                   <span className="text-slate-600 group-hover:text-amber-400 text-sm transition-colors">→</span>
                 </div>
@@ -182,8 +204,9 @@ export default function Home() {
 
         {/* Footer */}
         <footer className="w-full max-w-4xl mt-10 border-t border-slate-800 pt-6">
-          <p className="text-slate-600 text-xs leading-relaxed">
-            ⚠️ Tomá el contenido con consideración — puede contener errores. Si encontrás algo incorrecto, abrí un issue en el repositorio.
+          <p className="text-slate-600 text-xs leading-relaxed flex items-start gap-1.5">
+            <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+            Tomá el contenido con consideración — puede contener errores. Si encontrás algo incorrecto, abrí un issue en el repositorio.
           </p>
         </footer>
       </main>

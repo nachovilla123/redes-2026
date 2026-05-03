@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Trophy, Dumbbell, BookOpen } from "lucide-react";
 import { quizQuestions, TOPIC, type Difficulty } from "@/data/clase1";
 
 const DIFFICULTY_LABEL: Record<Difficulty, string> = {
@@ -60,7 +61,8 @@ export default function QuizPage() {
 
   if (finished) {
     const pct = Math.round((score / quizQuestions.length) * 100);
-    const emoji = pct >= 80 ? "🏆" : pct >= 60 ? "💪" : "📚";
+    const ResultIcon = pct >= 80 ? Trophy : pct >= 60 ? Dumbbell : BookOpen;
+    const iconColor = pct >= 80 ? "text-yellow-400" : pct >= 60 ? "text-blue-400" : "text-slate-400";
     const message =
       pct >= 80
         ? "Excelente manejo del tema!"
@@ -71,7 +73,7 @@ export default function QuizPage() {
     return (
       <main className="min-h-dvh flex flex-col items-center justify-center px-4 py-16">
         <div className="w-full max-w-lg text-center">
-          <div className="text-7xl mb-6">{emoji}</div>
+          <ResultIcon className={`w-16 h-16 mx-auto mb-6 ${iconColor}`} />
           <h2 className="text-3xl font-bold text-white mb-2">
             {score} / {quizQuestions.length} correctas
           </h2>

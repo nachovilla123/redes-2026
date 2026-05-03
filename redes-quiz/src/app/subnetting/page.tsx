@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { PartyPopper } from "lucide-react";
 import { subnetExercises, type SubnetExercise, type SubnetQuestion } from "@/data/subnetExercises";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -292,7 +293,7 @@ function ExerciseView({
             >
               {perfect ? (
                 <p className="text-emerald-400 font-bold text-lg">
-                  🎉 ¡Perfecto! {qTotal}/{qTotal}
+                  <PartyPopper className="w-4 h-4 inline mr-1.5" />¡Perfecto! {qTotal}/{qTotal}
                 </p>
               ) : (
                 <p className="text-white font-semibold text-base">

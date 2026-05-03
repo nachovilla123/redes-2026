@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { use } from "react";
+import { RefreshCw, Trophy, FileDown, Loader2, Clapperboard } from "lucide-react";
 import { getTopicBySlug, type Flashcard } from "@/data/index";
 import { notFound } from "next/navigation";
 import { downloadReviewPDF } from "@/lib/generatePDF";
@@ -114,7 +115,7 @@ function FlashcardSession({
       <main className="min-h-screen flex flex-col items-center justify-center px-4 py-16">
         <div className="w-full max-w-lg">
           <div className="text-center mb-8">
-            <div className="text-6xl mb-4">🔄</div>
+            <RefreshCw className="w-14 h-14 text-blue-400 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-white mb-1">Ronda {round} completa</h2>
             <p className="text-slate-400 text-sm">{doneIds.size} de {total} dominadas</p>
           </div>
@@ -144,11 +145,9 @@ function FlashcardSession({
             className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 border border-slate-700 text-slate-300 font-semibold rounded-xl py-3 transition-colors mb-3 text-sm"
           >
             {generatingPDF ? (
-              <>
-                <span className="animate-spin">⏳</span> Generando PDF...
-              </>
+              <><Loader2 className="w-4 h-4 animate-spin" /> Generando PDF...</>
             ) : (
-              <>📄 Descargar PDF para imprimir ({nextQueue.length} tarjetas)</>
+              <><FileDown className="w-4 h-4" /> Descargar PDF para imprimir ({nextQueue.length} tarjetas)</>
             )}
           </button>
 
@@ -173,7 +172,7 @@ function FlashcardSession({
     return (
       <main className="min-h-dvh flex flex-col items-center justify-center px-4 py-16">
         <div className="w-full max-w-lg text-center">
-          <div className="text-7xl mb-4">🏆</div>
+          <Trophy className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
           <h2 className="text-3xl font-bold text-white mb-2">¡Dominaste todo!</h2>
           <p className="text-slate-400 mb-1">{total} flashcards completadas</p>
           <p className="text-slate-500 text-sm mb-8">en {round} {round === 1 ? "ronda" : "rondas"}</p>
@@ -184,9 +183,9 @@ function FlashcardSession({
             className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 border border-slate-700 text-slate-300 font-semibold rounded-xl py-3 transition-colors mb-3 text-sm"
           >
             {generatingPDF ? (
-              <><span className="animate-spin">⏳</span> Generando PDF...</>
+              <><Loader2 className="w-4 h-4 animate-spin" /> Generando PDF...</>
             ) : (
-              <>📄 Descargar todas las tarjetas en PDF</>
+              <><FileDown className="w-4 h-4" /> Descargar todas las tarjetas en PDF</>
             )}
           </button>
 
@@ -283,7 +282,8 @@ function FlashcardSession({
                 }}
                 className="mt-5 inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold rounded-xl px-4 py-3 transition-colors text-sm self-start"
               >
-                🎬 Ver animación{card.simulator.label ? `: ${card.simulator.label}` : ""}
+                <Clapperboard className="w-4 h-4" />
+                Ver animación{card.simulator.label ? `: ${card.simulator.label}` : ""}
               </button>
             )}
           </div>
@@ -338,7 +338,7 @@ function FlashcardSession({
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-900">
               <div className="flex items-center gap-3 min-w-0">
-                <span className="text-xl">🎬</span>
+                <Clapperboard className="w-5 h-5 text-slate-300" />
                 <div className="min-w-0">
                   <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">Animación</p>
                   <p className="text-white font-semibold text-sm truncate">{simulatorOpen.label ?? "Animación"}</p>

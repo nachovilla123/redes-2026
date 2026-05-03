@@ -2,25 +2,30 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Hand, Target, CreditCard, FileDown, type LucideIcon } from "lucide-react";
 
-const STEPS = [
+const STEPS: { Icon: LucideIcon; iconColor: string; title: string; body: string }[] = [
   {
-    emoji: "👋",
+    Icon: Hand,
+    iconColor: "text-blue-400",
     title: "¡Bienvenido!",
     body: "Flashcards para preparar Redes de Información · UTN-FRBA.",
   },
   {
-    emoji: "🎯",
+    Icon: Target,
+    iconColor: "text-indigo-400",
     title: "Elegí un tema",
     body: "Cada tema tiene sus propias cards. Empezá por el que querés repasar.",
   },
   {
-    emoji: "🃏",
+    Icon: CreditCard,
+    iconColor: "text-violet-400",
     title: "Saltear o ver la respuesta",
     body: "Hacé click en la card para revelar la respuesta, o usá \"Saltear\" para ir más rápido.",
   },
   {
-    emoji: "📄",
+    Icon: FileDown,
+    iconColor: "text-emerald-400",
     title: "Descargá lo que no sabés",
     body: "Marcá \"A repasar\" en las que no te sabías. Al terminar podés bajar un PDF e imprimirlo.",
   },
@@ -76,8 +81,10 @@ export default function OnboardingModal({
       onClick={(e) => e.target === e.currentTarget && dismiss()}
     >
       <div className="w-full max-w-sm bg-slate-900 border border-slate-700 rounded-2xl p-7 text-center shadow-2xl">
-        {/* Emoji */}
-        <div className="text-5xl mb-4">{current.emoji}</div>
+        {/* Icon */}
+        <div className="flex justify-center mb-4">
+          <current.Icon className={`w-12 h-12 ${current.iconColor}`} />
+        </div>
 
         {/* Content */}
         <h2 className="text-xl font-bold text-white mb-3 leading-snug">

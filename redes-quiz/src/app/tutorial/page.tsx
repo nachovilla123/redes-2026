@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { PartyPopper } from "lucide-react";
 
 const DEMO_CARD = {
   front: "¿Qué es CSMA/CA y para qué sirve?",
@@ -54,7 +55,7 @@ export default function TutorialPage() {
     return (
       <main className="min-h-dvh flex flex-col items-center justify-center px-4">
         <div className="text-center max-w-sm">
-          <div className="text-6xl mb-5">🎉</div>
+          <PartyPopper className="w-14 h-14 text-blue-400 mx-auto mb-5" />
           <h2 className="text-2xl font-bold text-white mb-3">¡Ya sabés cómo funciona!</h2>
           <p className="text-slate-400 text-sm mb-8">
             Ahora elegí un tema y empezá a estudiar de verdad.

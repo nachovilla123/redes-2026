@@ -221,16 +221,29 @@ function FlashcardSession({
           </div>
         </div>
 
-        <div className="flex gap-1">
-          {flashcards.map((_, i) => (
+        {flashcards.length <= 20 ? (
+          <div className="flex gap-1">
+            {flashcards.map((_, i) => (
+              <div
+                key={i}
+                className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
+                  !roundDone && i === currentCardIdx ? "ring-2 ring-blue-400 ring-offset-1 ring-offset-slate-950" : ""
+                } ${dotColor(i)}`}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="h-1.5 w-full rounded-full bg-slate-800 overflow-hidden flex">
             <div
-              key={i}
-              className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
-                !roundDone && i === currentCardIdx ? "ring-2 ring-blue-400 ring-offset-1 ring-offset-slate-950" : ""
-              } ${dotColor(i)}`}
+              className="h-full bg-green-500 transition-all duration-300"
+              style={{ width: `${(doneIds.size / flashcards.length) * 100}%` }}
             />
-          ))}
-        </div>
+            <div
+              className="h-full bg-yellow-500 transition-all duration-300"
+              style={{ width: `${(nextQueue.length / flashcards.length) * 100}%` }}
+            />
+          </div>
+        )}
 
         <div className="flex gap-4 mt-2 text-xs text-slate-500">
           <span className="flex items-center gap-1">
@@ -267,7 +280,7 @@ function FlashcardSession({
           >
             <div className="cursor-pointer" onClick={flip}>
               <span className="text-xs text-blue-400 uppercase tracking-widest font-medium mb-4 block">Respuesta</span>
-              <p className="text-slate-100 text-sm sm:text-base leading-relaxed whitespace-pre-line">{card.back}</p>
+              <p className="text-slate-100 text-base leading-relaxed whitespace-pre-line">{card.back}</p>
             </div>
             {card.simulator && (card.simulator.url || card.simulator.animationId) && (
               <button
@@ -296,13 +309,13 @@ function FlashcardSession({
           <div className="flex gap-3">
             <button
               onClick={() => markAndAdvance("review")}
-              className="flex-1 bg-yellow-500/10 hover:bg-yellow-500/20 active:bg-yellow-500/30 border border-yellow-500/30 text-yellow-400 font-semibold rounded-xl py-4 transition-colors"
+              className="flex-1 bg-yellow-500/10 hover:bg-yellow-500/20 active:bg-yellow-500/30 active:scale-95 border border-yellow-500/30 text-yellow-400 font-semibold rounded-xl py-4 transition-all"
             >
               ↩ A repasar
             </button>
             <button
               onClick={() => markAndAdvance("known")}
-              className="flex-1 bg-green-500/10 hover:bg-green-500/20 active:bg-green-500/30 border border-green-500/30 text-green-400 font-semibold rounded-xl py-4 transition-colors"
+              className="flex-1 bg-green-500/10 hover:bg-green-500/20 active:bg-green-500/30 active:scale-95 border border-green-500/30 text-green-400 font-semibold rounded-xl py-4 transition-all"
             >
               ✓ Lo sé
             </button>
@@ -311,13 +324,13 @@ function FlashcardSession({
           <div className="flex gap-3">
             <button
               onClick={() => markAndAdvance("review")}
-              className="flex-[1] bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 text-slate-400 font-semibold rounded-xl py-4 transition-colors text-sm"
+              className="flex-[1] bg-slate-800 hover:bg-slate-700 active:bg-slate-600 active:scale-95 border border-slate-700 text-slate-400 font-semibold rounded-xl py-4 transition-all text-sm"
             >
               → Saltear
             </button>
             <button
               onClick={flip}
-              className="flex-[2] bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold rounded-xl py-4 transition-colors"
+              className="flex-[2] bg-blue-600 hover:bg-blue-500 active:bg-blue-700 active:scale-95 text-white font-semibold rounded-xl py-4 transition-all"
             >
               Ver respuesta
             </button>
@@ -359,8 +372,8 @@ function FlashcardSession({
                 <button
                   type="button"
                   onClick={() => setSimulatorOpen(null)}
-                  className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-lg leading-none flex items-center justify-center transition-colors"
-                  title="Cerrar (Esc)"
+                  className="w-11 h-11 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-lg leading-none flex items-center justify-center transition-colors"
+                  aria-label="Cerrar animación"
                 >
                   ×
                 </button>

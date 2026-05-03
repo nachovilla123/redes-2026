@@ -3,7 +3,7 @@
 import Link from "next/link";
 import {
   Radio, Layers, Shuffle, Wifi, Map, Globe, Lock, Cable,
-  ClipboardList, PenLine, AlertTriangle, type LucideIcon,
+  ClipboardList, PenLine, AlertTriangle, Trophy, type LucideIcon,
 } from "lucide-react";
 import { topics } from "@/data/index";
 import OnboardingModal from "@/components/OnboardingModal";
@@ -58,7 +58,7 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-slate-400 hover:text-blue-400 text-xs font-medium transition-colors"
-              title="LinkedIn — Ignacio Villarruel"
+              aria-label="LinkedIn de Ignacio Villarruel (abre en nueva pestaña)"
             >
               <LinkedinIcon />
               <span className="hidden sm:inline">Ignacio Villarruel</span>
@@ -68,7 +68,7 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-slate-400 hover:text-blue-400 text-xs font-medium transition-colors"
-              title="LinkedIn — Alan Fried"
+              aria-label="LinkedIn de Alan Fried (abre en nueva pestaña)"
             >
               <LinkedinIcon />
               <span className="hidden sm:inline">Alan Fried</span>
@@ -78,7 +78,7 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-slate-400 hover:text-white text-xs font-medium transition-colors"
-              title="GitHub"
+              aria-label="Repositorio en GitHub (abre en nueva pestaña)"
             >
               <GithubIcon />
               <span className="hidden sm:inline">redes-2026</span>
@@ -94,34 +94,56 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Subnetting — hero card, full width */}
-        <div className="w-full max-w-4xl mb-6">
-          <div className="bg-slate-900 border border-indigo-800/60 rounded-2xl p-6 md:p-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-indigo-900/40 flex items-center justify-center shrink-0">
-                  <PenLine className="w-6 h-6 text-indigo-300" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h2 className="text-white font-semibold text-lg">Práctica de Subnetting</h2>
-                    <span className="text-xs bg-indigo-900/50 text-indigo-300 border border-indigo-800/50 rounded-full px-2 py-0.5 font-medium">
-                      Interactivo
-                    </span>
-                  </div>
-                  <p className="text-slate-500 text-xs mb-2">IPv4 · Fill-in-the-blank · 6 ejercicios</p>
-                  <p className="text-slate-400 text-sm">
-                    Calculá broadcast, rango de hosts, máscara y más. Verificá tus respuestas al instante.
-                  </p>
-                </div>
+        {/* Hero cards — Subnetting + Quiz */}
+        <div className="w-full max-w-4xl mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Subnetting */}
+          <div className="bg-slate-900 border border-indigo-800/60 rounded-2xl p-6 flex flex-col gap-4">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-indigo-900/40 flex items-center justify-center shrink-0">
+                <PenLine className="w-6 h-6 text-indigo-300" />
               </div>
-              <Link
-                href="/subnetting"
-                className="shrink-0 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl px-6 py-3 transition-colors text-sm whitespace-nowrap"
-              >
-                Practicar ahora →
-              </Link>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <h2 className="text-white font-semibold text-base">Práctica de Subnetting</h2>
+                  <span className="text-xs bg-indigo-900/50 text-indigo-300 border border-indigo-800/50 rounded-full px-2 py-0.5 font-medium">
+                    Interactivo
+                  </span>
+                </div>
+                <p className="text-slate-500 text-xs mb-1">IPv4 · Fill-in-the-blank · 6 ejercicios</p>
+                <p className="text-slate-400 text-sm">Calculá broadcast, rango de hosts, máscara y más.</p>
+              </div>
             </div>
+            <Link
+              href="/subnetting"
+              className="mt-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 active:scale-95 text-white font-semibold rounded-xl px-6 py-3 transition-all text-sm"
+            >
+              Practicar ahora →
+            </Link>
+          </div>
+
+          {/* Quiz MCQ */}
+          <div className="bg-slate-900 border border-violet-800/60 rounded-2xl p-6 flex flex-col gap-4">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-violet-900/40 flex items-center justify-center shrink-0">
+                <Trophy className="w-6 h-6 text-violet-300" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <h2 className="text-white font-semibold text-base">Quiz Clase 1</h2>
+                  <span className="text-xs bg-violet-900/50 text-violet-300 border border-violet-800/50 rounded-full px-2 py-0.5 font-medium">
+                    Opción múltiple
+                  </span>
+                </div>
+                <p className="text-slate-500 text-xs mb-1">Introducción · Básico → Avanzado</p>
+                <p className="text-slate-400 text-sm">Elegí la opción correcta y recibí feedback al instante.</p>
+              </div>
+            </div>
+            <Link
+              href="/quiz"
+              className="mt-auto flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 active:bg-violet-700 active:scale-95 text-white font-semibold rounded-xl px-6 py-3 transition-all text-sm"
+            >
+              Empezar quiz →
+            </Link>
           </div>
         </div>
 
@@ -137,7 +159,7 @@ export default function Home() {
               <Link
                 key={topic.slug}
                 href={`/flashcards/${topic.slug}`}
-                className="group bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-5 flex flex-col gap-4 transition-colors"
+                className="group bg-slate-900 border border-slate-800 hover:border-slate-700 active:scale-[0.97] rounded-2xl p-5 flex flex-col gap-4 transition-all"
               >
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center shrink-0">
@@ -179,7 +201,7 @@ export default function Home() {
               <Link
                 key={topic.slug}
                 href={`/flashcards/${topic.slug}`}
-                className="group bg-slate-900 border border-amber-800/40 hover:border-amber-700/60 rounded-2xl p-5 flex flex-col gap-4 transition-colors"
+                className="group bg-slate-900 border border-amber-800/40 hover:border-amber-700/60 active:scale-[0.97] rounded-2xl p-5 flex flex-col gap-4 transition-all"
               >
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-900/30 flex items-center justify-center shrink-0">
@@ -206,7 +228,16 @@ export default function Home() {
         <footer className="w-full max-w-4xl mt-10 border-t border-slate-800 pt-6">
           <p className="text-slate-600 text-xs leading-relaxed flex items-start gap-1.5">
             <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-            Tomá el contenido con consideración — puede contener errores. Si encontrás algo incorrecto, abrí un issue en el repositorio.
+            Tomá el contenido con consideración — puede contener errores. Si encontrás algo incorrecto,{" "}
+            <a
+              href="https://github.com/nachovilla123/redes-2026/issues"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-slate-400 transition-colors"
+              aria-label="Abrir un issue en GitHub (abre en nueva pestaña)"
+            >
+              abrí un issue acá
+            </a>.
           </p>
         </footer>
       </main>

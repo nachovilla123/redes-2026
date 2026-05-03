@@ -25,3 +25,9 @@ body {
 .card-face {
   animation: card-appear 0.25s ease-out both;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .card-face {
+    animation: none;
+  }
+}

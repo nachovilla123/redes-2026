@@ -121,6 +121,12 @@ export const flashcardsParcialLAN: Flashcard[] = [
     back: "El AP actúa como Point Coordinator:\n1. Durante el CFP (Contention-Free Period), envía un Beacon con bit PCF activado.\n2. Realiza polling a cada estación registrada.\n3. Cada estación solo transmite cuando el AP le da permiso (trama CF-Poll).\n4. El AP puede combinar datos + CF-Poll en una misma trama.\n5. Al finalizar el CFP, envía CF-End y comienza el período de contención (DCF).",
     tag: "Wireless / PCF",
   },
+  {
+    id: 3018,
+    front: "Pregunta de parcial: ChatGPT dice que el nodo oculto se previene con 'planificación de ubicación de APs'. ¿Es correcta y completa? Fundamentá con los mecanismos del estándar IEEE 802.11.",
+    back: "La respuesta es INCORRECTA para lo que pide el estándar. Tiene dos errores de fondo:\n\n— Error 1: WiFi no puede detectar colisiones.\nEn Ethernet se usa CSMA/CD (Collision Detection): el nodo transmite y escucha simultáneamente. En WiFi eso es físicamente imposible: una antena no puede transmitir y recibir al mismo tiempo. Por eso 802.11 usa CSMA/CA (Collision Avoidance): evita las colisiones antes de que ocurran.\n\n— Error 2: No menciona el mecanismo del estándar.\nChatGPT propone una solución de diseño de infraestructura (ubicar los APs), no un mecanismo del protocolo 802.11.\n\nEl mecanismo correcto es RTS/CTS dentro del modo DCF:\n1. Estación A envía RTS al AP indicando la duración de la transmisión.\n2. El AP responde con CTS — este frame lo reciben TODOS los nodos del área, incluyendo C (que no ve a A).\n3. C recibe el CTS y actualiza su NAV (Network Allocation Vector): un temporizador virtual que le indica cuánto tiempo el medio estará ocupado. C no transmite durante ese tiempo.\n4. A transmite sin colisión.\n\nResumen: CSMA/CA + RTS/CTS + NAV es la solución del estándar. La planificación de APs no resuelve el problema en la capa de protocolo.",
+    tag: "Wireless / Parcial",
+  },
 ];
 
 export const flashcardsParcialIP: Flashcard[] = [
@@ -318,5 +324,11 @@ export const flashcardsParcialTransporte: Flashcard[] = [
     front: "¿Qué tipo de direcciones circulan dentro del sistema autónomo pero no en Internet?",
     back: "IPv4: direcciones privadas RFC 1918 (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16).\n\nIPv6:\n• Unique Local Addresses (ULA): fc00::/7 — enrutables dentro de la organización pero los routers de Internet no las propagan.\n• Link-Local (fe80::/10): solo dentro del mismo enlace, ni siquiera se rutean dentro del AS.",
     tag: "IPv6 / Direcciones",
+  },
+  {
+    id: 3217,
+    front: "Pregunta de parcial: Explicá el encapsulamiento en todas las capas del modelo OSI cuando un usuario escribe https://www.gov.ph/ en el browser. Indicá protocolo, PDU y qué agrega cada capa.",
+    back: "De arriba hacia abajo:\n\nCapa 7 — Aplicación\nProtocolo: HTTP · PDU: Mensaje\nEl browser construye un GET request: 'GET / HTTP/1.1\\nHost: www.gov.ph...'\n\nCapa 6 — Presentación\nProtocolo: TLS (la 'S' de HTTPS)\nCifra el mensaje HTTP. En TCP/IP esta capa está fusionada con Aplicación.\n\nCapa 5 — Sesión\nProtocolo: TLS handshake (establece y gestiona la sesión segura).\nEn TCP/IP también fusionada con Aplicación.\n\nCapa 4 — Transporte\nProtocolo: TCP · PDU: Segmento\nAgrega: puerto origen (efímero), puerto destino (443 para HTTPS), número de secuencia, ACK, checksum.\n[ TCP Header | datos HTTP cifrados ]\n\nCapa 3 — Red\nProtocolo: IP · PDU: Datagrama\nAgrega: IP origen (PC del usuario), IP destino (www.gov.ph, resuelta por DNS), TTL, protocolo=6 (TCP), checksum.\n[ IP Header | TCP Header | datos ]\n\nCapa 2 — Enlace de Datos\nProtocolo: Ethernet o 802.11 · PDU: Trama (Frame)\nAgrega: MAC origen, MAC destino (del gateway/router local, NO del servidor final), tipo, FCS (CRC-32).\n[ Eth Header | IP Header | TCP Header | datos | FCS ]\n\nCapa 1 — Física\nPDU: Bits\nConvierte la trama en señales eléctricas, lumínicas o electromagnéticas.\n10110101001110...\n\n— Puntos clave:\n• La MAC destino en capa 2 es la del router local (cambia en cada salto); la IP destino no cambia.\n• TLS vive en capas 5/6 del modelo OSI, pero en TCP/IP es parte de la capa Aplicación.\n• Cada capa encapsula lo de arriba: agrega cabecera al frente (Ethernet también agrega FCS al final).",
+    tag: "Encapsulamiento / Parcial",
   },
 ];

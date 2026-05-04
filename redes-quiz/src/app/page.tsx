@@ -3,8 +3,9 @@
 import Link from "next/link";
 import {
   Radio, Layers, Shuffle, Wifi, Map, Globe, Lock, Cable,
-  ClipboardList, PenLine, AlertTriangle, Trophy, type LucideIcon,
+  ClipboardList, PenLine, AlertTriangle, Trophy, BookOpen, type LucideIcon,
 } from "lucide-react";
+import { lecturas } from "@/data/lecturas";
 import { topics } from "@/data/index";
 import OnboardingModal from "@/components/OnboardingModal";
 
@@ -218,6 +219,41 @@ export default function Home() {
                     {topic.flashcards.length} preguntas
                   </span>
                   <span className="text-slate-600 group-hover:text-amber-400 text-sm transition-colors">→</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Lecturas section */}
+        <div className="w-full max-w-4xl mt-10">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-slate-500 text-xs font-medium tracking-widest uppercase">
+              Lecturas y explicaciones
+            </p>
+            <Link
+              href="/lecturas"
+              className="text-slate-500 hover:text-slate-300 text-xs transition-colors"
+            >
+              Ver todas →
+            </Link>
+          </div>
+          <p className="text-slate-500 text-sm mb-4">
+            Conceptos explicados con analogías y ejemplos reales.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {lecturas.slice(0, 4).map((lectura) => (
+              <Link
+                key={lectura.slug}
+                href={`/lecturas/${lectura.slug}`}
+                className="group bg-slate-900 border border-slate-800 hover:border-slate-700 active:scale-[0.97] rounded-2xl p-4 flex items-start gap-3 transition-all"
+              >
+                <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center shrink-0 mt-0.5">
+                  <BookOpen className="w-4 h-4 text-slate-400" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-white text-sm font-medium leading-snug">{lectura.title}</p>
+                  <p className="text-slate-600 text-xs mt-0.5 truncate">{lectura.tag}</p>
                 </div>
               </Link>
             ))}

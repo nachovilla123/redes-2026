@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { PartyPopper } from "lucide-react";
+import { PartyPopper, ChevronLeft } from "lucide-react";
 
 const DEMO_CARD = {
   front: "¿Qué es CSMA/CA y para qué sirve?",
@@ -13,10 +13,10 @@ const DEMO_CARD = {
 type Step = 1 | 2 | 3 | 4 | 5;
 
 const HINTS: Record<number, { text: string; sub?: string }> = {
-  1: { text: "Hacé click en la card para ver la respuesta", sub: "Siempre podés volver a verla tocándola de nuevo" },
-  2: { text: "¡Bien! Ahora hacé click de nuevo para ver la pregunta" },
-  3: { text: "Usá los botones para continuar", sub: "\"Saltear\" la deja para después · \"Ver respuesta\" la muestra" },
-  4: { text: "¿La sabías?", sub: "\"Lo sé\" la da por dominada · \"A repasar\" la vuelve a poner en la cola" },
+  1: { text: "Tocá la card para ver la respuesta", sub: "Podés volver a verla tocándola de nuevo" },
+  2: { text: "¡Bien! Tocá de nuevo para volver a la pregunta" },
+  3: { text: "Dos opciones desde el frente", sub: "\"Ya la sé\" la da por dominada sin verla · \"Ver respuesta\" la muestra primero" },
+  4: { text: "¿La sabías?", sub: "\"Lo sé\" la da por dominada · \"A repasar\" la vuelve a poner en la cola · ← deshace la última acción" },
 };
 
 export default function TutorialPage() {
@@ -35,7 +35,7 @@ export default function TutorialPage() {
     setStep(4);
   }
 
-  function handleSaltear() {
+  function handleYaLaSe() {
     if (step !== 3) return;
     setStep(5);
   }
@@ -145,57 +145,62 @@ export default function TutorialPage() {
 
       {/* ── Buttons ────────────────────────────────────────────────────── */}
       <div className="w-full max-w-xl mx-auto">
-        {/* Steps 1 & 2: buttons visible but bloqueados */}
+        {/* Steps 1 & 2: layout fantasma, no interactivo */}
         {(step === 1 || step === 2) && (
           <div className="flex gap-3 opacity-30 pointer-events-none select-none">
-            <div className="flex-[1] bg-slate-800 border border-slate-700 text-slate-400 font-semibold rounded-xl py-4 text-sm text-center">
-              → Saltear
+            <div className="w-11 shrink-0 flex items-center justify-center bg-slate-800 border border-slate-700 rounded-xl py-4">
+              <ChevronLeft className="w-5 h-5 text-slate-300" />
             </div>
-            <div className="flex-[2] bg-blue-600 text-white font-semibold rounded-xl py-4 text-center">
+            <div className="flex-1 bg-slate-800 border border-slate-700 text-slate-400 font-semibold rounded-xl py-4 text-sm text-center">
+              ✓ Ya la sé
+            </div>
+            <div className="flex-1 bg-blue-600 text-white font-semibold rounded-xl py-4 text-center">
               Ver respuesta
             </div>
           </div>
         )}
 
-        {/* Step 3: front con botones activos */}
+        {/* Step 3: frente con botones activos */}
         {step === 3 && !isFlipped && (
           <div className="flex gap-3">
+            <div className="w-11 shrink-0 flex items-center justify-center bg-slate-800 border border-slate-700 rounded-xl opacity-30 cursor-not-allowed">
+              <ChevronLeft className="w-5 h-5 text-slate-300" />
+            </div>
             <button
-              onClick={handleSaltear}
-              className="flex-[1] bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 text-slate-400 font-semibold rounded-xl py-4 transition-colors text-sm"
+              onClick={handleYaLaSe}
+              className="flex-1 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 active:scale-95 border border-slate-700 text-slate-300 font-semibold rounded-xl py-4 transition-all text-sm ring-2 ring-slate-500/30"
             >
-              → Saltear
+              ✓ Ya la sé
             </button>
             <button
               onClick={handleVerRespuesta}
-              className="flex-[2] bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold rounded-xl py-4 transition-colors ring-2 ring-blue-400/40"
+              className="flex-1 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 active:scale-95 text-white font-semibold rounded-xl py-4 transition-all ring-2 ring-blue-400/40"
             >
               Ver respuesta
             </button>
           </div>
         )}
 
-        {/* Step 4: back con A repasar / Lo sé */}
+        {/* Step 4: dorso con A repasar / Lo sé */}
         {step === 4 && isFlipped && (
           <div className="flex gap-3">
+            <div className="w-11 shrink-0 flex items-center justify-center bg-slate-800 border border-slate-700 rounded-xl opacity-30 cursor-not-allowed">
+              <ChevronLeft className="w-5 h-5 text-slate-300" />
+            </div>
             <div className="flex-1 flex flex-col gap-1.5">
-              <p className="text-yellow-500/80 text-xs text-center font-medium">
-                No la sabías o querés repasar
-              </p>
+              <p className="text-yellow-500/80 text-xs text-center font-medium">No la sabías</p>
               <button
                 onClick={handleMark}
-                className="w-full bg-yellow-500/10 hover:bg-yellow-500/20 active:bg-yellow-500/30 border border-yellow-500/30 text-yellow-400 font-semibold rounded-xl py-4 transition-colors ring-2 ring-yellow-500/30"
+                className="w-full bg-yellow-500/10 hover:bg-yellow-500/20 active:bg-yellow-500/30 active:scale-95 border border-yellow-500/30 text-yellow-400 font-semibold rounded-xl py-4 transition-all ring-2 ring-yellow-500/30"
               >
                 ↩ A repasar
               </button>
             </div>
             <div className="flex-1 flex flex-col gap-1.5">
-              <p className="text-green-500/80 text-xs text-center font-medium">
-                La tenías clara
-              </p>
+              <p className="text-green-500/80 text-xs text-center font-medium">La tenías clara</p>
               <button
                 onClick={handleMark}
-                className="w-full bg-green-500/10 hover:bg-green-500/20 active:bg-green-500/30 border border-green-500/30 text-green-400 font-semibold rounded-xl py-4 transition-colors ring-2 ring-green-500/30"
+                className="w-full bg-green-500/10 hover:bg-green-500/20 active:bg-green-500/30 active:scale-95 border border-green-500/30 text-green-400 font-semibold rounded-xl py-4 transition-all ring-2 ring-green-500/30"
               >
                 ✓ Lo sé
               </button>

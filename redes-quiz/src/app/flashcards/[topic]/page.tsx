@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { use } from "react";
-import { RefreshCw, Trophy, FileDown, Loader2, Clapperboard } from "lucide-react";
+import { RefreshCw, Trophy, FileDown, Loader2, Clapperboard, ChevronLeft } from "lucide-react";
 import { getTopicBySlug, type Flashcard } from "@/data/index";
 import { notFound } from "next/navigation";
 import { downloadReviewPDF } from "@/lib/generatePDF";
@@ -33,6 +33,8 @@ function FlashcardSession({
 }) {
   const total = flashcards.length;
 
+  type HistoryEntry = { cardIdx: number; action: "known" | "review" };
+
   const [doneIds, setDoneIds] = useState<Set<number>>(new Set());
   const [queue, setQueue] = useState<number[]>(() => flashcards.map((_, i) => i));
   const [queuePos, setQueuePos] = useState(0);
@@ -40,6 +42,7 @@ function FlashcardSession({
   const [round, setRound] = useState(1);
   const [isFlipped, setIsFlipped] = useState(false);
   const [roundDone, setRoundDone] = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [generatingPDF, setGeneratingPDF] = useState(false);
   const [simulatorOpen, setSimulatorOpen] = useState<{ url?: string; animationId?: string; label?: string } | null>(null);
 
@@ -70,6 +73,7 @@ function FlashcardSession({
   }
 
   function markAndAdvance(status: "known" | "review") {
+    setHistory(h => [...h, { cardIdx: currentCardIdx, action: status }]);
     if (status === "known") {
       setDoneIds((prev) => new Set([...prev, currentCardIdx]));
     } else {
@@ -77,11 +81,26 @@ function FlashcardSession({
     }
     setIsFlipped(false);
     if (queuePos < queue.length - 1) {
-      setTimeout(() => setQueuePos((p) => p + 1), 150);
+      setQueuePos((p) => p + 1);
     } else {
       setRoundDone(true);
     }
   }
+
+  function handleBack() {
+    const last = history[history.length - 1];
+    if (last.action === "known") {
+      setDoneIds(prev => { const s = new Set(prev); s.delete(last.cardIdx); return s; });
+    } else {
+      setNextQueue(prev => prev.filter(i => i !== last.cardIdx));
+    }
+    setHistory(h => h.slice(0, -1));
+    setQueuePos(p => p - 1);
+    setIsFlipped(false);
+    if (roundDone) setRoundDone(false);
+  }
+
+  const canGoBack = history.length > 0;
 
   function startNextRound() {
     setQueue(nextQueue);
@@ -89,6 +108,7 @@ function FlashcardSession({
     setQueuePos(0);
     setRound((r) => r + 1);
     setRoundDone(false);
+    setHistory([]);
   }
 
   function restartAll() {
@@ -99,6 +119,7 @@ function FlashcardSession({
     setRound(1);
     setRoundDone(false);
     setIsFlipped(false);
+    setHistory([]);
   }
 
   function dotColor(i: number): string {
@@ -305,38 +326,49 @@ function FlashcardSession({
 
       {/* ── Botones ────────────────────────────────────────────────── */}
       <div className="w-full max-w-xl mx-auto">
-        {isFlipped ? (
-          <div className="flex gap-3">
-            <button
-              onClick={() => markAndAdvance("review")}
-              className="flex-1 bg-yellow-500/10 hover:bg-yellow-500/20 active:bg-yellow-500/30 active:scale-95 border border-yellow-500/30 text-yellow-400 font-semibold rounded-xl py-4 transition-all"
-            >
-              ↩ A repasar
-            </button>
-            <button
-              onClick={() => markAndAdvance("known")}
-              className="flex-1 bg-green-500/10 hover:bg-green-500/20 active:bg-green-500/30 active:scale-95 border border-green-500/30 text-green-400 font-semibold rounded-xl py-4 transition-all"
-            >
-              ✓ Lo sé
-            </button>
-          </div>
-        ) : (
-          <div className="flex gap-3">
-            <button
-              onClick={() => markAndAdvance("review")}
-              className="flex-[1] bg-slate-800 hover:bg-slate-700 active:bg-slate-600 active:scale-95 border border-slate-700 text-slate-400 font-semibold rounded-xl py-4 transition-all text-sm"
-            >
-              → Saltear
-            </button>
-            <button
-              onClick={flip}
-              className="flex-[2] bg-blue-600 hover:bg-blue-500 active:bg-blue-700 active:scale-95 text-white font-semibold rounded-xl py-4 transition-all"
-            >
-              Ver respuesta
-            </button>
-          </div>
-        )}
+        <div className="flex gap-3">
+          {/* Botón volver — siempre presente, mismo alto que los demás */}
+          <button
+            onClick={handleBack}
+            disabled={!canGoBack}
+            aria-label="Volver a la pregunta anterior"
+            className="w-11 shrink-0 flex items-center justify-center bg-slate-800 hover:bg-slate-700 active:bg-slate-600 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed border border-slate-700 text-slate-300 rounded-xl transition-all"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
 
+          {isFlipped ? (
+            <>
+              <button
+                onClick={() => markAndAdvance("review")}
+                className="flex-1 bg-yellow-500/10 hover:bg-yellow-500/20 active:bg-yellow-500/30 active:scale-95 border border-yellow-500/30 text-yellow-400 font-semibold rounded-xl py-4 transition-all"
+              >
+                ↩ A repasar
+              </button>
+              <button
+                onClick={() => markAndAdvance("known")}
+                className="flex-1 bg-green-500/10 hover:bg-green-500/20 active:bg-green-500/30 active:scale-95 border border-green-500/30 text-green-400 font-semibold rounded-xl py-4 transition-all"
+              >
+                ✓ Lo sé
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => markAndAdvance("known")}
+                className="flex-1 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 active:scale-95 border border-slate-700 text-slate-300 font-semibold rounded-xl py-4 transition-all text-sm"
+              >
+                ✓ Ya la sé
+              </button>
+              <button
+                onClick={flip}
+                className="flex-1 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 active:scale-95 text-white font-semibold rounded-xl py-4 transition-all"
+              >
+                Ver respuesta
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* ── Modal del simulador ──────────────────────────────────── */}

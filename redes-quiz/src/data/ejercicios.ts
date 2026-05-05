@@ -148,7 +148,7 @@ export const ejerciciosLANWLAN: Ejercicio[] = [
     ],
   },
   {
-    id: 8,
+    id: 9,
     titulo: "PC2 espera aunque el servidor está libre — WiFi",
     tag: "WiFi / 802.11",
     escenario:
@@ -165,7 +165,7 @@ export const ejerciciosLANWLAN: Ejercicio[] = [
     ],
   },
   {
-    id: 9,
+    id: 10,
     titulo: "BA — broadcast storm con cableado estructurado",
     tag: "STP / Switching",
     escenario:

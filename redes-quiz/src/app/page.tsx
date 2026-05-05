@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import {
-  Radio, Layers, Shuffle, Wifi, Map, Globe, Lock, Cable,
+  Radio, Layers, Shuffle, Wifi, Map, Globe, Lock, Cable, ShieldCheck,
   ClipboardList, PenLine, AlertTriangle, Trophy, BookOpen, FlaskConical, type LucideIcon,
 } from "lucide-react";
 import { lecturas } from "@/data/lecturas";
@@ -22,6 +22,7 @@ const TOPIC_ICONS: Record<string, LucideIcon> = {
   "http-tls-jwt":                Lock,
   "cableado-estructurado":       Cable,
   "wlan-avanzado":               Wifi,
+  "vpn":                         ShieldCheck,
   "parcial-lan-stp-wireless":    ClipboardList,
   "parcial-ip-direccionamiento": ClipboardList,
   "parcial-transporte-ipv6":     ClipboardList,
@@ -114,12 +115,20 @@ export default function Home() {
                 <p className="text-slate-400 text-sm">Calculá broadcast, rango de hosts, máscara y más.</p>
               </div>
             </div>
-            <Link
-              href="/subnetting"
-              className="mt-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 active:scale-95 text-white font-semibold rounded-xl px-6 py-3 transition-all text-sm"
-            >
-              Practicar ahora →
-            </Link>
+            <div className="mt-auto flex flex-col gap-2">
+              <Link
+                href="/subnetting"
+                className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 active:scale-95 text-white font-semibold rounded-xl px-6 py-3 transition-all text-sm"
+              >
+                Practicar ahora →
+              </Link>
+              <Link
+                href="/subnetting/guia"
+                className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 active:scale-95 text-indigo-300 font-medium rounded-xl px-6 py-2.5 transition-all text-xs border border-slate-700"
+              >
+                No entiendo subnetting — ver guía visual
+              </Link>
+            </div>
           </div>
 
           {/* Quiz MCQ */}

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { PartyPopper } from "lucide-react";
+import { PartyPopper, BookOpen } from "lucide-react";
 import { subnetExercises, type SubnetExercise, type SubnetQuestion } from "@/data/subnetExercises";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -191,6 +191,13 @@ function ExerciseView({
             className="text-slate-500 hover:text-slate-300 text-sm transition-colors shrink-0"
           >
             ← Inicio
+          </Link>
+          <Link
+            href="/subnetting/guia"
+            className="flex items-center gap-1.5 text-indigo-400 hover:text-indigo-300 text-xs font-medium transition-colors shrink-0"
+          >
+            <BookOpen className="w-3.5 h-3.5" />
+            Ver guía visual
           </Link>
 
           {/* progress dots */}

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import {
   Radio, Layers, Shuffle, Wifi, Map, Globe, Lock, Cable,
-  ClipboardList, PenLine, AlertTriangle, Trophy, BookOpen, type LucideIcon,
+  ClipboardList, PenLine, AlertTriangle, Trophy, BookOpen, FlaskConical, type LucideIcon,
 } from "lucide-react";
 import { lecturas } from "@/data/lecturas";
 import { topics } from "@/data/index";
@@ -223,6 +223,42 @@ export default function Home() {
               </Link>
             ))}
           </div>
+        </div>
+
+        {/* Ejercicios section */}
+        <div className="w-full max-w-4xl mt-10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <p className="text-slate-500 text-xs font-medium tracking-widest uppercase">
+                Banco de ejercicios
+              </p>
+              <span className="text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full px-2 py-0.5 font-medium">
+                Nuevo
+              </span>
+            </div>
+            <Link
+              href="/ejercicios"
+              className="text-slate-500 hover:text-slate-300 text-xs transition-colors"
+            >
+              Ver todos →
+            </Link>
+          </div>
+          <p className="text-slate-500 text-sm mb-4">
+            Escenarios del docente con análisis. Pensá la respuesta antes de verla.
+          </p>
+          <Link
+            href="/ejercicios"
+            className="group bg-slate-900 border border-emerald-800/40 hover:border-emerald-700/60 active:scale-[0.99] rounded-2xl p-5 flex items-center gap-4 transition-all"
+          >
+            <div className="w-10 h-10 rounded-xl bg-emerald-900/30 flex items-center justify-center shrink-0">
+              <FlaskConical className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div className="flex-1">
+              <p className="text-white font-semibold text-sm">Escenarios LAN/WLAN</p>
+              <p className="text-slate-500 text-xs mt-0.5">10 ejercicios · Capas 2 a 4</p>
+            </div>
+            <span className="text-slate-600 group-hover:text-emerald-400 text-sm transition-colors">→</span>
+          </Link>
         </div>
 
         {/* Lecturas section */}

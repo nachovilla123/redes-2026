@@ -39,7 +39,7 @@ export const flashcardsClase4: Flashcard[] = [
   {
     id: 305,
     front: "Diferencia entre Ethernet (802.3) y WiFi (802.11)",
-    back: "| | Ethernet | WiFi |\n|---|---|---|\n| Medio | Cable (guiado) | Aire (no guiado) |\n| Colisiones | CSMA/CD (detecta) | CSMA/CA (evita) |\n| ACK capa 2 | No | Sí |\n| Nodo oculto | No aplica | Problema real → RTS/CTS |\n| Entrega garantizada | No (capa 2) | No (capa 2) |\n\nNinguno garantiza entrega confiable a nivel capa 2 — eso lo hace TCP en la capa de transporte.",
+    back: "Ethernet (802.3 — cable):\n  · Medio guiado, señal confinada\n  · Detecta colisiones mientras ocurren → CSMA/CD\n  · Sin ACK en capa 2\n  · No tiene problema de nodo oculto\n\nWiFi (802.11 — aire):\n  · Medio no guiado, señal se dispersa\n  · No puede detectar colisiones → evita con CSMA/CA\n  · ACK en capa 2 (confirma cada trama)\n  · Nodo oculto es un problema real → se resuelve con RTS/CTS\n\nAmbos: no garantizan entrega confiable en capa 2.\nEso es trabajo de TCP (capa de transporte).",
     tag: "WiFi",
   },
   // ARQ / Ventanas Deslizantes

@@ -127,6 +127,84 @@ export const flashcardsParcialLAN: Flashcard[] = [
     back: "La respuesta es INCORRECTA para lo que pide el estándar. Tiene dos errores de fondo:\n\n— Error 1: WiFi no puede detectar colisiones.\nEn Ethernet se usa CSMA/CD (Collision Detection): el nodo transmite y escucha simultáneamente. En WiFi eso es físicamente imposible: una antena no puede transmitir y recibir al mismo tiempo. Por eso 802.11 usa CSMA/CA (Collision Avoidance): evita las colisiones antes de que ocurran.\n\n— Error 2: No menciona el mecanismo del estándar.\nChatGPT propone una solución de diseño de infraestructura (ubicar los APs), no un mecanismo del protocolo 802.11.\n\nEl mecanismo correcto es RTS/CTS dentro del modo DCF:\n1. Estación A envía RTS al AP indicando la duración de la transmisión.\n2. El AP responde con CTS — este frame lo reciben TODOS los nodos del área, incluyendo C (que no ve a A).\n3. C recibe el CTS y actualiza su NAV (Network Allocation Vector): un temporizador virtual que le indica cuánto tiempo el medio estará ocupado. C no transmite durante ese tiempo.\n4. A transmite sin colisión.\n\nResumen: CSMA/CA + RTS/CTS + NAV es la solución del estándar. La planificación de APs no resuelve el problema en la capa de protocolo.",
     tag: "Wireless / Parcial",
   },
+  {
+    id: 3019,
+    front: "¿Qué es la conmutación de circuitos y en qué se diferencia de la conmutación de paquetes?",
+    back: "Conmutación de circuitos:\n• Se establece un camino dedicado entre origen y destino antes de transmitir.\n• Los recursos (ancho de banda, buffers) se reservan exclusivamente durante toda la comunicación.\n• Si no se usa el canal, el ancho de banda se desperdicia.\n• Ejemplo: red telefónica PSTN.\n\nConmutación de paquetes:\n• Los datos se dividen en paquetes independientes; cada uno viaja por la red y puede tomar caminos distintos.\n• Los recursos se comparten; no hay reserva previa.\n• Más eficiente para tráfico de datos; peor para tiempo real sin QoS.\n• Ejemplo: Internet.\n\nDos variantes de paquetes:\n• Circuito virtual (PVC/SVC): los paquetes siguen el mismo camino lógico preestablecido.\n• Datagrama: cada paquete se enruta de forma independiente.",
+    tag: "Conmutación",
+  },
+  {
+    id: 3020,
+    front: "Clasificación de redes por área geográfica: ¿qué diferencia a una LAN de una WAN?",
+    back: "LAN (Local Area Network):\n• Distancias cortas (edificio, campus).\n• Alta velocidad (>10 Mbps).\n• BER bajo (menos errores).\n• Infraestructura privada.\n• Usa difusión (broadcast) como método de acceso.\n• Sin restricciones externas de regulación.\n\nWAN (Wide Area Network):\n• Distancias grandes (ciudades, países).\n• Velocidad menor (<2 Mbps en enlaces tradicionales).\n• BER alto (más errores por mayor distancia).\n• Usa infraestructura pública (operadoras).\n• Usa conmutación (circuitos o paquetes).\n• Sujeta a regulaciones externas.\n\nMAN (Metropolitan): intermedia entre LAN y WAN, área de ciudad.",
+    tag: "Tipos de red",
+  },
+  {
+    id: 3021,
+    front: "Topologías de red: compará bus, estrella, anillo y malla.",
+    back: "Bus (lineal):\n• Todos comparten un único cable.\n• Pocos enlaces, fácil de expandir.\n• Difícil detectar fallas; si cae el bus, cae todo.\n\nEstrella:\n• Cada nodo se conecta a un concentrador central (hub/switch).\n• Fácil detectar fallas (nodo a nodo).\n• Si cae el centro, cae toda la red.\n• Muchos enlaces.\n\nAnillo:\n• Los nodos se conectan en círculo; cada trama recorre el anillo.\n• Falla de un nodo puede cortar la comunicación.\n• Fácil detectar fallas pero baja confiabilidad.\n\nMalla:\n• Cada nodo se conecta con muchos (o todos) los otros.\n• Alta redundancia y confiabilidad.\n• Muchos enlaces → caro.\n• Difícil detectar fallas de enlace específico.\n\nHíbrido/Árbol: combinación de topologías.",
+    tag: "Topologías",
+  },
+  {
+    id: 3022,
+    front: "¿Cuáles son las principales funciones de un protocolo de comunicaciones?",
+    back: "• Segmentación y ensamblado: divide datos en PDUs del tamaño apropiado; el receptor los reensambla.\n• Control de errores: detección (CRC, checksum) y corrección o retransmisión.\n• Control de flujo: evita que el emisor sature al receptor (ventana deslizante, XON/XOFF).\n• Control de la conexión: establecimiento, transferencia y cierre.\n• Encapsulamiento: agrega cabeceras de control a los datos.\n• Direccionamiento: identifica origen y destino (unicast, broadcast, multicast).\n• Multiplexación: permite varias conexiones lógicas sobre un mismo enlace físico.\n• Sincronismo: sincronización de bits, caracteres o bloques.\n• Entrega en orden: usa numeración secuencial.\n• Servicios de transmisión: prioridad, QoS, seguridad.",
+    tag: "Protocolos",
+  },
+  {
+    id: 3023,
+    front: "Simplex, Half-duplex y Full-duplex: ¿qué significa cada uno?",
+    back: "Simplex:\n• Un solo canal, comunicación unidireccional.\n• Solo un extremo transmite, el otro solo recibe.\n• Ejemplo: radio AM/FM, televisión.\n\nHalf-duplex:\n• Un canal, bidireccional pero no simultáneo.\n• En un momento se transmite en un sentido, luego en el contrario.\n• Ejemplo: walkie-talkie, WiFi (CSMA/CA obliga a esto en el canal compartido).\n\nFull-duplex:\n• Dos canales (o un canal con dos frecuencias/pares).\n• Bidireccional simultáneo: ambos extremos transmiten y reciben al mismo tiempo.\n• Ejemplo: telefonía, Ethernet con switch (cada puerto es full-duplex).",
+    tag: "Transmisión",
+  },
+  {
+    id: 3024,
+    front: "Hub y Bridge: ¿cómo opera cada uno y en qué capa trabajan?",
+    back: "Hub (repetidor multipuerto):\n• Capa 1 (Física).\n• Repite la señal por todos los puertos sin ninguna inteligencia.\n• Todo el hub es un único dominio de colisión: si dos estaciones transmiten, colisionan.\n• La velocidad total se reparte entre todos los puertos.\n• Obsoleto: reemplazado por el switch.\n\nBridge (puente):\n• Capa 2 (Enlace).\n• Interconecta dos segmentos LAN. Generalmente 2 puertos.\n• Cada puerto es un dominio de colisión separado: las colisiones no se propagan al otro lado.\n• Aprende direcciones MAC y reenvía solo las tramas necesarias.\n• Hace control de errores (almacena y verifica FCS) antes de retransmitir.\n• El switch es un 'bridge multipuerto'.",
+    tag: "Dispositivos / Hub / Bridge",
+  },
+  {
+    id: 3025,
+    front: "¿Qué es el dominio de colisión y el dominio de broadcast? ¿Qué dispositivo divide cada uno?",
+    back: "Dominio de colisión:\n• Área donde una colisión se propaga.\n• Hub: propaga colisiones → todo el hub es un dominio.\n• Switch: cada puerto es un dominio de colisión separado.\n• Bridge: separa dominios de colisión.\n• Router: separa dominios de colisión.\n\nDominio de broadcast:\n• Área donde una trama broadcast (FF:FF:FF:FF:FF:FF) llega a todos.\n• Hub: propaga broadcast.\n• Switch: propaga broadcast a todos los puertos (excepto el origen).\n• Bridge: propaga broadcast al otro segmento.\n• Router: NO propaga broadcast — es el límite del dominio de broadcast.\n\nResumen: el switch divide dominios de colisión pero no de broadcast. El router divide ambos.",
+    tag: "Dominio de colisión / Broadcast",
+  },
+  {
+    id: 3026,
+    front: "Códigos de línea Manchester: ¿cómo funcionan Manchester Bifase y Manchester Bifase Diferencial?",
+    back: "Manchester Bifase (usado en Ethernet 802.3):\n• Siempre hay una transición en el centro de cada intervalo de bit.\n• La transición transmite el dato Y sincroniza el reloj.\n• '0': transición de alto a bajo en el centro.\n• '1': transición de bajo a alto en el centro.\n• Ventaja: auto-sincronizante, no se necesita señal de reloj separada.\n\nManchester Bifase Diferencial (usado en Token Ring 802.5):\n• Siempre hay transición en el centro del bit (como el bifase).\n• La diferencia está en el inicio del intervalo:\n  - '0': ADEMÁS hay transición al inicio del intervalo.\n  - '1': NO hay transición al inicio del intervalo.\n• Ventaja: más inmune al ruido porque el dato se codifica en la diferencia, no en la polaridad.",
+    tag: "Códigos de línea / Manchester",
+  },
+  {
+    id: 3027,
+    front: "Modos de operación de un Switch: Store & Forward, Cut Through y Fragment Free.",
+    back: "Store & Forward:\n• El switch recibe la trama completa, calcula el CRC y verifica el tamaño antes de reenviar.\n• Descarta tramas con errores.\n• Latencia mayor (espera recibir todo).\n• Uso: redes corporativas donde la integridad importa más que la velocidad.\n\nCut Through:\n• Lee solo los primeros 6 bytes (MAC destino) y reenvía inmediatamente.\n• Latencia mínima.\n• NO detecta errores de la trama (puede reenviar tramas corruptas).\n\nFragment Free (variante de Cut Through):\n• Lee los primeros 64 bytes antes de reenviar.\n• Evita reenviar 'runts' (tramas cortas por colisión, siempre <64 bytes).\n• Intermedio entre los dos anteriores.\n\nAdaptive Cut Through: cambia automáticamente de modo según el nivel de errores detectados.",
+    tag: "Switch / Modos",
+  },
+  {
+    id: 3028,
+    front: "Algoritmo de backoff exponencial en CSMA/CD: ¿cómo funciona?",
+    back: "Después de una colisión, cada estación espera un tiempo aleatorio antes de reintentar.\n\nFórmula: tras la i-ésima colisión, se elige un número de ranura aleatorio entre 0 y (2ⁱ − 1).\n• 1ª colisión: espera 0 o 1 ranura.\n• 2ª colisión: espera entre 0 y 3 ranuras.\n• 3ª colisión: entre 0 y 7 ranuras.\n• ...\n• 10ª colisión: entre 0 y 1023 ranuras.\n• Tras la 10ª colisión el límite se fija en 1023 ranuras (no crece más).\n• Tras 16 colisiones consecutivas, la subcapa MAC aborta la transmisión y reporta error.\n\nUna ranura = 51.2 µs (en Ethernet a 10 Mbps = 64 bytes × 8 bits / 10 Mbps).\nCuantas más colisiones, mayor es el rango de espera → se reduce la probabilidad de volver a colisionar.",
+    tag: "CSMA/CD / Backoff",
+  },
+  {
+    id: 3029,
+    front: "LLC (Logical Link Control): ¿qué función cumple y qué es el SAP?",
+    back: "LLC (IEEE 802.2) es la subcapa superior del nivel de Enlace, por encima de MAC.\n\nFunciones:\n• Provee una interfaz uniforme hacia la capa de Red, independientemente de la tecnología MAC (Ethernet, Token Ring, WiFi).\n• Control de errores y control de flujo entre extremos a nivel de enlace (opcional).\n• Multiplexación: permite que múltiples protocolos de capa 3 compartan el mismo enlace.\n\nSAP (Service Access Point):\n• DSAP (Destination SAP): identifica el protocolo de capa superior en el receptor.\n• SSAP (Source SAP): identifica el protocolo de capa superior en el emisor.\n• Ejemplo: 0x06 = IP, 0xFE = OSI, 0xAA = SNAP (permite usar EtherType en tramas 802.3).\n\nCampo de control LLC: indica si el servicio es sin conexión (UI - Unnumbered Information) o con conexión (I-frames con numeración).",
+    tag: "LLC / SAP",
+  },
+  {
+    id: 3030,
+    front: "Seguridad en WiFi: WEP, WPA, WPA2 y WPA3. ¿Cuáles son sus diferencias clave?",
+    back: "WEP (Wired Equivalent Privacy):\n• Primer estándar de seguridad WiFi.\n• Cifrado RC4 con clave estática (40 o 104 bits).\n• Vulnerable: el IV de 24 bits se reutiliza, permitiendo romper la clave con captura de tráfico. Obsoleto.\n\nWPA (Wi-Fi Protected Access):\n• Reemplaza WEP. Usa TKIP (Temporal Key Integrity Protocol): claves dinámicas por paquete.\n• Mejora sobre WEP pero aún usa RC4. Considerado deprecated.\n\nWPA2:\n• Usa cifrado AES (Advanced Encryption Standard) con CCMP. Mucho más seguro.\n• WPA2-Personal (PSK): clave precompartida. Uso doméstico/PYME.\n• WPA2-Enterprise: autenticación por servidor RADIUS (802.1X). Uso corporativo.\n\nWPA3:\n• Agrega SAE (Simultaneous Authentication of Equals): elimina vulnerabilidad de diccionario offline.\n• Cifrado individual por sesión.\n\nOtros mecanismos: filtrado MAC (débil, se puede spoofear), ocultamiento SSID (oscuridad, no seguridad).",
+    tag: "Wireless / Seguridad",
+  },
+  {
+    id: 3031,
+    front: "Spread Spectrum: ¿qué es FHSS y DSSS? ¿Para qué sirven?",
+    back: "Spread Spectrum (espectro ensanchado): técnica que dispersa la señal en un ancho de banda mucho mayor al mínimo necesario, mejorando resistencia a interferencias y dificultando la intercepción.\n\nFHSS (Frequency Hopping Spread Spectrum):\n• La frecuencia de transmisión salta según una secuencia pseudoaleatoria conocida por emisor y receptor.\n• Interferencias en una frecuencia afectan solo los bits transmitidos durante ese salto.\n• Usado en Bluetooth y WiFi 802.11 original.\n\nDSSS (Direct Sequence Spread Spectrum):\n• Cada bit se multiplica por una secuencia de chips (código de mayor velocidad), expandiendo la señal.\n• Mayor resistencia al ruido de banda estrecha.\n• Usado en WiFi 802.11b.\n\nOFDM (Orthogonal Frequency Division Multiplexing):\n• Divide el canal en múltiples subportadoras paralelas.\n• Usado en 802.11a/g/n/ac — la tecnología dominante actual.",
+    tag: "Wireless / Spread Spectrum",
+  },
 ];
 
 export const flashcardsParcialIP: Flashcard[] = [
@@ -224,6 +302,12 @@ export const flashcardsParcialIP: Flashcard[] = [
     id: 3116,
     front: "DHCP: ¿cuántas veces y con qué frecuencia intenta renovar la concesión?",
     back: "1. Al 50% del lease (T1): unicast DHCPREQUEST al mismo servidor.\n2. Al 87.5% del lease (T2): si no obtuvo renovación, broadcast a cualquier servidor DHCP.\n3. Al 100%: si aún no renovó, abandona la IP y reinicia el proceso DORA completo (DISCOVER → OFFER → REQUEST → ACK).",
+    tag: "DHCP",
+  },
+  {
+    id: 3117,
+    front: "DHCP: explicá el proceso DORA. ¿Qué mensaje va en broadcast y por qué?",
+    back: "DORA es el proceso de 4 mensajes para que un host obtenga una IP automáticamente:\n\n1. DISCOVER (cliente → broadcast)\n   El cliente no tiene IP ni sabe dónde está el servidor DHCP. Envía en broadcast (255.255.255.255) para encontrar cualquier servidor disponible. MAC destino: FF:FF:FF:FF:FF:FF.\n\n2. OFFER (servidor → broadcast o unicast)\n   El servidor responde ofreciendo una IP disponible, junto con máscara, gateway, DNS y tiempo de lease. Puede ser broadcast si el cliente aún no tiene IP.\n\n3. REQUEST (cliente → broadcast)\n   El cliente acepta la oferta y lo anuncia en broadcast. El broadcast es importante: puede haber varios servidores DHCP; todos escuchan este mensaje y saben cuál fue elegido (los no elegidos liberan su oferta).\n\n4. ACK (servidor → broadcast o unicast)\n   El servidor confirma la asignación. El cliente ya puede usar la IP.\n\nResumen: DISCOVER y REQUEST van en broadcast porque el cliente aún no tiene IP configurada y/o necesita avisar a todos los servidores.",
     tag: "DHCP",
   },
 ];
@@ -330,5 +414,11 @@ export const flashcardsParcialTransporte: Flashcard[] = [
     front: "Pregunta de parcial: Explicá el encapsulamiento en todas las capas del modelo OSI cuando un usuario escribe https://www.gov.ph/ en el browser. Indicá protocolo, PDU y qué agrega cada capa.",
     back: "De arriba hacia abajo:\n\nCapa 7 — Aplicación\nProtocolo: HTTP · PDU: Mensaje\nEl browser construye un GET request: 'GET / HTTP/1.1\\nHost: www.gov.ph...'\n\nCapa 6 — Presentación\nProtocolo: TLS (la 'S' de HTTPS)\nCifra el mensaje HTTP. En TCP/IP esta capa está fusionada con Aplicación.\n\nCapa 5 — Sesión\nProtocolo: TLS handshake (establece y gestiona la sesión segura).\nEn TCP/IP también fusionada con Aplicación.\n\nCapa 4 — Transporte\nProtocolo: TCP · PDU: Segmento\nAgrega: puerto origen (efímero), puerto destino (443 para HTTPS), número de secuencia, ACK, checksum.\n[ TCP Header | datos HTTP cifrados ]\n\nCapa 3 — Red\nProtocolo: IP · PDU: Datagrama\nAgrega: IP origen (PC del usuario), IP destino (www.gov.ph, resuelta por DNS), TTL, protocolo=6 (TCP), checksum.\n[ IP Header | TCP Header | datos ]\n\nCapa 2 — Enlace de Datos\nProtocolo: Ethernet o 802.11 · PDU: Trama (Frame)\nAgrega: MAC origen, MAC destino (del gateway/router local, NO del servidor final), tipo, FCS (CRC-32).\n[ Eth Header | IP Header | TCP Header | datos | FCS ]\n\nCapa 1 — Física\nPDU: Bits\nConvierte la trama en señales eléctricas, lumínicas o electromagnéticas.\n10110101001110...\n\n— Puntos clave:\n• La MAC destino en capa 2 es la del router local (cambia en cada salto); la IP destino no cambia.\n• TLS vive en capas 5/6 del modelo OSI, pero en TCP/IP es parte de la capa Aplicación.\n• Cada capa encapsula lo de arriba: agrega cabecera al frente (Ethernet también agrega FCS al final).",
     tag: "Encapsulamiento / Parcial",
+  },
+  {
+    id: 3218,
+    front: "Cierre de conexión TCP: ¿cómo se realiza el four-way handshake?",
+    back: "El cierre es independiente en cada dirección (half-close). Se necesitan 4 mensajes:\n\n1. FIN (A → B): A termina de enviar datos y solicita cerrar su mitad.\n2. ACK (B → A): B confirma el FIN de A. B puede seguir enviando datos (estado CLOSE_WAIT).\n3. FIN (B → A): cuando B también termina, envía su propio FIN.\n4. ACK (A → B): A confirma el FIN de B. A entra en TIME_WAIT (espera 2×MSL ≈ 60–120s) antes de cerrar definitivamente.\n\nEstados clave:\n• CLOSE_WAIT: el que recibe el FIN primero; sigue enviando si tiene datos.\n• TIME_WAIT: el que inicia el cierre; espera por si el último ACK se perdió y B reenvía su FIN.\n\nDiferencia con el 3-way handshake de apertura: en el cierre los FIN y ACK no se pueden combinar en un solo mensaje porque cada dirección se cierra independientemente.",
+    tag: "TCP / Cierre",
   },
 ];

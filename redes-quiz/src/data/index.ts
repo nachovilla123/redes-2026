@@ -7,6 +7,7 @@ import { TOPIC6, flashcardsClase6 } from "./clase6";
 import { TOPIC7, flashcardsClase7 } from "./clase7";
 import { TOPIC8, flashcardsClase8 } from "./clase8";
 import { TOPIC9, flashcardsClase9 } from "./clase9";
+import { TOPIC10, flashcardsClase10 } from "./clase10";
 import {
   TOPIC_PARCIAL_LAN,
   TOPIC_PARCIAL_IP,
@@ -83,6 +84,12 @@ export const topics: Topic[] = [
     emoji: "📡",
     ...TOPIC9,
     flashcards: flashcardsClase9,
+  },
+  {
+    slug: "vpn",
+    emoji: "🔐",
+    ...TOPIC10,
+    flashcards: flashcardsClase10,
   },
   {
     slug: "parcial-lan-stp-wireless",

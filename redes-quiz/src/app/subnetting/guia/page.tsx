@@ -399,18 +399,54 @@ export default function GuiaSubnettingPage() {
               <IpBitDisplay parts={[192, 168, 1, 0]} prefix={24} subBits={2} />
             </div>
 
+            {/* Por qué saltos de 64 */}
+            <div className="border-t border-slate-800 pt-4 space-y-3">
+              <p className="text-xs text-slate-400 font-semibold">
+                ¿Por qué cada subred tiene 64 IPs y salta de 64 en 64?
+              </p>
+              <div className="bg-slate-800/60 rounded-xl px-4 py-3 space-y-3">
+                <div className="flex items-center gap-2 text-sm flex-wrap">
+                  <span className="text-slate-400">6 bits de host</span>
+                  <span className="text-slate-600">→</span>
+                  <span className="text-white font-bold font-mono">2⁶ = 64 IPs totales por subred</span>
+                </div>
+                {/* Barra visual del bloque */}
+                <div className="space-y-1">
+                  <div className="flex rounded-lg overflow-hidden h-9 text-[11px] font-bold">
+                    <div className="bg-blue-600 flex items-center justify-center w-[1/64*100%] px-2 shrink-0 w-8">
+                      1
+                    </div>
+                    <div className="bg-emerald-600 flex-1 flex items-center justify-center">
+                      62 hosts útiles
+                    </div>
+                    <div className="bg-red-600 flex items-center justify-center shrink-0 w-8">
+                      1
+                    </div>
+                  </div>
+                  <div className="flex justify-between text-[10px]">
+                    <span className="text-blue-400">dir. de red (.0)</span>
+                    <span className="text-emerald-400">rango asignable (.1 → .62)</span>
+                    <span className="text-red-400">broadcast (.63)</span>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  De esas 64 IPs: <span className="text-blue-300">1 es la dirección de red</span> (la primera), <span className="text-red-300">1 es el broadcast</span> (la última), y las <span className="text-emerald-300">62 del medio son los hosts útiles</span>. El siguiente bloque arranca justo donde termina éste, por eso los saltos son siempre de 64.
+                </p>
+              </div>
+            </div>
+
             {/* Las 4 combinaciones */}
             <div className="border-t border-slate-800 pt-4 space-y-2">
               <p className="text-xs text-slate-400 font-semibold">
                 Los 2 bits prestados generan 4 combinaciones — cada una es una subred:
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="space-y-2">
                 {demo.subnets.map((s, i) => (
                   <div
                     key={i}
-                    className="bg-slate-800/60 rounded-xl px-4 py-3 flex items-center gap-3"
+                    className="bg-slate-800/60 rounded-xl px-4 py-2.5 flex items-center gap-3"
                   >
-                    {/* Bits */}
+                    {/* Bits — solo los de subred */}
                     <div className="flex gap-0.5 shrink-0">
                       {s.subnetPattern.split("").map((b, j) => (
                         <span
@@ -420,23 +456,13 @@ export default function GuiaSubnettingPage() {
                           {b}
                         </span>
                       ))}
-                      <div className="flex gap-0.5 ml-0.5">
-                        {Array.from({ length: 6 }, (_, j) => (
-                          <span
-                            key={j}
-                            className="w-5 h-5 flex items-center justify-center bg-amber-500/70 rounded text-[10px] font-bold font-mono text-white"
-                          >
-                            0
-                          </span>
-                        ))}
-                      </div>
+                      <span className="text-slate-600 font-mono text-xs ml-1">xxxxxx</span>
                     </div>
-                    <div className="min-w-0">
-                      <p className="font-mono text-sm text-white font-bold">{s.networkAddr}/26</p>
-                      <p className="text-[10px] text-slate-500">
-                        .{i * 64} → .{i * 64 + 63}
-                      </p>
-                    </div>
+                    <span className="text-slate-600 text-xs shrink-0">→</span>
+                    <p className="font-mono text-sm text-white font-bold min-w-0">{s.networkAddr}/26</p>
+                    <p className="text-[10px] text-slate-500 ml-auto shrink-0">
+                      .{i * 64}–.{i * 64 + 63}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -799,7 +825,19 @@ export default function GuiaSubnettingPage() {
         </section>
 
         {/* CTA */}
-        <div className="pb-8">
+        <div className="pb-8 flex flex-col gap-3">
+          <Link
+            href="/subnetting/vlsm"
+            className="block w-full py-4 rounded-2xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] text-indigo-300 font-semibold text-sm text-center transition-all border border-slate-700"
+          >
+            Ver VLSM — subredes de tamaño variable →
+          </Link>
+          <Link
+            href="/subnetting/supernetting"
+            className="block w-full py-4 rounded-2xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] text-violet-300 font-semibold text-sm text-center transition-all border border-slate-700"
+          >
+            Ver Supernetting — CIDR Route Summarization →
+          </Link>
           <Link
             href="/subnetting"
             className="block w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white font-bold text-sm text-center transition-all"
